@@ -1,0 +1,318 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# MinerEmissionsSplit Custom Minting Feature - Cursor Rules
+
+## Overview
+Implement a custom minting mechanism that intercepts Cosmos inflation emissions and splits them 50/50 between staking rewards (FeeCollector) and LLM inference miner rewards (x/inferencerewards).
+
+## Architecture & Context
+
+### Current State Analysis
+- **Cosmos SDK Version**: v0.53.0 (✅ HAS custom MintFn feature)
+- **Current Mint Flow**: Standard x/mint module → FeeCollector (100%)
+- **Target Flow**: Custom MintFn → FeeCollector (50%) + x/inferencerewards (50%)
+
+### Implementation Strategy
+With v0.53.0's custom MintFn support, we'll:
+1. Create a **simple custom MintFn** that handles emission splitting
+2. Use standard mint module with custom function injection
+3. **No need for a separate module** - just a custom function!
+4. Much cleaner, safer, and easier to maintain
+
+## Implementation Structure: Custom MintFn (v0.53.0)
+
+### Simple Custom MintFn Approach
+With v0.53.0, we implement a **single custom function** instead of an entire module:
+
+```go
+// app/miner_emissions.go - Simple custom mint function
+package app
+
+import (
+    "cosmossdk.io/math"
+    sdk "github.com/cosmos/cosmos-sdk/types"
+    authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+    minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+    mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
+)
+
+// MinerEmissionsSplitMintFn implements custom 50/50 emission splitting
+func MinerEmissionsSplitMintFn(ctx sdk.Context, k *mintkeeper.Keeper) error {
+    // 1. Get current minter state and parameters
+    minter := k.GetMinter(ctx)
+    params := k.GetParams(ctx)
+    
+    // 2. Calculate total supply for provisions calculation
+    stakingTokenSupply := k.StakingTokenSupply(ctx)
+    bondedRatio := k.BondedRatio(ctx)
+    
+    // 3. Calculate inflation using standard mint logic
+    minter.Inflation = minter.NextInflationRate(ctx, params, bondedRatio)
+    minter.AnnualProvisions = minter.NextAnnualProvisions(ctx, params, stakingTokenSupply)
+    
+    // 4. Calculate this block's provision
+    blockProvision := minter.BlockProvision(params)
+    
+    // 5. Mint total amount to mint module first
+    mintedCoin := sdk.NewCoin(params.MintDenom, blockProvision)
+    mintedCoins := sdk.NewCoins(mintedCoin)
+    
+    if err := k.MintCoins(ctx, mintedCoins); err != nil {
+        return err
+    }
+    
+    // 6. Split emissions 50/50
+    stakingAmount := blockProvision.QuoRaw(2)  // 50%
+    minerAmount := blockProvision.Sub(stakingAmount)  // Remaining (handles odd amounts)
+    
+    stakingCoins := sdk.NewCoins(sdk.NewCoin(params.MintDenom, stakingAmount))
+    minerCoins := sdk.NewCoins(sdk.NewCoin(params.MintDenom, minerAmount))
+    
+    // 7. Transfer to FeeCollector (staking rewards)
+    if err := k.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, authtypes.FeeCollectorName, stakingCoins); err != nil {
+        return err
+    }
+    
+    // 8. Transfer to inference rewards module
+    if err := k.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, "inferencerewards", minerCoins); err != nil {
+        return err
+    }
+    
+    // 9. Update minter state
+    k.SetMinter(ctx, minter)
+    
+    // 10. Emit events
+    ctx.EventManager().EmitEvent(
+        sdk.NewEvent(
+            minttypes.EventTypeMint,
+            sdk.NewAttribute(minttypes.AttributeKeyBondedRatio, bondedRatio.String()),
+            sdk.NewAttribute(minttypes.AttributeKeyInflation, minter.Inflation.String()),
+            sdk.NewAttribute(minttypes.AttributeKeyAnnualProvisions, minter.AnnualProvisions.String()),
+            sdk.NewAttribute(minttypes.AttributeKeyAmount, mintedCoin.Amount.String()),
+            sdk.NewAttribute("staking_amount", stakingAmount.String()),
+            sdk.NewAttribute("miner_amount", minerAmount.String()),
+        ),
+    )
+    
+    return nil
+}
+```
+
+### App Integration (Simple!)
+```go
+// In app/app.go or app_config.go
+app.MintKeeper = mintkeeper.NewKeeper(
+    appCodec,
+    runtime.NewKVStoreService(keys[minttypes.StoreKey]),
+    app.StakingKeeper,
+    app.AccountKeeper,
+    app.BankKeeper,
+    authtypes.FeeCollectorName,
+    authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+    mintkeeper.WithMintFn(MinerEmissionsSplitMintFn), // ✅ Custom MintFn injection!
+)
+```
+
+## Dependencies & Module Integration
+
+### Required Module Account Permissions
+The only change needed in `app/app_config.go` moduleAccPerms:
+```go
+// Ensure inferencerewards module exists and has proper permissions
+{Account: "inferencerewards", Permissions: []string{authtypes.Minter}}, // If rewards module needs minting
+```
+
+### No Additional Module Changes Required!
+✅ **No changes to beginBlockers** - mint module stays in place  
+✅ **No changes to genesisModuleOrder** - standard mint module handles everything  
+✅ **No new module dependencies** - everything uses existing mint keeper  
+✅ **No new proto definitions** - standard mint module provides all interfaces
+
+## State Management
+
+### Uses Existing Mint Module State
+✅ **No custom state required** - standard x/mint module handles all state  
+✅ **Standard Minter struct** - existing `Inflation` and `AnnualProvisions` fields  
+✅ **Standard Params** - all existing mint parameters work as-is  
+✅ **No migration needed** - existing chain state remains unchanged
+
+### Current Mint Module State (Already Available)
+```go
+// From cosmossdk.io/x/mint/types
+type Minter struct {
+    Inflation        math.LegacyDec  // Current inflation rate  
+    AnnualProvisions math.LegacyDec  // Annual provisions amount
+}
+
+type Params struct {
+    MintDenom           string          // Denomination to mint
+    InflationRateChange math.LegacyDec  // Rate change per year
+    InflationMax        math.LegacyDec  // Maximum inflation rate
+    InflationMin        math.LegacyDec  // Minimum inflation rate
+    GoalBonded          math.LegacyDec  // Target bonded ratio
+    BlocksPerYear       uint64          // Blocks per year for calculations
+}
+```
+
+### Optional: Future Parameter Extensions
+If needed later, we could extend mint params via governance to add:
+```go
+// These could be added to mint params in the future if needed
+StakingAllocation   math.LegacyDec  // Percentage to staking (default: 0.5)
+MinerAllocation     math.LegacyDec  // Percentage to miners (default: 0.5)
+```
+
+## Event Definitions
+```go
+// Event types for emission tracking
+const (
+    EventTypeMint         = "mint"
+    EventTypeEmissionSplit = "emission_split"
+    
+    AttributeKeyBondedRatio      = "bonded_ratio"
+    AttributeKeyInflation        = "inflation"
+    AttributeKeyAnnualProvisions = "annual_provisions"
+    AttributeKeyAmount           = "amount"
+    AttributeKeyStakingAmount    = "staking_amount"
+    AttributeKeyMinerAmount      = "miner_amount"
+)
+```
+
+## CLI Commands Structure
+```go
+// Queries
+func GetQueryCmd() *cobra.Command {
+    // GetCmdQueryParams() - Query minting parameters
+    // GetCmdQueryInflation() - Query current inflation
+    // GetCmdQueryAnnualProvisions() - Query annual provisions
+    // GetCmdQueryMinter() - Query minter state
+}
+
+// Transactions (governance only)  
+func GetTxCmd() *cobra.Command {
+    // Update parameters via governance
+}
+```
+
+## Testing Requirements
+
+### Unit Test Coverage (>90% target)
+Test files to create:
+- `keeper/minter_test.go` - Inflation calculations
+- `keeper/emissions_test.go` - Emission splitting logic
+- `keeper/params_test.go` - Parameter validation
+- `keeper/keeper_test.go` - General keeper functionality
+
+### Key Test Cases
+1. **Inflation Calculation Tests**
+   - Verify inflation adjusts based on bonded ratio
+   - Test inflation bounds (min/max)
+   - Test annual provisions calculation
+
+2. **Emission Splitting Tests**
+   - Verify 50/50 split accuracy
+   - Test odd number handling
+   - Verify module-to-module transfers
+   - Test event emission
+
+3. **Integration Tests**
+   - Full begin blocker execution
+   - Module account balance verification
+   - Parameter governance updates
+
+4. **Edge Cases**
+   - Zero inflation scenarios
+   - Maximum inflation scenarios
+   - Module account permission errors
+
+## Proto Definitions
+
+Required .proto files:
+- `proto/mineremissions/v1beta1/mineremissions.proto`
+- `proto/mineremissions/v1beta1/genesis.proto`
+- `proto/mineremissions/v1beta1/query.proto`
+- `proto/mineremissions/v1beta1/tx.proto` (for governance updates)
+
+## Implementation Steps (Much Simpler!)
+
+### Phase 1: Dependency Update ✅ **COMPLETED**
+1. ✅ Update go.mod to Cosmos SDK v0.53.0
+2. Run `go mod tidy` to update dependencies
+3. Fix any compilation errors from SDK upgrade
+
+### Phase 2: Create Custom MintFn (15 minutes)
+1. Create `app/miner_emissions.go` with custom mint function
+2. Update mint keeper initialization in `app/app.go` to use custom function
+3. Ensure `inferencerewards` module account exists with proper permissions
+
+### Phase 3: Testing & Validation (30 minutes)  
+1. Unit test the custom MintFn logic
+2. Integration test with full chain startup
+3. Verify 50/50 emission split in block execution
+4. Test standard mint queries still work
+
+### Phase 4: Deployment
+1. Test on local devnet
+2. Deploy to testnet
+3. Monitor emission splitting in block explorer
+
+## Error Handling Patterns
+```go
+// Define module-specific errors
+var (
+    ErrInvalidInflationRate = errors.Register(ModuleName, 2, "invalid inflation rate")
+    ErrInvalidAllocation    = errors.Register(ModuleName, 3, "invalid allocation percentage")
+    ErrMintingFailed        = errors.Register(ModuleName, 4, "minting failed")
+    ErrTransferFailed       = errors.Register(ModuleName, 5, "module-to-module transfer failed")
+)
+```
+
+## Security Considerations
+- Validate all parameter updates through governance
+- Ensure module account permissions are correctly set
+- Validate emission splitting math for overflow/underflow
+- Implement proper access controls for keeper methods
+- Test edge cases with zero/maximum values
+
+## Performance Considerations
+- Emission calculations happen every block - optimize for speed
+- Use integer arithmetic where possible to avoid precision loss
+- Cache frequently accessed parameters
+- Minimize state reads/writes per block
+
+## Backwards Compatibility
+- Maintain compatibility with existing mint module queries
+- Preserve inflation parameter semantics
+- Ensure governance parameter updates work seamlessly
+- Support migration from existing mint module state
+
+## Key Files to Create/Modify
+
+### New Files (Minimal!)
+1. `app/miner_emissions.go` - Custom MintFn implementation (~50 lines)
+
+### Modified Files (Minimal!)
+1. `app/app.go` or `app/app_config.go` - Add custom MintFn to mint keeper initialization (~1 line change)
+2. Ensure `inferencerewards` module exists with proper permissions
+
+### No Changes Required
+❌ **No changes to beginBlockers** - mint module stays  
+❌ **No new proto files** - standard mint module handles everything  
+❌ **No new CLI commands** - standard mint queries work  
+❌ **No genesis changes** - existing state compatible  
+❌ **No module ordering changes** - mint module position unchanged
+
+## Benefits of v0.53.0 Approach
+
+✅ **90% less code** - Single function vs entire module  
+✅ **Much safer** - Smaller surface area for bugs  
+✅ **Easier testing** - Test one function vs whole module  
+✅ **Better maintainability** - Less complexity  
+✅ **Faster implementation** - 45 minutes vs 4+ hours  
+✅ **Full backward compatibility** - All existing mint functionality preserved  
+✅ **No breaking changes** - Existing chains can upgrade seamlessly
+
+This v0.53.0 implementation provides the exact same MinerEmissionsSplit functionality with dramatically reduced complexity and risk.
