@@ -83,6 +83,7 @@ var (
 		{Account: nft.ModuleName},
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: icatypes.ModuleName},
+		{Account: "inferencerewards"}, // Module account for LLM inference miner rewards
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
