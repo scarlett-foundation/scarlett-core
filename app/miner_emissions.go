@@ -8,6 +8,19 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 )
 
+// ProvideMinerEmissionsMintFn is a depinject provider for our custom mint function
+func ProvideMinerEmissionsMintFn(bankKeeper bankkeeper.Keeper) mintkeeper.MintFn {
+	return MinerEmissionsSplitMintFnFactory(bankKeeper)
+}
+
+// MinerEmissionsSplitMintFnFactory creates a custom mint function with the required dependencies.
+// This follows the depinject pattern for Cosmos SDK v0.53.0.
+func MinerEmissionsSplitMintFnFactory(bk bankkeeper.Keeper) mintkeeper.MintFn {
+	return func(ctx sdk.Context, k *mintkeeper.Keeper) error {
+		return MinerEmissionsSplitMintFn(ctx, k, bk)
+	}
+}
+
 // MinerEmissionsSplitMintFn implements custom 50/50 emission splitting.
 // It's designed to be used as a custom MintFn with the x/mint module keeper.
 func MinerEmissionsSplitMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkeeper.Keeper) error {
