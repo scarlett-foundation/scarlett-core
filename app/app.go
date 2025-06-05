@@ -155,6 +155,8 @@ func New(
 				// read the depinject documentation and depinject module wiring for more information
 				// on available options and how to use them.
 			),
+			// Provide our custom mint function for 50/50 emission splitting
+			depinject.Provide(ProvideMinerEmissionsMintFn),
 		)
 	)
 
