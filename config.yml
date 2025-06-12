@@ -1,27 +1,24 @@
 version: 1
 validation: sovereign
-default_denom: stake
+default_denom: sclt
 accounts: 
 - name: alice
   coins:
-  - 20000token
-  - 200000000stake
+  - 200000000sclt
 - name: bob
   coins:
-  - 10000token
-  - 100000000stake
+  - 100000000sclt
 client:
   openapi:
     path: docs/static/openapi.yml
 faucet:
   name: bob
   coins:
-  - 5token
-  - 100000stake
+  - 100000sclt
 validators:
 - name: alice
-  bonded: 100000000stake
+  bonded: 100000000sclt
 - name: validator1
-  bonded: 200000000stake
+  bonded: 200000000sclt
 - name: validator2
-  bonded: 100000000stake
+  bonded: 100000000sclt
