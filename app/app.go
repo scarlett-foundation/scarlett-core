@@ -53,7 +53,7 @@ const (
 	// Name is the name of the application.
 	Name = "scarlett-core"
 	// AccountAddressPrefix is the prefix for accounts addresses.
-	AccountAddressPrefix = "cosmos"
+	AccountAddressPrefix = "scarlett"
 	// ChainCoinType is the coin type of the chain.
 	ChainCoinType = 118
 )
