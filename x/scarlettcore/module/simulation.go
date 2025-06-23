@@ -44,6 +44,21 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		weightMsgBurnTokens,
 		scarlettcoresimulation.SimulateMsgBurnTokens(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
+	const (
+		opWeightMsgBurnGenesisStake          = "op_weight_msg_scarlettcore"
+		defaultWeightMsgBurnGenesisStake int = 100
+	)
+
+	var weightMsgBurnGenesisStake int
+	simState.AppParams.GetOrGenerate(opWeightMsgBurnGenesisStake, &weightMsgBurnGenesisStake, nil,
+		func(_ *rand.Rand) {
+			weightMsgBurnGenesisStake = defaultWeightMsgBurnGenesisStake
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgBurnGenesisStake,
+		scarlettcoresimulation.SimulateMsgBurnGenesisStake(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
 
 	return operations
 }

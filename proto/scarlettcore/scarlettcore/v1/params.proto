@@ -10,4 +10,7 @@ option go_package = "scarlett-core/x/scarlettcore/types";
 message Params {
   option (amino.name) = "scarlettcore/x/scarlettcore/Params";
   option (gogoproto.equal) = true;
+
+  // genesis_address is the address allowed to execute genesis burn
+  string genesis_address = 1;
 }
