@@ -18,6 +18,29 @@ import (
 	"scarlett-core/x/scarlettcore/types"
 )
 
+// Mock BankKeeper for testing
+type mockBankKeeper struct{}
+
+func (m mockBankKeeper) SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
+	return sdk.NewCoins()
+}
+
+func (m mockBankKeeper) BurnCoins(ctx context.Context, moduleName string, amt sdk.Coins) error {
+	return nil
+}
+
+func (m mockBankKeeper) GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	return sdk.NewCoin(denom, sdk.NewInt(0))
+}
+
+func (m mockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+	return nil
+}
+
+func (m mockBankKeeper) GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
+	return sdk.NewCoins()
+}
+
 type fixture struct {
 	ctx          context.Context
 	keeper       keeper.Keeper

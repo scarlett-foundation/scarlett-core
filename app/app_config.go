@@ -84,6 +84,7 @@ var (
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: icatypes.ModuleName},
 		{Account: "inferencerewards"}, // Module account for LLM inference miner rewards
+		{Account: scarlettcoremoduletypes.ModuleName, Permissions: []string{authtypes.Burner}}, // Required for token burning
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
