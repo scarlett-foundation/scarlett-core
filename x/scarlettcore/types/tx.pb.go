@@ -35,8 +35,6 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type MsgUpdateParams struct {
 	// authority is the address that controls the module (defaults to x/gov unless overwritten).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// params defines the module parameters to update.
-	//
 	// NOTE: All parameters must be supplied.
 	Params Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
 }
@@ -126,9 +124,109 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
+// MsgBurnTokens defines the MsgBurnTokens message.
+type MsgBurnTokens struct {
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Amount  string `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	Denom   string `protobuf:"bytes,3,opt,name=denom,proto3" json:"denom,omitempty"`
+}
+
+func (m *MsgBurnTokens) Reset()         { *m = MsgBurnTokens{} }
+func (m *MsgBurnTokens) String() string { return proto.CompactTextString(m) }
+func (*MsgBurnTokens) ProtoMessage()    {}
+func (*MsgBurnTokens) Descriptor() ([]byte, []int) {
+	return fileDescriptor_799e89c401ea84a8, []int{2}
+}
+func (m *MsgBurnTokens) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgBurnTokens) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgBurnTokens.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgBurnTokens) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBurnTokens.Merge(m, src)
+}
+func (m *MsgBurnTokens) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgBurnTokens) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBurnTokens.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgBurnTokens proto.InternalMessageInfo
+
+func (m *MsgBurnTokens) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgBurnTokens) GetAmount() string {
+	if m != nil {
+		return m.Amount
+	}
+	return ""
+}
+
+func (m *MsgBurnTokens) GetDenom() string {
+	if m != nil {
+		return m.Denom
+	}
+	return ""
+}
+
+// MsgBurnTokensResponse defines the MsgBurnTokensResponse message.
+type MsgBurnTokensResponse struct {
+}
+
+func (m *MsgBurnTokensResponse) Reset()         { *m = MsgBurnTokensResponse{} }
+func (m *MsgBurnTokensResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgBurnTokensResponse) ProtoMessage()    {}
+func (*MsgBurnTokensResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_799e89c401ea84a8, []int{3}
+}
+func (m *MsgBurnTokensResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgBurnTokensResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgBurnTokensResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgBurnTokensResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBurnTokensResponse.Merge(m, src)
+}
+func (m *MsgBurnTokensResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgBurnTokensResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBurnTokensResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgBurnTokensResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "scarlettcore.scarlettcore.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "scarlettcore.scarlettcore.v1.MsgUpdateParamsResponse")
+	proto.RegisterType((*MsgBurnTokens)(nil), "scarlettcore.scarlettcore.v1.MsgBurnTokens")
+	proto.RegisterType((*MsgBurnTokensResponse)(nil), "scarlettcore.scarlettcore.v1.MsgBurnTokensResponse")
 }
 
 func init() {
@@ -136,7 +234,7 @@ func init() {
 }
 
 var fileDescriptor_799e89c401ea84a8 = []byte{
-	// 332 bytes of a gzipped FileDescriptorProto
+	// 429 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x2d, 0x4e, 0x4e, 0x2c,
 	0xca, 0x49, 0x2d, 0x29, 0x49, 0xce, 0x2f, 0x4a, 0xd5, 0x47, 0xe1, 0x94, 0x19, 0xea, 0x97, 0x54,
 	0xe8, 0x15, 0x14, 0xe5, 0x97, 0xe4, 0x0b, 0xc9, 0x20, 0xcb, 0xe8, 0xa1, 0x70, 0xca, 0x0c, 0xa5,
@@ -152,12 +250,18 @@ var fileDescriptor_799e89c401ea84a8 = []byte{
 	0x3c, 0x71, 0x4f, 0x9e, 0x61, 0xc5, 0xf3, 0x0d, 0x5a, 0x8c, 0x41, 0x50, 0xed, 0x56, 0x76, 0x4d,
 	0xcf, 0x37, 0x68, 0x21, 0x0c, 0xee, 0x7a, 0xbe, 0x41, 0x4b, 0x1b, 0xc5, 0x17, 0x15, 0xa8, 0x9e,
 	0x42, 0xf3, 0x80, 0x92, 0x24, 0x97, 0x38, 0x9a, 0x50, 0x50, 0x6a, 0x71, 0x41, 0x7e, 0x5e, 0x71,
-	0xaa, 0x51, 0x13, 0x23, 0x17, 0xb3, 0x6f, 0x71, 0xba, 0x50, 0x09, 0x17, 0x0f, 0x8a, 0x9f, 0x75,
-	0xf1, 0xbb, 0x15, 0xcd, 0x38, 0x29, 0x53, 0x92, 0x94, 0xc3, 0x6c, 0x97, 0x62, 0x6d, 0x00, 0xf9,
-	0xd3, 0xc9, 0xe6, 0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x9c,
-	0xf0, 0x58, 0x8e, 0xe1, 0xc2, 0x63, 0x39, 0x86, 0x1b, 0x8f, 0xe5, 0x18, 0xa2, 0x94, 0x60, 0x26,
-	0xe9, 0x62, 0xf3, 0x67, 0x49, 0x65, 0x41, 0x6a, 0x71, 0x12, 0x1b, 0x38, 0xe6, 0x8c, 0x01, 0x01,
-	0x00, 0x00, 0xff, 0xff, 0xa9, 0x3d, 0xcf, 0x4b, 0x88, 0x02, 0x00, 0x00,
+	0xaa, 0x52, 0x3d, 0x17, 0xaf, 0x6f, 0x71, 0xba, 0x53, 0x69, 0x51, 0x5e, 0x48, 0x7e, 0x76, 0x6a,
+	0x5e, 0xb1, 0x90, 0x11, 0x17, 0x7b, 0x72, 0x51, 0x6a, 0x62, 0x49, 0x7e, 0x11, 0x41, 0xaf, 0xc2,
+	0x14, 0x0a, 0x89, 0x71, 0xb1, 0x25, 0xe6, 0xe6, 0x97, 0xe6, 0x95, 0x80, 0x3d, 0xca, 0x19, 0x04,
+	0xe5, 0x09, 0x89, 0x70, 0xb1, 0xa6, 0xa4, 0xe6, 0xe5, 0xe7, 0x4a, 0x30, 0x83, 0x85, 0x21, 0x1c,
+	0x2b, 0x1e, 0x90, 0x6f, 0x60, 0x7a, 0x95, 0xc4, 0xb9, 0x44, 0x51, 0x1c, 0x00, 0x73, 0x99, 0xd1,
+	0x27, 0x46, 0x2e, 0x66, 0xdf, 0xe2, 0x74, 0xa1, 0x12, 0x2e, 0x1e, 0x94, 0xd8, 0xd0, 0xc5, 0x1f,
+	0x8a, 0x68, 0x1e, 0x95, 0x32, 0x25, 0x49, 0x39, 0xcc, 0x76, 0xa1, 0x3c, 0x2e, 0x2e, 0xa4, 0x40,
+	0xd1, 0x26, 0x68, 0x08, 0x42, 0xb1, 0x94, 0x31, 0x09, 0x8a, 0x61, 0xf6, 0x49, 0xb1, 0x36, 0x80,
+	0x62, 0xdc, 0xc9, 0xe6, 0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63,
+	0x9c, 0xf0, 0x58, 0x8e, 0xe1, 0xc2, 0x63, 0x39, 0x86, 0x1b, 0x8f, 0xe5, 0x18, 0xa2, 0x94, 0x60,
+	0xe6, 0xe8, 0x62, 0x8b, 0xf1, 0x92, 0xca, 0x82, 0xd4, 0xe2, 0x24, 0x36, 0x70, 0x1a, 0x36, 0x06,
+	0x04, 0x00, 0x00, 0xff, 0xff, 0xdf, 0xa7, 0x7d, 0x5b, 0x92, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -175,6 +279,8 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// BurnTokens defines the BurnTokens RPC.
+	BurnTokens(ctx context.Context, in *MsgBurnTokens, opts ...grpc.CallOption) (*MsgBurnTokensResponse, error)
 }
 
 type msgClient struct {
@@ -194,11 +300,22 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) BurnTokens(ctx context.Context, in *MsgBurnTokens, opts ...grpc.CallOption) (*MsgBurnTokensResponse, error) {
+	out := new(MsgBurnTokensResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.scarlettcore.v1.Msg/BurnTokens", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// BurnTokens defines the BurnTokens RPC.
+	BurnTokens(context.Context, *MsgBurnTokens) (*MsgBurnTokensResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -207,6 +324,9 @@ type UnimplementedMsgServer struct {
 
 func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) BurnTokens(ctx context.Context, req *MsgBurnTokens) (*MsgBurnTokensResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BurnTokens not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -231,6 +351,24 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_BurnTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgBurnTokens)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).BurnTokens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.scarlettcore.v1.Msg/BurnTokens",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).BurnTokens(ctx, req.(*MsgBurnTokens))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scarlettcore.scarlettcore.v1.Msg",
@@ -239,6 +377,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "BurnTokens",
+			Handler:    _Msg_BurnTokens_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -308,6 +450,73 @@ func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgBurnTokens) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgBurnTokens) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgBurnTokens) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Denom)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Amount) > 0 {
+		i -= len(m.Amount)
+		copy(dAtA[i:], m.Amount)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Amount)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgBurnTokensResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgBurnTokensResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgBurnTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -335,6 +544,36 @@ func (m *MsgUpdateParams) Size() (n int) {
 }
 
 func (m *MsgUpdateParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgBurnTokens) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Amount)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgBurnTokensResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -491,6 +730,202 @@ func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgBurnTokens) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgBurnTokens: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgBurnTokens: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Amount = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgBurnTokensResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgBurnTokensResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgBurnTokensResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
