@@ -12,16 +12,19 @@ import (
 )
 
 type Keeper struct {
-	storeService corestore.KVStoreService
-	cdc          codec.Codec
-	addressCodec address.Codec
-	bankKeeper   types.BankKeeper
+	storeService  corestore.KVStoreService
+	cdc           codec.Codec
+	addressCodec  address.Codec
+	bankKeeper    types.BankKeeper
+	stakingKeeper types.StakingKeeper
 	// Address capable of executing a MsgUpdateParams message.
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
 	Schema collections.Schema
 	Params collections.Item[types.Params]
+	// Track pending genesis burns (unbonding ID -> completion time)
+	PendingGenesisBurns collections.Map[uint64, int64]
 }
 
 func NewKeeper(
@@ -29,6 +32,7 @@ func NewKeeper(
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	bankKeeper types.BankKeeper,
+	stakingKeeper types.StakingKeeper, // Can be nil temporarily
 	authority []byte,
 
 ) Keeper {
@@ -39,13 +43,15 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
-		storeService: storeService,
-		cdc:          cdc,
-		addressCodec: addressCodec,
-		bankKeeper:   bankKeeper,
-		authority:    authority,
+		storeService:  storeService,
+		cdc:           cdc,
+		addressCodec:  addressCodec,
+		bankKeeper:    bankKeeper,
+		stakingKeeper: stakingKeeper, // Can be nil
+		authority:     authority,
 
-		Params: collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		Params:              collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		PendingGenesisBurns: collections.NewMap(sb, types.PendingGenesisBurnsKey, "pending_genesis_burns", collections.Uint64Key, collections.Int64Value),
 	}
 
 	schema, err := sb.Build()

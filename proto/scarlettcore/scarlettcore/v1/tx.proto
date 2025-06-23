@@ -20,6 +20,9 @@ service Msg {
 
   // BurnTokens defines the BurnTokens RPC.
   rpc BurnTokens(MsgBurnTokens) returns (MsgBurnTokensResponse);
+
+  // BurnGenesisStake defines the BurnGenesisStake RPC.
+  rpc BurnGenesisStake(MsgBurnGenesisStake) returns (MsgBurnGenesisStakeResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -53,3 +56,17 @@ message MsgBurnTokens {
 
 // MsgBurnTokensResponse defines the MsgBurnTokensResponse message.
 message MsgBurnTokensResponse {}
+
+// MsgBurnGenesisStake defines the MsgBurnGenesisStake message.
+message MsgBurnGenesisStake {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgBurnGenesisStakeResponse defines the MsgBurnGenesisStakeResponse message.
+message MsgBurnGenesisStakeResponse {
+  // unbonded_amount is the amount that will be burned after unbonding period
+  string unbonded_amount = 1;
+  // unbonding_completion_time is when the tokens will be available for burning
+  int64 unbonding_completion_time = 2;
+}
