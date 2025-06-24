@@ -2,12 +2,13 @@
 
 ## Overview
 
-The Genesis Fair Launch feature implements a **Satoshi-style anonymous decentralization mechanism** where the founding validator (genesis account) can permanently burn their entire stake, removing themselves from the network and reducing the total token supply.
+The Genesis Fair Launch feature implements a **Satoshi-style anonymous decentralization mechanism** where the founding validator (genesis account) can **progressively burn their stake** in flexible amounts, gradually reducing their control and the total token supply.
 
 This creates **true decentralization** by:
-- ✅ **Eliminating founder control** - Genesis keys become useless after execution
+- ✅ **Flexible decentralization** - Burn any amount, any time
+- ✅ **Gradual approach** - Test with small amounts, scale up
 - ✅ **Reducing token supply** - All genesis tokens are burned (not redistributed)
-- ✅ **One-time execution** - Cannot be repeated or reversed
+- ✅ **Multiple executions** - Can be called repeatedly until all stake is burned
 - ✅ **Network safety** - Requires minimum validator diversity before execution
 - ✅ **Transparent process** - All actions are recorded on-chain with events
 
@@ -166,7 +167,13 @@ validators:
 
 13. **Execute Genesis Burn**
     ```bash
-    scarlett-cored tx scarlettcore burn-genesis-stake --from alice --gas auto --gas-adjustment 1.5 --yes
+    # Burn a specific amount (e.g., 25M sclt)
+    scarlett-cored tx scarlettcore burn-genesis-stake 25000000sclt --from alice --gas auto --gas-adjustment 1.5 --yes
+    
+    # Or burn a different amount (e.g., 50M sclt)
+    scarlett-cored tx scarlettcore burn-genesis-stake 50000000sclt --from alice --gas auto --gas-adjustment 1.5 --yes
+    
+    # Can be called multiple times until all stake is burned
     ```
 
 ### Phase 5: Verify Results
@@ -211,21 +218,46 @@ validators:
 ## Expected Results
 
 ### Immediate Effects (Block of Execution)
-- ✅ **Alice's self-delegation unbonded**: 100M sclt enters 21-day unbonding
-- ✅ **Network continues**: Alice's validator remains active with 500M delegated stake
+- ✅ **Specified amount unbonded**: Only the requested amount enters 21-day unbonding
+- ✅ **Network continues**: Alice's validator remains active with remaining stake
 - ✅ **Other delegators unaffected**: validator1-4 keep their delegations to Alice
-- ✅ **Alice loses validator rewards**: No longer earns from her own stake
-- ✅ **`genesis_stake_burn_initiated` event emitted**
-- ✅ **One-time execution flag set** (prevents re-execution)
+- ✅ **Flexible control**: Alice can burn more later or stop at any amount
+- ✅ **`genesis_stake_burn_initiated` event emitted** with requested and actual amounts
+- ✅ **Multiple executions allowed** (no one-time restriction)
 
 ### Long-term Effects (After 21 Days)
-- ✅ **100M sclt automatically burned** via EndBlock processing
-- ✅ **Total supply reduced** from 600M to 500M sclt (16.7% deflation)
-- ✅ **Alice's keys become useless** for validator rewards (true decentralization)
-- ✅ **Network remains stable** with Alice's validator operated by delegated stake
-- ✅ **`genesis_tokens_burned` event emitted**
+- ✅ **Specified amount automatically burned** via EndBlock processing
+- ✅ **Gradual supply reduction** based on cumulative burns over time
+- ✅ **Alice retains control** until she chooses to burn remaining stake
+- ✅ **Network remains stable** with Alice's validator operated by remaining stake
+- ✅ **`genesis_tokens_burned` event emitted** for each completed burn
 
 ## Key Testing Insights
+
+### Flexible Burning Examples
+```bash
+# Example progression:
+# Initial: Alice has 100M sclt self-delegation
+
+# Burn 1: Test with 10M sclt
+scarlett-cored tx scarlettcore burn-genesis-stake 10000000sclt --from alice
+# Result: 90M remaining, 10M unbonding
+
+# Burn 2: Burn another 25M sclt  
+scarlett-cored tx scarlettcore burn-genesis-stake 25000000sclt --from alice
+# Result: 65M remaining, 35M total unbonding
+
+# Burn 3: Burn remaining 65M sclt
+scarlett-cored tx scarlettcore burn-genesis-stake 65000000sclt --from alice
+# Result: 0M remaining, 100M total burned over time
+```
+
+### Amount Validation
+- ✅ **Format validation**: Must be valid coin format (e.g., "50000000sclt")
+- ✅ **Positive amounts**: Cannot burn zero or negative amounts
+- ✅ **Denomination check**: Must use "sclt" denomination
+- ✅ **Available stake check**: Cannot exceed current self-delegation
+- ✅ **Precision handling**: Handles share-to-token conversions accurately
 
 ### Why Delegations Are Critical
 - **Without delegations**: Alice unbonds → Validator removed → Network crashes

@@ -14,6 +14,7 @@ var (
 	ErrInsufficientBalance = errors.Register(ModuleName, 1101, "insufficient balance to burn")
 	ErrInvalidAmount       = errors.Register(ModuleName, 1102, "invalid burn amount")
 	ErrInvalidDenom        = errors.Register(ModuleName, 1103, "invalid denomination")
+	ErrInvalidAddress      = errors.Register(ModuleName, 1104, "invalid address")
 
 	// Genesis burn errors
 	ErrNotGenesisAddress      = errors.Register(ModuleName, 2001, "caller is not the configured genesis address")
