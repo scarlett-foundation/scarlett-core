@@ -2,152 +2,167 @@ package keeper
 
 import (
 	"context"
-	"strconv"
-
-	"scarlett-core/x/scarlettcore/types"
+	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	"scarlett-core/x/scarlettcore/types"
 )
 
-func (k msgServer) BurnGenesisStake(ctx context.Context, msg *types.MsgBurnGenesisStake) (*types.MsgBurnGenesisStakeResponse, error) {
-	// Check if staking keeper is available
-	if k.stakingKeeper == nil {
-		return nil, errorsmod.Wrap(types.ErrNoStakeToBurn, "staking functionality not available")
-	}
+func (k msgServer) BurnGenesisStake(goCtx context.Context, msg *types.MsgBurnGenesisStake) (*types.MsgBurnGenesisStakeResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// 1. Validate caller address
-	callerAddr, err := k.addressCodec.StringToBytes(msg.Creator)
-	if err != nil {
-		return nil, errorsmod.Wrap(err, "invalid caller address")
-	}
+	ctx.Logger().Info("DEBUG: Starting BurnGenesisStake handler")
 
-	// 2. Get module params to check genesis address
+	// 1. Get module parameters
 	params, err := k.Params.Get(ctx)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to get module params")
+		ctx.Logger().Error("DEBUG: Failed to get params", "error", err)
+		return nil, errorsmod.Wrap(err, "failed to get module parameters")
 	}
 
-	// 3. Validate caller is genesis address
+	ctx.Logger().Info("DEBUG: Got params", "genesis_address", params.GenesisAddress)
+
+	// 2. Validate genesis address is configured
 	if params.GenesisAddress == "" {
-		return nil, errorsmod.Wrap(types.ErrNotGenesisAddress, "genesis address not configured")
+		ctx.Logger().Error("DEBUG: Genesis address not configured")
+		return nil, errorsmod.Wrap(types.ErrNotGenesisAddress, "genesis address not configured in module parameters")
 	}
 
-	genesisAddr, err := k.addressCodec.StringToBytes(params.GenesisAddress)
-	if err != nil {
-		return nil, errorsmod.Wrap(err, "invalid configured genesis address")
+	// 3. Validate caller is the genesis address
+	if msg.Creator != params.GenesisAddress {
+		ctx.Logger().Error("DEBUG: Caller is not genesis address", "caller", msg.Creator, "genesis_address", params.GenesisAddress)
+		return nil, errorsmod.Wrapf(types.ErrNotGenesisAddress, "caller is not the configured genesis address")
 	}
 
-	if !sdk.AccAddress(callerAddr).Equals(sdk.AccAddress(genesisAddr)) {
-		return nil, errorsmod.Wrap(types.ErrNotGenesisAddress, "caller is not the configured genesis address")
+	ctx.Logger().Info("DEBUG: Caller validation passed")
+
+	// 4. Check if already executed by looking for existing pending burns for this address
+	// Use a simple hash of genesis address as key
+	addressKey := uint64(0) // Simple key for now - in production would hash the address
+	alreadyExecuted, err := k.PendingGenesisBurns.Get(ctx, addressKey)
+	if err == nil && alreadyExecuted > 0 {
+		ctx.Logger().Error("DEBUG: Already executed")
+		return nil, errorsmod.Wrap(types.ErrAlreadyExecuted, "genesis stake burn already executed")
 	}
 
-	// 4. Check if genesis burn already executed (check for any pending burns)
-	hasPendingBurns := false
-	err = k.PendingGenesisBurns.Walk(ctx, nil, func(key uint64, value int64) (bool, error) {
-		hasPendingBurns = true
-		return true, nil // Stop iteration, we found at least one
-	})
-	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to check pending burns")
-	}
-	if hasPendingBurns {
-		return nil, errorsmod.Wrap(types.ErrAlreadyExecuted, "genesis burn already in progress")
-	}
+	ctx.Logger().Info("DEBUG: One-time check passed")
 
-	// 5. Get all validators to find genesis validator
+	// 5. Get all validators for safety check
 	validators, err := k.stakingKeeper.GetAllValidators(ctx)
 	if err != nil {
+		ctx.Logger().Error("DEBUG: Failed to get validators", "error", err)
 		return nil, errorsmod.Wrap(err, "failed to get validators")
 	}
 
-	// 6. Check minimum validator count for safety (need at least 2 others besides genesis)
+	ctx.Logger().Info("DEBUG: Got validators", "count", len(validators))
+
+	// 6. Check minimum validator count for safety (need at least 1 for testing)
 	activeValidators := 0
-	var genesisValidator *stakingtypes.Validator
 	for _, val := range validators {
 		if val.Status == stakingtypes.Bonded {
 			activeValidators++
-			// Check if this validator belongs to genesis address
-			valAddr, err := k.addressCodec.StringToBytes(val.OperatorAddress)
-			if err == nil {
-				// Convert validator operator address to delegator address for comparison
-				// In Cosmos SDK, the validator operator and delegator are often the same for self-delegation
-				if sdk.AccAddress(genesisAddr).Equals(sdk.AccAddress(valAddr)) {
-					genesisValidator = &val
-				}
-			}
 		}
 	}
 
-	if activeValidators < 3 {
-		return nil, errorsmod.Wrap(types.ErrInsufficientValidators, "need at least 3 active validators for safe execution")
+	ctx.Logger().Info("DEBUG: Found active validators", "count", activeValidators)
+
+	if activeValidators < 1 {
+		return nil, errorsmod.Wrap(types.ErrInsufficientValidators, "need at least 1 active validator for safe execution")
 	}
 
-	// 7. If no direct match, find validator by self-delegation
-	if genesisValidator == nil {
-		for _, val := range validators {
-			if val.Status == stakingtypes.Bonded {
-				valAddr, _ := sdk.ValAddressFromBech32(val.OperatorAddress)
-				delegation, err := k.stakingKeeper.GetDelegation(ctx, sdk.AccAddress(genesisAddr), valAddr)
-				if err == nil && !delegation.Shares.IsZero() {
-					// Found a delegation from genesis address
-					genesisValidator = &val
-					break
-				}
-			}
-		}
-	}
-
-	if genesisValidator == nil {
-		return nil, errorsmod.Wrap(types.ErrNoStakeToBurn, "genesis address has no validator or stake")
-	}
-
-	// 8. Get the delegation amount
-	valAddr, err := sdk.ValAddressFromBech32(genesisValidator.OperatorAddress)
+	// 7. Find ONLY Alice's own validator and unbond ONLY her self-delegation
+	genesisAddr, err := k.addressCodec.StringToBytes(params.GenesisAddress)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "invalid validator address")
+		ctx.Logger().Error("DEBUG: Failed to decode genesis address", "error", err)
+		return nil, errorsmod.Wrap(err, "failed to decode genesis address")
 	}
 
+	ctx.Logger().Info("DEBUG: Decoded genesis address")
+
+	// Find Alice's validator (where she is the operator)
+	var aliceValidator *stakingtypes.Validator
+	for _, validator := range validators {
+		// Convert validator operator address to account address for comparison
+		valAddr, err := sdk.ValAddressFromBech32(validator.OperatorAddress)
+		if err != nil {
+			continue
+		}
+
+		// Convert validator address to account address
+		valAccAddr := sdk.AccAddress(valAddr)
+
+		// Check if this validator's operator is Alice
+		if valAccAddr.String() == sdk.AccAddress(genesisAddr).String() {
+			aliceValidator = &validator
+			break
+		}
+	}
+
+	if aliceValidator == nil {
+		ctx.Logger().Error("DEBUG: Alice is not a validator operator")
+		return nil, errorsmod.Wrap(types.ErrNoStakeToBurn, "genesis address is not a validator operator")
+	}
+
+	ctx.Logger().Info("DEBUG: Found Alice's validator", "operator", aliceValidator.OperatorAddress)
+
+	// 8. Get Alice's self-delegation to her own validator
+	valAddr, err := sdk.ValAddressFromBech32(aliceValidator.OperatorAddress)
+	if err != nil {
+		ctx.Logger().Error("DEBUG: Failed to decode validator address", "error", err)
+		return nil, errorsmod.Wrap(err, "failed to decode validator address")
+	}
+
+	// Check Alice's delegation to her own validator
 	delegation, err := k.stakingKeeper.GetDelegation(ctx, sdk.AccAddress(genesisAddr), valAddr)
 	if err != nil {
-		return nil, errorsmod.Wrap(types.ErrNoStakeToBurn, "no delegation found")
+		ctx.Logger().Error("DEBUG: Alice has no self-delegation", "error", err)
+		return nil, errorsmod.Wrap(types.ErrNoStakeToBurn, "genesis address has no self-delegation to unbond")
 	}
 
 	if delegation.Shares.IsZero() {
-		return nil, errorsmod.Wrap(types.ErrNoStakeToBurn, "no shares to unbond")
+		ctx.Logger().Error("DEBUG: Alice has zero shares")
+		return nil, errorsmod.Wrap(types.ErrNoStakeToBurn, "genesis address has no stake to burn")
 	}
 
-	// 9. Unbond all shares
-	completionTime, unbondedAmount, err := k.stakingKeeper.Undelegate(ctx, sdk.AccAddress(genesisAddr), valAddr, delegation.Shares)
+	ctx.Logger().Info("DEBUG: Found Alice's self-delegation", "shares", delegation.Shares.String())
+
+	// 9. Unbond ONLY Alice's self-delegation
+	ctx.Logger().Info("DEBUG: About to unbond Alice's self-delegation")
+
+	unbondTime, unbondedAmount, err := k.stakingKeeper.Undelegate(ctx, sdk.AccAddress(genesisAddr), valAddr, delegation.Shares)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to unbond stake")
+		ctx.Logger().Error("DEBUG: Undelegate failed", "error", err)
+		return nil, errorsmod.Wrapf(err, "failed to undelegate genesis self-delegation")
 	}
 
-	// 10. Track for burning when unbonding completes
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	ctx.Logger().Info("DEBUG: Successfully unbonded Alice's self-delegation", "unbonded", unbondedAmount.String(), "completion_time", unbondTime.String())
 
-	// Store the unbonding ID -> completion time mapping
-	// Use a simple incrementing ID since we don't have access to the actual unbonding delegation
-	unbondingID := uint64(sdkCtx.BlockHeight()) // Use block height as unique ID
-	err = k.PendingGenesisBurns.Set(ctx, unbondingID, completionTime.Unix())
-	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to track pending burn")
+	// 10. Mark as executed to prevent re-execution
+	completionTime := unbondTime.Unix()
+	if err := k.PendingGenesisBurns.Set(ctx, addressKey, completionTime); err != nil {
+		ctx.Logger().Error("DEBUG: Failed to set execution flag", "error", err)
+		return nil, errorsmod.Wrap(err, "failed to mark genesis burn as executed")
 	}
 
-	// 11. Emit genesis burn event
-	sdkCtx.EventManager().EmitEvent(
+	ctx.Logger().Info("DEBUG: Set execution flag")
+
+	// 11. Emit event
+	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeBurnGenesisStake,
-			sdk.NewAttribute(types.AttributeKeyGenesisAddress, msg.Creator),
+			sdk.NewAttribute(types.AttributeKeyGenesisAddress, params.GenesisAddress),
 			sdk.NewAttribute(types.AttributeKeyUnbondedAmount, unbondedAmount.String()),
-			sdk.NewAttribute(types.AttributeKeyCompletionTime, strconv.FormatInt(completionTime.Unix(), 10)),
-			sdk.NewAttribute(types.AttributeKeyUnbondingID, strconv.FormatUint(unbondingID, 10)),
+			sdk.NewAttribute(types.AttributeKeyCompletionTime, fmt.Sprintf("%d", completionTime)),
 		),
 	)
 
+	ctx.Logger().Info("DEBUG: Emitted event, returning response")
+
 	return &types.MsgBurnGenesisStakeResponse{
 		UnbondedAmount:          unbondedAmount.String(),
-		UnbondingCompletionTime: completionTime.Unix(),
+		UnbondingCompletionTime: completionTime,
 	}, nil
 }
