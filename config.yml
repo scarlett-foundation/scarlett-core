@@ -8,6 +8,18 @@ accounts:
 - name: bob
   coins:
   - 100000000sclt
+- name: validator1
+  coins:
+  - 250000000sclt
+- name: validator2
+  coins:
+  - 150000000sclt
+- name: validator3
+  coins:
+  - 150000000sclt
+- name: validator4
+  coins:
+  - 150000000sclt
 client:
   openapi:
     path: docs/static/openapi.yml
@@ -22,3 +34,24 @@ validators:
   bonded: 200000000sclt
 - name: validator2
   bonded: 100000000sclt
+- name: validator3
+  bonded: 100000000sclt
+- name: validator4
+  bonded: 100000000sclt
+genesis:
+  chain_id: scarlettcore
+  app_state:
+    gov:
+      params:
+        voting_period: "60s"
+        expedited_voting_period: "30s"
+        max_deposit_period: "120s"
+        min_deposit:
+        - amount: "1000000"
+          denom: sclt
+        expedited_min_deposit:
+        - amount: "2000000"
+          denom: sclt
+        quorum: "0.334000000000000000"
+        threshold: "0.500000000000000000"
+        expedited_threshold: "0.667000000000000000"
