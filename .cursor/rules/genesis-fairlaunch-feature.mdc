@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Genesis Fair Launch Custom Module Feature - Cursor Rules
 

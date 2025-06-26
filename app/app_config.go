@@ -1,6 +1,8 @@
 package app
 
 import (
+	_ "scarlett-core/x/emissions/module"
+	emissionsmoduletypes "scarlett-core/x/emissions/types"
 	_ "scarlett-core/x/scarlettcore/module"
 	scarlettcoremoduletypes "scarlett-core/x/scarlettcore/types"
 	"time"
@@ -129,6 +131,7 @@ var (
 						ibcexported.ModuleName,
 						// chain modules
 						scarlettcoremoduletypes.ModuleName,
+						emissionsmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -138,6 +141,7 @@ var (
 						group.ModuleName,
 						// chain modules
 						scarlettcoremoduletypes.ModuleName,
+						emissionsmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -175,6 +179,7 @@ var (
 						icatypes.ModuleName,
 						// chain modules
 						scarlettcoremoduletypes.ModuleName,
+						emissionsmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -274,6 +279,10 @@ var (
 			{
 				Name:   scarlettcoremoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&scarlettcoremoduletypes.Module{}),
+			},
+			{
+				Name:   emissionsmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&emissionsmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
