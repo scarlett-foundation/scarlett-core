@@ -23,6 +23,9 @@ service Msg {
 
   // AddEmissionDestination defines the AddEmissionDestination RPC.
   rpc AddEmissionDestination(MsgAddEmissionDestination) returns (MsgAddEmissionDestinationResponse);
+
+  // RemoveEmissionDestination defines the RemoveEmissionDestination RPC.
+  rpc RemoveEmissionDestination(MsgRemoveEmissionDestination) returns (MsgRemoveEmissionDestinationResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -70,3 +73,14 @@ message MsgAddEmissionDestination {
 
 // MsgAddEmissionDestinationResponse defines the MsgAddEmissionDestinationResponse message.
 message MsgAddEmissionDestinationResponse {}
+
+// MsgRemoveEmissionDestination defines the MsgRemoveEmissionDestination message.
+message MsgRemoveEmissionDestination {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string module = 2;
+  string reason = 3;
+}
+
+// MsgRemoveEmissionDestinationResponse defines the MsgRemoveEmissionDestinationResponse message.
+message MsgRemoveEmissionDestinationResponse {}
