@@ -34,6 +34,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a update-emission-split tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "destinations"}, {ProtoField: "weights"}, {ProtoField: "reason"}},
 				},
+				{
+					RpcMethod:      "AddEmissionDestination",
+					Use:            "add-emission-destination [module] [weight] [description] [reason]",
+					Short:          "Send a add-emission-destination tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "module"}, {ProtoField: "weight"}, {ProtoField: "description"}, {ProtoField: "reason"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},
