@@ -158,9 +158,7 @@ func New(
 				// on available options and how to use them.
 
 				// Use governance-controlled emissions mint function
-				depinject.Provide(func(emissionsKeeper emissionsmodulekeeper.Keeper) mintkeeper.MintFn {
-					return emissionsKeeper.ProvideDynamicMintFn()
-				}),
+				depinject.Provide(ProvideDynamicEmissionsMintFn),
 			),
 		)
 	)
