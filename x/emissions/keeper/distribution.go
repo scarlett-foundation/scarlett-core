@@ -13,14 +13,14 @@ import (
 )
 
 // ProvideDynamicMintFn creates a dynamic mint function that uses governance-controlled emission parameters
-func (k Keeper) ProvideDynamicMintFn() func(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
+func (k Keeper) ProvideDynamicMintFn() mintkeeper.MintFn {
 	return func(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
-		return k.DynamicEmissionsMintFn(ctx)
+		return k.DynamicEmissionsMintFn(ctx, mintKeeper)
 	}
 }
 
 // DynamicEmissionsMintFn implements dynamic emission splitting using governance-controlled parameters
-func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context) error {
+func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
 	// 1. Get governance-controlled emission parameters
 	emissionParams, err := k.GetEmissionParams(ctx)
 	if err != nil {
@@ -59,25 +59,25 @@ func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context) error {
 		return fmt.Errorf("failed to create emission splitter: %w", err)
 	}
 
-	// 4. Get current minter state and parameters using our mint keeper
-	minter, err := k.getMinterState(ctx)
+	// 4. Get current minter state and parameters using the provided mint keeper
+	minter, err := k.getMinterState(ctx, mintKeeper)
 	if err != nil {
 		return fmt.Errorf("failed to get minter state: %w", err)
 	}
 
-	params, err := k.mintKeeper.Params.Get(ctx)
+	params, err := mintKeeper.Params.Get(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get mint params: %w", err)
 	}
 
 	// 5. Calculate inflation and provisions using standard mint logic
-	if err := k.updateInflation(ctx, &minter, params); err != nil {
+	if err := k.updateInflation(ctx, &minter, params, mintKeeper); err != nil {
 		return fmt.Errorf("failed to update inflation: %w", err)
 	}
 
 	// 6. Calculate and mint this block's provision
 	blockProvisionCoin := minter.BlockProvision(params)
-	if err := k.mintTokens(ctx, blockProvisionCoin); err != nil {
+	if err := k.mintTokens(ctx, blockProvisionCoin, mintKeeper); err != nil {
 		return fmt.Errorf("failed to mint tokens: %w", err)
 	}
 
@@ -87,7 +87,7 @@ func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context) error {
 	}
 
 	// 8. Update minter state in the store
-	if err := k.mintKeeper.Minter.Set(ctx, minter); err != nil {
+	if err := mintKeeper.Minter.Set(ctx, minter); err != nil {
 		return fmt.Errorf("failed to update minter state: %w", err)
 	}
 
@@ -143,8 +143,8 @@ func (k Keeper) convertToEmissionsConfig(params types.EmissionParams) emissions.
 }
 
 // getMinterState retrieves and validates the current minter state
-func (k Keeper) getMinterState(ctx sdk.Context) (minttypes.Minter, error) {
-	minter, err := k.mintKeeper.Minter.Get(ctx)
+func (k Keeper) getMinterState(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) (minttypes.Minter, error) {
+	minter, err := mintKeeper.Minter.Get(ctx)
 	if err != nil {
 		return minttypes.Minter{}, fmt.Errorf("failed to get minter: %w", err)
 	}
@@ -152,9 +152,9 @@ func (k Keeper) getMinterState(ctx sdk.Context) (minttypes.Minter, error) {
 }
 
 // updateInflation calculates and updates inflation rates and annual provisions
-func (k Keeper) updateInflation(ctx sdk.Context, minter *minttypes.Minter, params minttypes.Params) error {
+func (k Keeper) updateInflation(ctx sdk.Context, minter *minttypes.Minter, params minttypes.Params, mintKeeper *mintkeeper.Keeper) error {
 	// Get staking metrics
-	stakingTokenSupply, err := k.mintKeeper.StakingTokenSupply(ctx)
+	stakingTokenSupply, err := mintKeeper.StakingTokenSupply(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get staking token supply: %w", err)
 	}
@@ -172,13 +172,13 @@ func (k Keeper) updateInflation(ctx sdk.Context, minter *minttypes.Minter, param
 }
 
 // mintTokens mints the specified amount of tokens to the mint module account
-func (k Keeper) mintTokens(ctx sdk.Context, coin sdk.Coin) error {
+func (k Keeper) mintTokens(ctx sdk.Context, coin sdk.Coin, mintKeeper *mintkeeper.Keeper) error {
 	if coin.Amount.IsZero() {
 		return nil // Nothing to mint
 	}
 
 	coins := sdk.NewCoins(coin)
-	if err := k.mintKeeper.MintCoins(ctx, coins); err != nil {
+	if err := mintKeeper.MintCoins(ctx, coins); err != nil {
 		return fmt.Errorf("failed to mint %s: %w", coins.String(), err)
 	}
 
@@ -316,5 +316,8 @@ func (k Keeper) activateEmergencyFallback(ctx sdk.Context, reason string) error 
 		"reason", reason, "height", ctx.BlockHeight())
 
 	// Continue with fallback configuration
-	return k.DynamicEmissionsMintFn(ctx)
+	// Note: This is a recursive call from within the mint function, so we need to
+	// use the original mint keeper reference. Since we're in an emergency fallback,
+	// we'll use the keeper's mint keeper reference.
+	return k.DynamicEmissionsMintFn(ctx, &k.mintKeeper)
 }

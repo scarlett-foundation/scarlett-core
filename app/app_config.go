@@ -239,7 +239,9 @@ var (
 			},
 			{
 				Name:   minttypes.ModuleName,
-				Config: appconfig.WrapAny(&mintmodulev1.Module{}),
+				Config: appconfig.WrapAny(&mintmodulev1.Module{
+					// Note: Custom mint function will be set after keeper initialization
+				}),
 			},
 			{
 				Name: group.ModuleName,
