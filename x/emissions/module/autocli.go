@@ -17,6 +17,27 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod:      "EmissionParams",
+					Use:            "emission-params ",
+					Short:          "Query emission-params",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
+				{
+					RpcMethod:      "EmissionHistory",
+					Use:            "emission-history ",
+					Short:          "Query emission-history",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
+				{
+					RpcMethod: "DestinationStats",
+					Use: "destination-stats ",
+					Short: "Query destination-stats",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
