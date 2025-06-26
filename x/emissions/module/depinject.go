@@ -8,6 +8,10 @@ import (
 	"cosmossdk.io/depinject/appconfig"
 	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
+	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	"scarlett-core/x/emissions/keeper"
 	"scarlett-core/x/emissions/types"
@@ -33,8 +37,11 @@ type ModuleInputs struct {
 	Cdc          codec.Codec
 	AddressCodec address.Codec
 
-	AuthKeeper types.AuthKeeper
-	BankKeeper types.BankKeeper
+	AuthKeeper    types.AuthKeeper
+	BankKeeper    bankkeeper.Keeper
+	GovKeeper     *govkeeper.Keeper
+	StakingKeeper *stakingkeeper.Keeper
+	MintKeeper    mintkeeper.Keeper
 }
 
 type ModuleOutputs struct {
@@ -54,7 +61,11 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.StoreService,
 		in.Cdc,
 		in.AddressCodec,
-		authority,
+		authority.Bytes(),
+		in.BankKeeper,
+		*in.GovKeeper,
+		*in.StakingKeeper,
+		in.MintKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 
