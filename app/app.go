@@ -157,9 +157,10 @@ func New(
 				// read the depinject documentation and depinject module wiring for more information
 				// on available options and how to use them.
 
-				// Use legacy mint function temporarily to avoid circular dependency
-				// TODO: Transition to governance-controlled mint function after app initialization
-				ProvideMinerEmissionsMintFn,
+				// Use governance-controlled emissions mint function
+				depinject.Provide(func(emissionsKeeper emissionsmodulekeeper.Keeper) mintkeeper.MintFn {
+					return emissionsKeeper.ProvideDynamicMintFn()
+				}),
 			),
 		)
 	)
