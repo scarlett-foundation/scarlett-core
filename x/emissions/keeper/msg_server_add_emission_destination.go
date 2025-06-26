@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 
 	"scarlett-core/x/emissions/types"
@@ -9,11 +10,18 @@ import (
 )
 
 func (k msgServer) AddEmissionDestination(ctx context.Context, msg *types.MsgAddEmissionDestination) (*types.MsgAddEmissionDestinationResponse, error) {
-	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
+	// 1. Authority validation - only governance can add emission destinations
+	authority, err := k.addressCodec.StringToBytes(msg.Creator)
+	if err != nil {
 		return nil, errorsmod.Wrap(err, "invalid authority address")
 	}
 
-	// TODO: Handle the message
+	if !bytes.Equal(k.GetAuthority(), authority) {
+		expectedAuthorityStr, _ := k.addressCodec.BytesToString(k.GetAuthority())
+		return nil, errorsmod.Wrapf(types.ErrUnauthorized, "invalid authority; expected %s, got %s", expectedAuthorityStr, msg.Creator)
+	}
+
+	// TODO: Handle the message - implement adding new emission destination
 
 	return &types.MsgAddEmissionDestinationResponse{}, nil
 }

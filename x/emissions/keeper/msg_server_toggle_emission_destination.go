@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 
 	"scarlett-core/x/emissions/types"
@@ -9,11 +10,18 @@ import (
 )
 
 func (k msgServer) ToggleEmissionDestination(ctx context.Context, msg *types.MsgToggleEmissionDestination) (*types.MsgToggleEmissionDestinationResponse, error) {
-	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
+	// 1. Authority validation - only governance can toggle emission destinations
+	authority, err := k.addressCodec.StringToBytes(msg.Creator)
+	if err != nil {
 		return nil, errorsmod.Wrap(err, "invalid authority address")
 	}
 
-	// TODO: Handle the message
+	if !bytes.Equal(k.GetAuthority(), authority) {
+		expectedAuthorityStr, _ := k.addressCodec.BytesToString(k.GetAuthority())
+		return nil, errorsmod.Wrapf(types.ErrUnauthorized, "invalid authority; expected %s, got %s", expectedAuthorityStr, msg.Creator)
+	}
+
+	// TODO: Handle the message - implement toggling emission destination
 
 	return &types.MsgToggleEmissionDestinationResponse{}, nil
 }
