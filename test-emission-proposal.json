@@ -1,30 +1,15 @@
 {
-  "title": "Initialize Dynamic Emission Parameters",
-  "description": "Set initial emission split: 60% to validators (fee_collector) and 40% to AI inference rewards",
+  "title": "Activate Dynamic Governance-Controlled Emissions: 60/40 Split",
+  "summary": "Activate governance-controlled emissions with 60% to validators and 40% to AI inference rewards",
+  "description": "Activate the dynamic governance-controlled emissions system with a 60% allocation to validators (fee_collector) and 40% allocation to AI inference rewards (inferencerewards module). This proposal will replace the current hardcoded mint distribution with a governance-controlled system that can be adjusted through future proposals.",
   "messages": [
     {
       "@type": "/scarlettcore.emissions.v1.MsgUpdateEmissionSplit",
-      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47",
-      "destinations": [
-        {
-          "module_name": "fee_collector",
-          "weight": "0.60",
-          "description": "Validator and delegator rewards",
-          "enabled": true,
-          "min_weight": "0.30",
-          "max_weight": "0.70"
-        },
-        {
-          "module_name": "inferencerewards",
-          "weight": "0.40", 
-          "description": "AI inference provider rewards",
-          "enabled": true,
-          "min_weight": "0.10",
-          "max_weight": "0.60"
-        }
-      ],
-      "reason": "Initialize dynamic governance-controlled emissions with balanced validator and AI inference incentives"
+      "creator": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700j4l5sjv",
+      "destinations": ["fee_collector", "inferencerewards"],
+      "weights": ["0.60", "0.40"],
+      "reason": "Initial activation of governance-controlled emissions to test dynamic distribution system"
     }
   ],
-  "deposit": "1000000sclt"
+  "deposit": "10000000sclt"
 } 
