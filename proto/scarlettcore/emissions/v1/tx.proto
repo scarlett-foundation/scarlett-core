@@ -20,6 +20,9 @@ service Msg {
 
   // UpdateEmissionSplit defines the UpdateEmissionSplit RPC.
   rpc UpdateEmissionSplit(MsgUpdateEmissionSplit) returns (MsgUpdateEmissionSplitResponse);
+
+  // AddEmissionDestination defines the AddEmissionDestination RPC.
+  rpc AddEmissionDestination(MsgAddEmissionDestination) returns (MsgAddEmissionDestinationResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -54,3 +57,16 @@ message MsgUpdateEmissionSplit {
 
 // MsgUpdateEmissionSplitResponse defines the MsgUpdateEmissionSplitResponse message.
 message MsgUpdateEmissionSplitResponse {}
+
+// MsgAddEmissionDestination defines the MsgAddEmissionDestination message.
+message MsgAddEmissionDestination {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string module = 2;
+  string weight = 3;
+  string description = 4;
+  string reason = 5;
+}
+
+// MsgAddEmissionDestinationResponse defines the MsgAddEmissionDestinationResponse message.
+message MsgAddEmissionDestinationResponse {}

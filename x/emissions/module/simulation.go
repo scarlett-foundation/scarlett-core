@@ -44,6 +44,21 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		weightMsgUpdateEmissionSplit,
 		emissionssimulation.SimulateMsgUpdateEmissionSplit(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
+	const (
+		opWeightMsgAddEmissionDestination          = "op_weight_msg_emissions"
+		defaultWeightMsgAddEmissionDestination int = 100
+	)
+
+	var weightMsgAddEmissionDestination int
+	simState.AppParams.GetOrGenerate(opWeightMsgAddEmissionDestination, &weightMsgAddEmissionDestination, nil,
+		func(_ *rand.Rand) {
+			weightMsgAddEmissionDestination = defaultWeightMsgAddEmissionDestination
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgAddEmissionDestination,
+		emissionssimulation.SimulateMsgAddEmissionDestination(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
 
 	return operations
 }
