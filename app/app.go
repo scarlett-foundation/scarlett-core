@@ -46,6 +46,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"scarlett-core/docs"
+	emissionsmodulekeeper "scarlett-core/x/emissions/keeper"
 	scarlettcoremodulekeeper "scarlett-core/x/scarlettcore/keeper"
 )
 
@@ -99,6 +100,7 @@ type App struct {
 	TransferKeeper      ibctransferkeeper.Keeper
 
 	ScarlettcoreKeeper scarlettcoremodulekeeper.Keeper
+	EmissionsKeeper    emissionsmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -181,6 +183,7 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
 		&app.ScarlettcoreKeeper,
+		&app.EmissionsKeeper,
 	); err != nil {
 		panic(err)
 	}
