@@ -46,6 +46,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a remove-emission-destination tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "module"}, {ProtoField: "reason"}},
 				},
+				{
+					RpcMethod:      "ToggleEmissionDestination",
+					Use:            "toggle-emission-destination [module] [enabled] [reason]",
+					Short:          "Send a toggle-emission-destination tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "module"}, {ProtoField: "enabled"}, {ProtoField: "reason"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},
