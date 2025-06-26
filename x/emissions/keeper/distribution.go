@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"cosmossdk.io/math"
@@ -19,126 +20,94 @@ func (k Keeper) ProvideDynamicMintFn() mintkeeper.MintFn {
 	}
 }
 
-// DynamicEmissionsMintFn implements dynamic emission splitting using governance-controlled parameters
+// DynamicEmissionsMintFn implements the MintFn interface for governance-controlled emissions
 func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
-	// 1. Get governance-controlled emission parameters
-	emissionParams, err := k.GetEmissionParams(ctx)
-	if err != nil {
-		// Fallback to default parameters if not found
-		emissionParams = types.DefaultEmissionParams()
-		// Store default parameters for future use
-		if err := k.SetEmissionParams(ctx, emissionParams); err != nil {
-			return fmt.Errorf("failed to store default emission parameters: %w", err)
-		}
+	// 1. Get governance-controlled parameters
+	params, err := k.Params.Get(ctx)
+	if err != nil || !params.Enabled {
+		// Fallback to default behavior if governance params not set
+		return k.applyFallbackConfiguration(ctx, mintKeeper)
 	}
 
-	// 2. EMERGENCY CONTROLS - Check if emergency stop is active
-	if emissionParams.IsEmergencyActive() {
-		return k.handleEmergencyStop(ctx, emissionParams)
+	// 2. Parse governance parameters
+	var destinations []types.EmissionDestination
+	if err := json.Unmarshal([]byte(params.EmissionDestinations), &destinations); err != nil {
+		return k.activateEmergencyFallback(ctx, mintKeeper, "invalid governance parameters")
 	}
 
-	// 3. FALLBACK MECHANISM - Check if fallback is enabled
-	if emissionParams.FallbackEnabled {
-		emissionParams = k.applyFallbackConfiguration(emissionParams)
-	}
+	// 3. Convert to emissions config
+	emissionsConfig := k.convertGovernanceToEmissionsConfig(destinations)
 
-	// 4. SAFETY VALIDATION - Ensure parameters are still valid
-	if err := types.ValidateEmissionParams(emissionParams); err != nil {
-		// If validation fails, activate emergency fallback
-		ctx.Logger().Error("Emission parameters validation failed, activating emergency fallback",
-			"error", err, "height", ctx.BlockHeight())
-		return k.activateEmergencyFallback(ctx, fmt.Sprintf("validation_failure: %s", err.Error()))
-	}
-
-	// 2. Convert governance parameters to emissions config
-	config := k.convertToEmissionsConfig(emissionParams)
-
-	// 3. Create emission splitter using existing logic
-	splitter, err := emissions.NewEmissionSplitter(config, k.bankKeeper)
+	// 4. Create emission splitter using existing logic
+	splitter, err := emissions.NewEmissionSplitter(emissionsConfig, k.bankKeeper)
 	if err != nil {
 		return fmt.Errorf("failed to create emission splitter: %w", err)
 	}
 
-	// 4. Get current minter state and parameters using the provided mint keeper
+	// 5. Get minter state and mint tokens
 	minter, err := k.getMinterState(ctx, mintKeeper)
 	if err != nil {
-		return fmt.Errorf("failed to get minter state: %w", err)
+		return err
 	}
 
-	params, err := mintKeeper.Params.Get(ctx)
+	mintParams, err := mintKeeper.Params.Get(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get mint params: %w", err)
 	}
 
-	// 5. Calculate inflation and provisions using standard mint logic
-	if err := k.updateInflation(ctx, &minter, params, mintKeeper); err != nil {
+	// 6. Calculate inflation and provisions using standard mint logic
+	if err := k.updateInflation(ctx, &minter, mintParams, mintKeeper); err != nil {
 		return fmt.Errorf("failed to update inflation: %w", err)
 	}
 
-	// 6. Calculate and mint this block's provision
-	blockProvisionCoin := minter.BlockProvision(params)
-	if err := k.mintTokens(ctx, blockProvisionCoin, mintKeeper); err != nil {
+	// 7. Calculate and mint this block's provision
+	blockProvisionCoin := minter.BlockProvision(mintParams)
+	coins := sdk.NewCoins(blockProvisionCoin)
+	if err := mintKeeper.MintCoins(ctx, coins); err != nil {
 		return fmt.Errorf("failed to mint tokens: %w", err)
 	}
 
-	// 7. Distribute minted tokens using governance-controlled splitter
-	if err := splitter.DistributeTokens(ctx, params.MintDenom, blockProvisionCoin.Amount); err != nil {
+	// 8. Distribute according to governance configuration
+	if err := splitter.DistributeTokens(ctx, mintParams.MintDenom, blockProvisionCoin.Amount); err != nil {
 		return fmt.Errorf("failed to distribute tokens: %w", err)
 	}
 
-	// 8. Update minter state in the store
+	// 9. Update minter state in the store
 	if err := mintKeeper.Minter.Set(ctx, minter); err != nil {
 		return fmt.Errorf("failed to update minter state: %w", err)
 	}
 
-	// 9. Update destination metrics
-	if err := k.updateDestinationMetrics(ctx, emissionParams.Destinations, blockProvisionCoin.Amount, params.MintDenom); err != nil {
-		return fmt.Errorf("failed to update destination metrics: %w", err)
-	}
-
-	// 10. Emit comprehensive events
-	distributions, _ := splitter.CalculateDistribution(blockProvisionCoin.Amount)
-	bondedRatio, _ := k.stakingKeeper.BondedRatio(ctx)
-
-	k.emitDynamicEmissionEvent(
-		ctx,
-		blockProvisionCoin.Amount,
-		distributions,
-		emissionParams,
-		minter,
-		bondedRatio,
+	// 10. Emit governance events
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeEmissionDistributed,
+			sdk.NewAttribute(types.AttributeKeyAmount, blockProvisionCoin.String()),
+			sdk.NewAttribute("governance_controlled", "true"),
+			sdk.NewAttribute("destinations", params.EmissionDestinations),
+		),
 	)
 
 	return nil
 }
 
-// convertToEmissionsConfig converts governance parameters to the existing emissions config format
-func (k Keeper) convertToEmissionsConfig(params types.EmissionParams) emissions.EmissionsConfig {
-	if !params.Enabled {
-		// Return disabled config - all to fee collector
-		return emissions.EmissionsConfig{
-			Enabled:      false,
-			Destinations: []emissions.EmissionDestination{},
-		}
-	}
+// convertGovernanceToEmissionsConfig converts governance parameters to emissions config
+func (k Keeper) convertGovernanceToEmissionsConfig(destinations []types.EmissionDestination) emissions.EmissionsConfig {
+	var emissionDestinations []emissions.EmissionDestination
 
-	// Convert governance destinations to emissions destinations
-	destinations := make([]emissions.EmissionDestination, len(params.Destinations))
-	for i, dest := range params.Destinations {
+	for _, dest := range destinations {
 		if !dest.Enabled {
-			continue // Skip disabled destinations
+			continue
 		}
-
-		destinations[i] = emissions.EmissionDestination{
+		emissionDestinations = append(emissionDestinations, emissions.EmissionDestination{
 			ModuleName:  dest.ModuleName,
 			Weight:      dest.Weight,
 			Description: dest.Description,
-		}
+		})
 	}
 
 	return emissions.EmissionsConfig{
 		Enabled:      true,
-		Destinations: destinations,
+		Destinations: emissionDestinations,
 	}
 }
 
@@ -167,20 +136,6 @@ func (k Keeper) updateInflation(ctx sdk.Context, minter *minttypes.Minter, param
 	// Calculate inflation using standard mint logic
 	minter.Inflation = minter.NextInflationRate(params, bondedRatio)
 	minter.AnnualProvisions = minter.NextAnnualProvisions(params, stakingTokenSupply)
-
-	return nil
-}
-
-// mintTokens mints the specified amount of tokens to the mint module account
-func (k Keeper) mintTokens(ctx sdk.Context, coin sdk.Coin, mintKeeper *mintkeeper.Keeper) error {
-	if coin.Amount.IsZero() {
-		return nil // Nothing to mint
-	}
-
-	coins := sdk.NewCoins(coin)
-	if err := mintKeeper.MintCoins(ctx, coins); err != nil {
-		return fmt.Errorf("failed to mint %s: %w", coins.String(), err)
-	}
 
 	return nil
 }
@@ -276,18 +231,46 @@ func (k Keeper) handleEmergencyStop(ctx sdk.Context, params types.EmissionParams
 }
 
 // applyFallbackConfiguration applies fallback configuration when enabled
-func (k Keeper) applyFallbackConfiguration(params types.EmissionParams) types.EmissionParams {
+func (k Keeper) applyFallbackConfiguration(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
 	// If fallback is enabled, revert to safe default 50/50 configuration
 	fallbackParams := types.DefaultEmissionParams()
 	fallbackParams.FallbackEnabled = true
-	fallbackParams.UpdatedBy = params.UpdatedBy + "_fallback"
-	fallbackParams.UpdatedAt = params.UpdatedAt
+	fallbackParams.UpdatedBy = "automatic_fallback"
+	fallbackParams.UpdatedAt = ctx.BlockHeight()
 
-	return fallbackParams
+	// Store emergency parameters
+	if err := k.SetEmissionParams(ctx, fallbackParams); err != nil {
+		return fmt.Errorf("failed to store emergency parameters: %w", err)
+	}
+
+	// Store in history for audit trail
+	if err := k.SetEmissionHistory(ctx, ctx.BlockHeight(), fallbackParams); err != nil {
+		ctx.Logger().Error("Failed to store emergency history", "error", err)
+	}
+
+	// Emit emergency activation event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeEmergencyStop,
+			sdk.NewAttribute("reason", "automatic_fallback"),
+			sdk.NewAttribute("emergency_type", "automatic_fallback"),
+			sdk.NewAttribute("block_height", fmt.Sprintf("%d", ctx.BlockHeight())),
+			sdk.NewAttribute("fallback_active", "true"),
+		),
+	)
+
+	ctx.Logger().Error("Emergency fallback activated",
+		"reason", "automatic_fallback", "height", ctx.BlockHeight())
+
+	// Continue with fallback configuration
+	// Note: This is a recursive call from within the mint function, so we need to
+	// use the original mint keeper reference. Since we're in an emergency fallback,
+	// we'll use the keeper's mint keeper reference.
+	return k.DynamicEmissionsMintFn(ctx, mintKeeper)
 }
 
 // activateEmergencyFallback activates emergency fallback when critical errors occur
-func (k Keeper) activateEmergencyFallback(ctx sdk.Context, reason string) error {
+func (k Keeper) activateEmergencyFallback(ctx sdk.Context, mintKeeper *mintkeeper.Keeper, reason string) error {
 	// Create emergency fallback parameters
 	emergencyParams := types.CreateFallbackParams(reason, ctx.BlockHeight())
 
@@ -319,5 +302,5 @@ func (k Keeper) activateEmergencyFallback(ctx sdk.Context, reason string) error 
 	// Note: This is a recursive call from within the mint function, so we need to
 	// use the original mint keeper reference. Since we're in an emergency fallback,
 	// we'll use the keeper's mint keeper reference.
-	return k.DynamicEmissionsMintFn(ctx, &k.mintKeeper)
+	return k.DynamicEmissionsMintFn(ctx, mintKeeper)
 }
