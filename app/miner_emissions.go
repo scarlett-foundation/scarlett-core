@@ -9,25 +9,37 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	"scarlett-core/app/emissions"
+	emissionskeeper "scarlett-core/x/emissions/keeper"
 )
 
-// ProvideMinerEmissionsMintFn is a depinject provider for our custom mint function
+// ProvideDynamicEmissionsMintFn is a depinject provider for our dynamic governance-controlled mint function
+func ProvideDynamicEmissionsMintFn(emissionsKeeper emissionskeeper.Keeper) mintkeeper.MintFn {
+	return emissionsKeeper.ProvideDynamicMintFn()
+}
+
+// DEPRECATED: Legacy functions kept for backward compatibility during transition
+
+// ProvideMinerEmissionsMintFn is a depinject provider for our custom mint function (LEGACY)
+// This is kept for backward compatibility but should be replaced with ProvideDynamicEmissionsMintFn
 func ProvideMinerEmissionsMintFn(bankKeeper bankkeeper.Keeper) mintkeeper.MintFn {
 	return MinerEmissionsSplitMintFnFactory(bankKeeper)
 }
 
-// MinerEmissionsSplitMintFnFactory creates a custom mint function with the required dependencies.
-// This follows the depinject pattern for Cosmos SDK v0.53.0.
+// MinerEmissionsSplitMintFnFactory creates a custom mint function with the required dependencies (LEGACY)
+// This follows the depinject pattern for Cosmos SDK v0.53.0 but uses hardcoded parameters.
+// DEPRECATED: Use the dynamic governance-controlled version instead.
 func MinerEmissionsSplitMintFnFactory(bk bankkeeper.Keeper) mintkeeper.MintFn {
 	return func(ctx sdk.Context, k *mintkeeper.Keeper) error {
 		return MinerEmissionsSplitMintFn(ctx, k, bk)
 	}
 }
 
-// MinerEmissionsSplitMintFn implements custom emission splitting using the modular emissions package.
+// MinerEmissionsSplitMintFn implements custom emission splitting using the modular emissions package (LEGACY)
 // It's designed to be used as a custom MintFn with the x/mint module keeper.
+// DEPRECATED: This function uses hardcoded emission parameters. Use the dynamic governance-controlled
+// version from x/emissions module instead.
 func MinerEmissionsSplitMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkeeper.Keeper) error {
-	// 1. Initialize modular emissions system
+	// 1. Initialize modular emissions system with hardcoded config
 	config := emissions.DefaultEmissionsConfig()
 	splitter, err := emissions.NewEmissionSplitter(config, bk)
 	if err != nil {
@@ -66,7 +78,7 @@ func MinerEmissionsSplitMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkee
 		return fmt.Errorf("failed to update minter state: %w", err)
 	}
 
-	// 7. Emit comprehensive events
+	// 7. Emit comprehensive events (legacy format)
 	distributions, _ := splitter.CalculateDistribution(blockProvisionCoin.Amount)
 	bondedRatio, _ := k.BondedRatio(ctx)
 
@@ -81,6 +93,8 @@ func MinerEmissionsSplitMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkee
 
 	return nil
 }
+
+// LEGACY HELPER FUNCTIONS (kept for backward compatibility)
 
 // getMinterState retrieves and validates the current minter state
 func getMinterState(ctx sdk.Context, k *mintkeeper.Keeper) (minttypes.Minter, error) {
