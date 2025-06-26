@@ -1,21 +1,29 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
-	"scarlett-core/x/emissions/types"
-
+	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"scarlett-core/x/emissions/types"
 )
 
 func (k msgServer) UpdateEmissionSplit(goCtx context.Context, msg *types.MsgUpdateEmissionSplit) (*types.MsgUpdateEmissionSplitResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// 1. Authority validation - only governance can update emission parameters
-	if string(k.GetAuthority()) != msg.Creator {
-		return nil, types.ErrUnauthorized
+	authority, err := k.addressCodec.StringToBytes(msg.Creator)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "invalid authority address")
+	}
+
+	if !bytes.Equal(k.GetAuthority(), authority) {
+		expectedAuthorityStr, _ := k.addressCodec.BytesToString(k.GetAuthority())
+		return nil, errorsmod.Wrapf(types.ErrUnauthorized, "invalid authority; expected %s, got %s", expectedAuthorityStr, msg.Creator)
 	}
 
 	// 2. Check for emergency stop conditions
