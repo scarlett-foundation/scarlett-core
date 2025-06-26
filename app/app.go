@@ -156,9 +156,11 @@ func New(
 				// for instance supplying a custom address codec for not using bech32 addresses.
 				// read the depinject documentation and depinject module wiring for more information
 				// on available options and how to use them.
+
+				// Use legacy mint function temporarily to avoid circular dependency
+				// TODO: Transition to governance-controlled mint function after app initialization
+				ProvideMinerEmissionsMintFn,
 			),
-			// Provide our dynamic governance-controlled emission splitting
-			depinject.Provide(ProvideDynamicEmissionsMintFn),
 		)
 	)
 

@@ -1,0 +1,30 @@
+{
+  "title": "Initialize Dynamic Emission Parameters",
+  "description": "Set initial emission split: 60% to validators (fee_collector) and 40% to AI inference rewards",
+  "messages": [
+    {
+      "@type": "/scarlettcore.emissions.v1.MsgUpdateEmissionSplit",
+      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47",
+      "destinations": [
+        {
+          "module_name": "fee_collector",
+          "weight": "0.60",
+          "description": "Validator and delegator rewards",
+          "enabled": true,
+          "min_weight": "0.30",
+          "max_weight": "0.70"
+        },
+        {
+          "module_name": "inferencerewards",
+          "weight": "0.40", 
+          "description": "AI inference provider rewards",
+          "enabled": true,
+          "min_weight": "0.10",
+          "max_weight": "0.60"
+        }
+      ],
+      "reason": "Initialize dynamic governance-controlled emissions with balanced validator and AI inference incentives"
+    }
+  ],
+  "deposit": "1000000sclt"
+} 
