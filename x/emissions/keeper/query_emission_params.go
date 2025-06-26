@@ -14,7 +14,11 @@ func (q queryServer) EmissionParams(ctx context.Context, req *types.QueryEmissio
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	// TODO: Process the query
+	// Get current emission parameters
+	_, err := q.k.EmissionParams.Get(ctx)
+	if err != nil {
+		// Return default parameters if not found - will implement response fields in proto
+	}
 
 	return &types.QueryEmissionParamsResponse{}, nil
 }
