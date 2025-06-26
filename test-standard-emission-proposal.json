@@ -1,0 +1,16 @@
+{
+  "title": "Activate Governance-Controlled Emissions: 60% Validators, 40% AI Inference",
+  "description": "Enable dynamic emissions with 60% to validators (fee_collector) and 40% to AI inference rewards (inferencerewards)",
+  "summary": "Activate governance-controlled token emissions with 60/40 split",
+  "messages": [
+    {
+      "@type": "/scarlettcore.emissions.v1.MsgUpdateParams",
+      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700j4l5sjv",
+      "params": {
+        "emission_destinations": "[{\"module_name\":\"fee_collector\",\"weight\":\"0.60\",\"description\":\"Validator and delegator rewards\",\"enabled\":true},{\"module_name\":\"inferencerewards\",\"weight\":\"0.40\",\"description\":\"AI inference provider rewards\",\"enabled\":true}]",
+        "enabled": true
+      }
+    }
+  ],
+  "deposit": "10000000sclt"
+} 
