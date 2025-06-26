@@ -6,10 +6,6 @@ package types
 import (
 	context "context"
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-
 	_ "github.com/cosmos/cosmos-sdk/types/query"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
@@ -19,6 +15,9 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	io "io"
+	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -263,6 +262,80 @@ func (m *QueryEmissionHistoryResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryEmissionHistoryResponse proto.InternalMessageInfo
 
+// QueryDestinationStatsRequest defines the QueryDestinationStatsRequest message.
+type QueryDestinationStatsRequest struct {
+}
+
+func (m *QueryDestinationStatsRequest) Reset()         { *m = QueryDestinationStatsRequest{} }
+func (m *QueryDestinationStatsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryDestinationStatsRequest) ProtoMessage()    {}
+func (*QueryDestinationStatsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_88f0ec2b1eac5e40, []int{6}
+}
+func (m *QueryDestinationStatsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryDestinationStatsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryDestinationStatsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryDestinationStatsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDestinationStatsRequest.Merge(m, src)
+}
+func (m *QueryDestinationStatsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryDestinationStatsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryDestinationStatsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryDestinationStatsRequest proto.InternalMessageInfo
+
+// QueryDestinationStatsResponse defines the QueryDestinationStatsResponse message.
+type QueryDestinationStatsResponse struct {
+}
+
+func (m *QueryDestinationStatsResponse) Reset()         { *m = QueryDestinationStatsResponse{} }
+func (m *QueryDestinationStatsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryDestinationStatsResponse) ProtoMessage()    {}
+func (*QueryDestinationStatsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_88f0ec2b1eac5e40, []int{7}
+}
+func (m *QueryDestinationStatsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryDestinationStatsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryDestinationStatsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryDestinationStatsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDestinationStatsResponse.Merge(m, src)
+}
+func (m *QueryDestinationStatsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryDestinationStatsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryDestinationStatsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryDestinationStatsResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "scarlettcore.emissions.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "scarlettcore.emissions.v1.QueryParamsResponse")
@@ -270,6 +343,8 @@ func init() {
 	proto.RegisterType((*QueryEmissionParamsResponse)(nil), "scarlettcore.emissions.v1.QueryEmissionParamsResponse")
 	proto.RegisterType((*QueryEmissionHistoryRequest)(nil), "scarlettcore.emissions.v1.QueryEmissionHistoryRequest")
 	proto.RegisterType((*QueryEmissionHistoryResponse)(nil), "scarlettcore.emissions.v1.QueryEmissionHistoryResponse")
+	proto.RegisterType((*QueryDestinationStatsRequest)(nil), "scarlettcore.emissions.v1.QueryDestinationStatsRequest")
+	proto.RegisterType((*QueryDestinationStatsResponse)(nil), "scarlettcore.emissions.v1.QueryDestinationStatsResponse")
 }
 
 func init() {
@@ -277,34 +352,37 @@ func init() {
 }
 
 var fileDescriptor_88f0ec2b1eac5e40 = []byte{
-	// 421 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x2d, 0x4e, 0x4e, 0x2c,
-	0xca, 0x49, 0x2d, 0x29, 0x49, 0xce, 0x2f, 0x4a, 0xd5, 0x4f, 0xcd, 0xcd, 0x2c, 0x2e, 0xce, 0xcc,
-	0xcf, 0x2b, 0xd6, 0x2f, 0x33, 0xd4, 0x2f, 0x2c, 0x4d, 0x2d, 0xaa, 0xd4, 0x2b, 0x28, 0xca, 0x2f,
-	0xc9, 0x17, 0x92, 0x44, 0x56, 0xa6, 0x07, 0x57, 0xa6, 0x57, 0x66, 0x28, 0x25, 0x98, 0x98, 0x9b,
-	0x99, 0x97, 0xaf, 0x0f, 0x26, 0x21, 0xaa, 0xa5, 0xb4, 0x92, 0xf3, 0x8b, 0x73, 0xf3, 0x8b, 0xf5,
-	0x93, 0x12, 0x8b, 0x53, 0x21, 0xc6, 0xe8, 0x97, 0x19, 0x26, 0xa5, 0x96, 0x24, 0x1a, 0xea, 0x17,
-	0x24, 0xa6, 0x67, 0xe6, 0x25, 0x96, 0x64, 0xe6, 0xe7, 0x41, 0xd5, 0x8a, 0xa4, 0xe7, 0xa7, 0xe7,
-	0x83, 0x99, 0xfa, 0x20, 0x16, 0x54, 0x54, 0x26, 0x3d, 0x3f, 0x3f, 0x3d, 0x27, 0x55, 0x3f, 0xb1,
-	0x20, 0x53, 0x3f, 0x31, 0x2f, 0x2f, 0xbf, 0x04, 0xac, 0xa5, 0x18, 0x2a, 0xab, 0x86, 0xdb, 0xd1,
-	0x05, 0x89, 0x45, 0x89, 0xb9, 0x50, 0x75, 0x4a, 0x22, 0x5c, 0x42, 0x81, 0x20, 0xdb, 0x03, 0xc0,
-	0x82, 0x41, 0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x4a, 0xd1, 0x5c, 0xc2, 0x28, 0xa2, 0xc5, 0x05,
-	0xf9, 0x79, 0xc5, 0xa9, 0x42, 0x2e, 0x5c, 0x6c, 0x10, 0xcd, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0xdc,
-	0x46, 0x8a, 0x7a, 0x38, 0xfd, 0xac, 0x07, 0xd1, 0xea, 0xc4, 0x79, 0xe2, 0x9e, 0x3c, 0xc3, 0x8a,
-	0xe7, 0x1b, 0xb4, 0x18, 0x83, 0xa0, 0x7a, 0x95, 0x64, 0xb8, 0xa4, 0xc0, 0x86, 0xbb, 0x42, 0x95,
-	0xa3, 0x5a, 0x2d, 0xcb, 0x25, 0x8d, 0x55, 0x16, 0xe2, 0x04, 0x0c, 0x69, 0x8f, 0xcc, 0xe2, 0x92,
-	0xfc, 0xa2, 0x4a, 0x98, 0x6e, 0x39, 0x2e, 0x19, 0xec, 0xd2, 0x10, 0xed, 0x46, 0xfd, 0x2c, 0x5c,
-	0xac, 0x60, 0x05, 0x42, 0x93, 0x19, 0xb9, 0xd8, 0x20, 0x66, 0x0b, 0xe9, 0xe2, 0xf1, 0x06, 0x66,
-	0xe0, 0x48, 0xe9, 0x11, 0xab, 0x1c, 0xea, 0x64, 0xad, 0xa6, 0xcb, 0x4f, 0x26, 0x33, 0xa9, 0x08,
-	0x29, 0xe9, 0xc3, 0xf4, 0xe9, 0xe2, 0x8a, 0x14, 0xa1, 0x2d, 0x8c, 0x5c, 0x7c, 0xa8, 0x3e, 0x17,
-	0x32, 0x25, 0x64, 0x1d, 0xd6, 0x70, 0x94, 0x32, 0x23, 0x55, 0x1b, 0xd4, 0xb5, 0xc6, 0x60, 0xd7,
-	0xea, 0x0a, 0x69, 0xe3, 0x73, 0x2d, 0x8c, 0x13, 0x0f, 0x75, 0xf6, 0x0e, 0x46, 0x2e, 0x7e, 0xb4,
-	0x20, 0x17, 0x22, 0xda, 0x01, 0xa8, 0x51, 0x28, 0x65, 0x4e, 0xb2, 0x3e, 0xa8, 0xcb, 0x4d, 0xc0,
-	0x2e, 0xd7, 0x13, 0xd2, 0x21, 0xca, 0xe5, 0x19, 0x10, 0xdd, 0x4e, 0x96, 0x27, 0x1e, 0xc9, 0x31,
-	0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3, 0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb,
-	0x31, 0xdc, 0x78, 0x2c, 0xc7, 0x10, 0x25, 0x8f, 0x6a, 0x4c, 0x05, 0x92, 0x41, 0x25, 0x95, 0x05,
-	0xa9, 0xc5, 0x49, 0x6c, 0xe0, 0x2c, 0x64, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0x28, 0x8a, 0xf0,
-	0x9e, 0x21, 0x04, 0x00, 0x00,
+	// 473 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0xcd, 0xae, 0xd2, 0x40,
+	0x18, 0x86, 0x3b, 0x26, 0x90, 0x38, 0x26, 0xfe, 0x8c, 0x2c, 0xb4, 0x42, 0xd1, 0x46, 0x8d, 0x41,
+	0xdb, 0x49, 0x41, 0xfc, 0xd9, 0x12, 0x4c, 0x5c, 0x2a, 0xee, 0x74, 0x41, 0x06, 0x9c, 0xd4, 0x26,
+	0xb4, 0x53, 0x3a, 0x03, 0x91, 0xad, 0x57, 0x60, 0xc2, 0x4d, 0xb8, 0x74, 0xe1, 0xc2, 0x85, 0x17,
+	0xc0, 0xca, 0x90, 0xb8, 0x71, 0x75, 0x72, 0x02, 0x27, 0x39, 0xb7, 0x71, 0xc2, 0x74, 0xca, 0xa1,
+	0x40, 0xf9, 0xd9, 0x34, 0xd3, 0x79, 0xdf, 0xf7, 0xfb, 0x9e, 0x7e, 0x33, 0x29, 0x7c, 0xc4, 0xbb,
+	0x24, 0xea, 0x51, 0x21, 0xba, 0x2c, 0xa2, 0x98, 0xfa, 0x1e, 0xe7, 0x1e, 0x0b, 0x38, 0x1e, 0x3a,
+	0xb8, 0x3f, 0xa0, 0xd1, 0xc8, 0x0e, 0x23, 0x26, 0x18, 0xba, 0xbb, 0x6a, 0xb3, 0x97, 0x36, 0x7b,
+	0xe8, 0xe8, 0xb7, 0x88, 0xef, 0x05, 0x0c, 0xcb, 0x67, 0xec, 0xd6, 0x2b, 0x5d, 0xc6, 0x7d, 0xc6,
+	0x71, 0x87, 0x70, 0x1a, 0x97, 0xc1, 0x43, 0xa7, 0x43, 0x05, 0x71, 0x70, 0x48, 0x5c, 0x2f, 0x20,
+	0xc2, 0x63, 0x81, 0xf2, 0x16, 0x5c, 0xe6, 0x32, 0xb9, 0xc4, 0x8b, 0x95, 0xda, 0x2d, 0xba, 0x8c,
+	0xb9, 0x3d, 0x8a, 0x49, 0xe8, 0x61, 0x12, 0x04, 0x4c, 0xc8, 0x08, 0x57, 0xea, 0xe3, 0x6c, 0xe8,
+	0x90, 0x44, 0xc4, 0x57, 0x3e, 0xb3, 0x00, 0xd1, 0xfb, 0x45, 0xf7, 0x77, 0x72, 0xb3, 0x45, 0xfb,
+	0x03, 0xca, 0x85, 0xf9, 0x09, 0xde, 0x4e, 0xed, 0xf2, 0x90, 0x05, 0x9c, 0xa2, 0x26, 0xcc, 0xc7,
+	0xe1, 0x3b, 0xe0, 0x3e, 0x78, 0x72, 0xad, 0xfa, 0xc0, 0xce, 0xfc, 0x66, 0x3b, 0x8e, 0x36, 0xae,
+	0x4e, 0x4e, 0xca, 0xda, 0x8f, 0xf3, 0x9f, 0x15, 0xd0, 0x52, 0x59, 0xb3, 0x08, 0x75, 0x59, 0xfc,
+	0x8d, 0xb2, 0xa7, 0x5b, 0x97, 0xe0, 0xbd, 0xad, 0x6a, 0x8c, 0xb0, 0x21, 0xbf, 0xf5, 0xb8, 0x60,
+	0xd1, 0x28, 0x49, 0x1b, 0xb0, 0xb8, 0x5d, 0x56, 0xf1, 0x44, 0x6f, 0x52, 0x2e, 0xd4, 0x90, 0x3f,
+	0x08, 0x22, 0x96, 0xdd, 0xcb, 0xb0, 0x94, 0xa1, 0xc7, 0x05, 0xaa, 0x7f, 0x73, 0x30, 0x27, 0x1d,
+	0x68, 0x0c, 0x60, 0x3e, 0x86, 0x43, 0xd6, 0x8e, 0x39, 0x6c, 0x4e, 0x57, 0xb7, 0x0f, 0xb5, 0x2b,
+	0xe8, 0xca, 0xb7, 0x7f, 0x67, 0xe3, 0x2b, 0x0f, 0x91, 0x89, 0x93, 0x9c, 0x95, 0x75, 0xaa, 0xe8,
+	0x17, 0x80, 0xd7, 0xd3, 0xa3, 0x43, 0xf5, 0x7d, 0xed, 0xb6, 0x1e, 0x84, 0xfe, 0xe2, 0xd8, 0x98,
+	0xa2, 0xad, 0x49, 0x5a, 0x0b, 0x3d, 0xdd, 0x45, 0x9b, 0xbc, 0xb4, 0x15, 0xf6, 0x6f, 0x00, 0x6f,
+	0xac, 0x9d, 0x19, 0x3a, 0x18, 0x20, 0x7d, 0x07, 0xf4, 0x97, 0x47, 0xe7, 0x14, 0xf9, 0x73, 0x49,
+	0x6e, 0xa3, 0x67, 0x07, 0x91, 0x7f, 0x51, 0x98, 0x7f, 0x00, 0xbc, 0xb9, 0x7e, 0x5d, 0xd0, 0x5e,
+	0x86, 0x8c, 0x0b, 0xa8, 0xbf, 0x3a, 0x3e, 0xa8, 0xe8, 0xeb, 0x92, 0x1e, 0x23, 0x6b, 0x17, 0xfd,
+	0xe7, 0xcb, 0x74, 0x9b, 0x2f, 0xe2, 0x8d, 0xd7, 0x93, 0x99, 0x01, 0xa6, 0x33, 0x03, 0x9c, 0xce,
+	0x0c, 0xf0, 0x7d, 0x6e, 0x68, 0xd3, 0xb9, 0xa1, 0xfd, 0x9f, 0x1b, 0xda, 0xc7, 0x72, 0xba, 0xce,
+	0xd7, 0x95, 0x4a, 0x62, 0x14, 0x52, 0xde, 0xc9, 0xcb, 0x5f, 0x48, 0xed, 0x22, 0x00, 0x00, 0xff,
+	0xff, 0x19, 0x1f, 0x8b, 0x70, 0x21, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -325,6 +403,8 @@ type QueryClient interface {
 	EmissionParams(ctx context.Context, in *QueryEmissionParamsRequest, opts ...grpc.CallOption) (*QueryEmissionParamsResponse, error)
 	// EmissionHistory Queries a list of EmissionHistory items.
 	EmissionHistory(ctx context.Context, in *QueryEmissionHistoryRequest, opts ...grpc.CallOption) (*QueryEmissionHistoryResponse, error)
+	// DestinationStats Queries a list of DestinationStats items.
+	DestinationStats(ctx context.Context, in *QueryDestinationStatsRequest, opts ...grpc.CallOption) (*QueryDestinationStatsResponse, error)
 }
 
 type queryClient struct {
@@ -362,6 +442,15 @@ func (c *queryClient) EmissionHistory(ctx context.Context, in *QueryEmissionHist
 	return out, nil
 }
 
+func (c *queryClient) DestinationStats(ctx context.Context, in *QueryDestinationStatsRequest, opts ...grpc.CallOption) (*QueryDestinationStatsResponse, error) {
+	out := new(QueryDestinationStatsResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.emissions.v1.Query/DestinationStats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
@@ -370,6 +459,8 @@ type QueryServer interface {
 	EmissionParams(context.Context, *QueryEmissionParamsRequest) (*QueryEmissionParamsResponse, error)
 	// EmissionHistory Queries a list of EmissionHistory items.
 	EmissionHistory(context.Context, *QueryEmissionHistoryRequest) (*QueryEmissionHistoryResponse, error)
+	// DestinationStats Queries a list of DestinationStats items.
+	DestinationStats(context.Context, *QueryDestinationStatsRequest) (*QueryDestinationStatsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -384,6 +475,9 @@ func (*UnimplementedQueryServer) EmissionParams(ctx context.Context, req *QueryE
 }
 func (*UnimplementedQueryServer) EmissionHistory(ctx context.Context, req *QueryEmissionHistoryRequest) (*QueryEmissionHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EmissionHistory not implemented")
+}
+func (*UnimplementedQueryServer) DestinationStats(ctx context.Context, req *QueryDestinationStatsRequest) (*QueryDestinationStatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DestinationStats not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -444,6 +538,24 @@ func _Query_EmissionHistory_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_DestinationStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryDestinationStatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).DestinationStats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.emissions.v1.Query/DestinationStats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).DestinationStats(ctx, req.(*QueryDestinationStatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scarlettcore.emissions.v1.Query",
@@ -460,6 +572,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EmissionHistory",
 			Handler:    _Query_EmissionHistory_Handler,
+		},
+		{
+			MethodName: "DestinationStats",
+			Handler:    _Query_DestinationStats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -614,6 +730,52 @@ func (m *QueryEmissionHistoryResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryDestinationStatsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryDestinationStatsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryDestinationStatsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryDestinationStatsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryDestinationStatsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryDestinationStatsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -673,6 +835,24 @@ func (m *QueryEmissionHistoryRequest) Size() (n int) {
 }
 
 func (m *QueryEmissionHistoryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryDestinationStatsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryDestinationStatsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -997,6 +1177,106 @@ func (m *QueryEmissionHistoryResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: QueryEmissionHistoryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryDestinationStatsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryDestinationStatsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryDestinationStatsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryDestinationStatsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryDestinationStatsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryDestinationStatsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
