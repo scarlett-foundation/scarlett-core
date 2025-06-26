@@ -15,5 +15,17 @@ const (
 	GovModuleName = "gov"
 )
 
-// ParamsKey is the prefix to retrieve all Params
-var ParamsKey = collections.NewPrefix("p_emissions")
+// Collection keys for state management
+var (
+	// ParamsKey is the prefix to retrieve all Params
+	ParamsKey = collections.NewPrefix("p_emissions")
+
+	// EmissionParamsKey is the prefix for emission parameters
+	EmissionParamsKey = collections.NewPrefix("emission_params")
+
+	// EmissionHistoryPrefix is the prefix for emission parameter history
+	EmissionHistoryPrefix = collections.NewPrefix("emission_history")
+
+	// DestinationMetricsPrefix is the prefix for destination metrics
+	DestinationMetricsPrefix = collections.NewPrefix("destination_metrics")
+)
