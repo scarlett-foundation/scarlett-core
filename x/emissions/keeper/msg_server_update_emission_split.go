@@ -3,95 +3,217 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"scarlett-core/x/emissions/types"
 
-	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k msgServer) UpdateEmissionSplit(ctx context.Context, msg *types.MsgUpdateEmissionSplit) (*types.MsgUpdateEmissionSplitResponse, error) {
-	// Validate authority
-	if msg.Creator != string(k.GetAuthority()) {
-		return nil, errorsmod.Wrapf(types.ErrUnauthorized, "invalid authority; expected %s, got %s", k.GetAuthority(), msg.Creator)
+func (k msgServer) UpdateEmissionSplit(goCtx context.Context, msg *types.MsgUpdateEmissionSplit) (*types.MsgUpdateEmissionSplitResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// 1. Authority validation - only governance can update emission parameters
+	if string(k.GetAuthority()) != msg.Creator {
+		return nil, types.ErrUnauthorized
 	}
 
-	// Parse destinations and weights from string arrays
-	if len(msg.Destinations) != len(msg.Weights) {
-		return nil, errorsmod.Wrap(types.ErrInvalidDestination, "destinations and weights arrays must have same length")
+	// 2. Check for emergency stop conditions
+	currentParams, err := k.GetEmissionParams(ctx)
+	if err == nil && currentParams.IsEmergencyActive() {
+		return nil, types.ErrEmergencyActive
 	}
 
-	// Build emission destinations
-	destinations := make([]types.EmissionDestination, len(msg.Destinations))
-	for i, moduleName := range msg.Destinations {
-		weight, err := math.LegacyNewDecFromStr(msg.Weights[i])
-		if err != nil {
-			return nil, errorsmod.Wrapf(types.ErrInvalidWeight, "invalid weight for destination %d: %v", i, err)
-		}
-
-		destinations[i] = types.EmissionDestination{
-			ModuleName:  moduleName,
-			Weight:      weight,
-			Description: fmt.Sprintf("Governance-controlled rewards for %s module", moduleName),
-			Enabled:     true,
-			MinWeight:   math.LegacyNewDecWithPrec(1, 2),  // 1% minimum
-			MaxWeight:   math.LegacyNewDecWithPrec(70, 2), // 70% maximum
-		}
+	// 3. Parse and validate destinations from governance proposal
+	destinations, err := k.parseDestinations(msg.Destinations, msg.Weights)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse destinations: %w", err)
 	}
 
-	// Get current parameters for history tracking
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	currentParams, _ := k.GetEmissionParams(ctx)
-
-	// Create new emission parameters
+	// 4. Create new emission parameters
 	newParams := types.EmissionParams{
-		Destinations: destinations,
-		Enabled:      true,
-		UpdatedBy:    msg.Reason,
-		UpdatedAt:    sdkCtx.BlockHeight(),
+		Destinations:    destinations,
+		Enabled:         true,
+		UpdatedBy:       fmt.Sprintf("gov_proposal_%s", msg.Creator),
+		UpdatedAt:       ctx.BlockHeight(),
+		EmergencyStop:   false,
+		FallbackEnabled: false,
 	}
 
-	// Validate new parameters
-	if err := newParams.Validate(); err != nil {
-		return nil, errorsmod.Wrap(types.ErrInvalidDestination, err.Error())
+	// 5. Comprehensive validation with safety bounds
+	if err := types.ValidateEmissionParams(newParams); err != nil {
+		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
-	// Store new parameters using helper method
+	// 6. Additional governance-specific validations
+	if err := k.validateGovernanceProposal(newParams, msg); err != nil {
+		return nil, fmt.Errorf("governance validation failed: %w", err)
+	}
+
+	// 7. Store parameter history for audit trail
+	if err := k.SetEmissionHistory(ctx, ctx.BlockHeight(), currentParams); err != nil {
+		// Log but don't fail - history is important but not critical
+		ctx.Logger().Error("Failed to store emission history", "error", err, "height", ctx.BlockHeight())
+	}
+
+	// 8. Update emission parameters
 	if err := k.SetEmissionParams(ctx, newParams); err != nil {
-		return nil, errorsmod.Wrap(err, "failed to set emission parameters")
+		return nil, fmt.Errorf("failed to store emission parameters: %w", err)
 	}
 
-	// Store in history for audit trail using helper method
-	if err := k.SetEmissionHistory(ctx, sdkCtx.BlockHeight(), newParams); err != nil {
-		return nil, errorsmod.Wrap(err, "failed to store emission history")
-	}
-
-	// Emit governance event
-	sdkCtx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeEmissionParamsUpdated,
-			sdk.NewAttribute(types.AttributeKeyProposalID, msg.Reason),
-			sdk.NewAttribute(types.AttributeKeyOldParams, formatParams(currentParams)),
-			sdk.NewAttribute(types.AttributeKeyNewParams, formatParams(newParams)),
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(sdk.AttributeKeyAction, "update_emission_split"),
-		),
-	)
+	// 9. Emit comprehensive governance event
+	k.emitEmissionParamsUpdatedEvent(ctx, currentParams, newParams, msg.Reason)
 
 	return &types.MsgUpdateEmissionSplitResponse{}, nil
 }
 
-// formatParams formats emission parameters for event attributes
-func formatParams(params types.EmissionParams) string {
-	if len(params.Destinations) == 0 {
-		return "none"
+// parseDestinations converts string arrays from governance proposal to EmissionDestination structs
+func (k msgServer) parseDestinations(moduleNames, weights []string) ([]types.EmissionDestination, error) {
+	if len(moduleNames) != len(weights) {
+		return nil, fmt.Errorf("mismatched destinations and weights count: %d vs %d", len(moduleNames), len(weights))
 	}
 
-	var parts []string
-	for _, dest := range params.Destinations {
-		parts = append(parts, fmt.Sprintf("%s:%s", dest.ModuleName, dest.Weight.String()))
+	if len(moduleNames) == 0 {
+		return nil, types.ErrNoDestinations
 	}
-	return strings.Join(parts, ",")
+
+	destinations := make([]types.EmissionDestination, len(moduleNames))
+	rules := types.DefaultValidationRules()
+
+	for i, moduleName := range moduleNames {
+		// Parse weight from string
+		weight, err := math.LegacyNewDecFromStr(weights[i])
+		if err != nil {
+			return nil, fmt.Errorf("invalid weight for %s: %w", moduleName, err)
+		}
+
+		// Create destination with safety bounds
+		destinations[i] = types.EmissionDestination{
+			ModuleName:  moduleName,
+			Weight:      weight,
+			Description: k.getModuleDescription(moduleName),
+			Enabled:     true,
+			MinWeight:   k.getMinWeightForModule(moduleName, rules),
+			MaxWeight:   rules.MaxSingleDestination,
+		}
+	}
+
+	return destinations, nil
+}
+
+// validateGovernanceProposal performs additional governance-specific validations
+func (k msgServer) validateGovernanceProposal(params types.EmissionParams, msg *types.MsgUpdateEmissionSplit) error {
+	rules := types.DefaultValidationRules()
+
+	// 1. Check minimum proposal requirements
+	if len(msg.Destinations) > int(rules.MaxDestinations) {
+		return types.ErrExceedsMaxDestinations
+	}
+
+	// 2. Validate proposal reason is provided
+	if msg.Reason == "" {
+		return fmt.Errorf("governance proposal must include reason for emission changes")
+	}
+
+	// 3. Check for dangerous configurations
+	if err := k.validateDangerousConfigurations(params); err != nil {
+		return fmt.Errorf("dangerous configuration detected: %w", err)
+	}
+
+	// 4. Ensure validator rewards are sufficient
+	if !params.IsValidatorRewardSufficient() {
+		return types.ErrBelowMinValidatorReward
+	}
+
+	return nil
+}
+
+// validateDangerousConfigurations checks for potentially harmful emission configurations
+func (k msgServer) validateDangerousConfigurations(params types.EmissionParams) error {
+	rules := types.DefaultValidationRules()
+
+	// 1. Check for concentration risk - no single destination should exceed safety threshold
+	for _, dest := range params.Destinations {
+		if dest.Weight.GT(rules.MaxSingleDestination) {
+			return fmt.Errorf("destination %s exceeds maximum single destination limit: %s > %s",
+				dest.ModuleName, dest.Weight.String(), rules.MaxSingleDestination.String())
+		}
+	}
+
+	// 2. Ensure fee_collector (validator rewards) meets minimum threshold
+	validatorWeight := math.LegacyZeroDec()
+	for _, dest := range params.Destinations {
+		if dest.ModuleName == "fee_collector" && dest.Enabled {
+			validatorWeight = dest.Weight
+			break
+		}
+	}
+
+	if validatorWeight.LT(rules.MinValidatorReward) {
+		return fmt.Errorf("validator rewards below safety minimum: %s < %s",
+			validatorWeight.String(), rules.MinValidatorReward.String())
+	}
+
+	return nil
+}
+
+// getModuleDescription returns a human-readable description for known modules
+func (k msgServer) getModuleDescription(moduleName string) string {
+	descriptions := map[string]string{
+		"fee_collector":    "Validator and delegator staking rewards",
+		"inferencerewards": "AI inference provider rewards",
+		"distribution":     "Distribution module rewards",
+		"community_pool":   "Community pool funding",
+	}
+
+	if desc, exists := descriptions[moduleName]; exists {
+		return desc
+	}
+	return fmt.Sprintf("Rewards for %s module", moduleName)
+}
+
+// getMinWeightForModule returns minimum weight requirements for specific modules
+func (k msgServer) getMinWeightForModule(moduleName string, rules types.EmissionValidationRules) math.LegacyDec {
+	// fee_collector (validators) have special minimum requirements
+	if moduleName == "fee_collector" {
+		return rules.MinValidatorReward
+	}
+	// Other modules have no specific minimum (can be zero)
+	return math.LegacyZeroDec()
+}
+
+// emitEmissionParamsUpdatedEvent emits a comprehensive event for governance parameter updates
+func (k msgServer) emitEmissionParamsUpdatedEvent(ctx sdk.Context, oldParams, newParams types.EmissionParams, reason string) {
+	attributes := []sdk.Attribute{
+		sdk.NewAttribute(types.AttributeKeyOldParams, k.paramsToString(oldParams)),
+		sdk.NewAttribute(types.AttributeKeyNewParams, k.paramsToString(newParams)),
+		sdk.NewAttribute(types.AttributeKeyReason, reason),
+		sdk.NewAttribute("block_height", fmt.Sprintf("%d", ctx.BlockHeight())),
+		sdk.NewAttribute("updated_by", newParams.UpdatedBy),
+		sdk.NewAttribute("num_destinations", fmt.Sprintf("%d", len(newParams.Destinations))),
+		sdk.NewAttribute("governance_controlled", "true"),
+	}
+
+	// Add individual destination details
+	for i, dest := range newParams.Destinations {
+		prefix := fmt.Sprintf("dest_%d", i)
+		attributes = append(attributes,
+			sdk.NewAttribute(prefix+"_module", dest.ModuleName),
+			sdk.NewAttribute(prefix+"_weight", dest.Weight.String()),
+			sdk.NewAttribute(prefix+"_enabled", fmt.Sprintf("%t", dest.Enabled)),
+			sdk.NewAttribute(prefix+"_description", dest.Description),
+		)
+	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(types.EventTypeEmissionParamsUpdated, attributes...),
+	)
+}
+
+// paramsToString converts emission parameters to a compact string representation
+func (k msgServer) paramsToString(params types.EmissionParams) string {
+	if jsonStr, err := params.ToJSON(); err == nil {
+		return jsonStr
+	}
+	return "invalid_params"
 }

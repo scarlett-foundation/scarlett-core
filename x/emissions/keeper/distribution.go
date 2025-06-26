@@ -32,6 +32,24 @@ func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context) error {
 		}
 	}
 
+	// 2. EMERGENCY CONTROLS - Check if emergency stop is active
+	if emissionParams.IsEmergencyActive() {
+		return k.handleEmergencyStop(ctx, emissionParams)
+	}
+
+	// 3. FALLBACK MECHANISM - Check if fallback is enabled
+	if emissionParams.FallbackEnabled {
+		emissionParams = k.applyFallbackConfiguration(emissionParams)
+	}
+
+	// 4. SAFETY VALIDATION - Ensure parameters are still valid
+	if err := types.ValidateEmissionParams(emissionParams); err != nil {
+		// If validation fails, activate emergency fallback
+		ctx.Logger().Error("Emission parameters validation failed, activating emergency fallback",
+			"error", err, "height", ctx.BlockHeight())
+		return k.activateEmergencyFallback(ctx, fmt.Sprintf("validation_failure: %s", err.Error()))
+	}
+
 	// 2. Convert governance parameters to emissions config
 	config := k.convertToEmissionsConfig(emissionParams)
 
@@ -233,4 +251,70 @@ func (k Keeper) emitDynamicEmissionEvent(
 			sdk.NewAttribute(sdk.AttributeKeyAmount, totalAmount.String()),
 		),
 	)
+}
+
+// EMERGENCY CONTROL FUNCTIONS
+
+// handleEmergencyStop processes emergency stop conditions
+func (k Keeper) handleEmergencyStop(ctx sdk.Context, params types.EmissionParams) error {
+	ctx.Logger().Info("Emergency stop is active, halting emissions",
+		"reason", "emergency_stop", "height", ctx.BlockHeight())
+
+	// Emit emergency stop event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeEmergencyStop,
+			sdk.NewAttribute("reason", "emergency_stop_active"),
+			sdk.NewAttribute("block_height", fmt.Sprintf("%d", ctx.BlockHeight())),
+			sdk.NewAttribute("updated_by", params.UpdatedBy),
+		),
+	)
+
+	// During emergency stop, we don't mint or distribute any tokens
+	// This effectively halts all emissions until governance resolves the emergency
+	return nil
+}
+
+// applyFallbackConfiguration applies fallback configuration when enabled
+func (k Keeper) applyFallbackConfiguration(params types.EmissionParams) types.EmissionParams {
+	// If fallback is enabled, revert to safe default 50/50 configuration
+	fallbackParams := types.DefaultEmissionParams()
+	fallbackParams.FallbackEnabled = true
+	fallbackParams.UpdatedBy = params.UpdatedBy + "_fallback"
+	fallbackParams.UpdatedAt = params.UpdatedAt
+
+	return fallbackParams
+}
+
+// activateEmergencyFallback activates emergency fallback when critical errors occur
+func (k Keeper) activateEmergencyFallback(ctx sdk.Context, reason string) error {
+	// Create emergency fallback parameters
+	emergencyParams := types.CreateFallbackParams(reason, ctx.BlockHeight())
+
+	// Store emergency parameters
+	if err := k.SetEmissionParams(ctx, emergencyParams); err != nil {
+		return fmt.Errorf("failed to store emergency parameters: %w", err)
+	}
+
+	// Store in history for audit trail
+	if err := k.SetEmissionHistory(ctx, ctx.BlockHeight(), emergencyParams); err != nil {
+		ctx.Logger().Error("Failed to store emergency history", "error", err)
+	}
+
+	// Emit emergency activation event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeEmergencyStop,
+			sdk.NewAttribute("reason", reason),
+			sdk.NewAttribute("emergency_type", "automatic_fallback"),
+			sdk.NewAttribute("block_height", fmt.Sprintf("%d", ctx.BlockHeight())),
+			sdk.NewAttribute("fallback_active", "true"),
+		),
+	)
+
+	ctx.Logger().Error("Emergency fallback activated",
+		"reason", reason, "height", ctx.BlockHeight())
+
+	// Continue with fallback configuration
+	return k.DynamicEmissionsMintFn(ctx)
 }
