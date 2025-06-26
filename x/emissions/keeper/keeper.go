@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 
 	"cosmossdk.io/collections"
@@ -30,11 +32,12 @@ type Keeper struct {
 	mintKeeper    mintkeeper.Keeper
 
 	// Collections for state management
-	Schema             collections.Schema
-	Params             collections.Item[types.Params]
-	EmissionParams     collections.Item[types.EmissionParams]
-	EmissionHistory    collections.Map[int64, types.EmissionParams]    // Block height -> params
-	DestinationMetrics collections.Map[string, types.DestinationStats] // Module -> stats
+	Schema collections.Schema
+	Params collections.Item[types.Params]
+	// Temporarily use string storage for custom types until proto implementation
+	EmissionParamsRaw     collections.Item[string]
+	EmissionHistoryRaw    collections.Map[int64, string]
+	DestinationMetricsRaw collections.Map[string, string]
 }
 
 func NewKeeper(
@@ -63,11 +66,11 @@ func NewKeeper(
 		stakingKeeper: stakingKeeper,
 		mintKeeper:    mintKeeper,
 
-		// Initialize collections
-		Params:             collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
-		EmissionParams:     collections.NewItem(sb, types.EmissionParamsKey, "emission_params", codec.CollValue[types.EmissionParams](cdc)),
-		EmissionHistory:    collections.NewMap(sb, types.EmissionHistoryPrefix, "emission_history", collections.Int64Key, codec.CollValue[types.EmissionParams](cdc)),
-		DestinationMetrics: collections.NewMap(sb, types.DestinationMetricsPrefix, "destination_metrics", collections.StringKey, codec.CollValue[types.DestinationStats](cdc)),
+		// Initialize collections - using string storage temporarily
+		Params:                collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		EmissionParamsRaw:     collections.NewItem(sb, types.EmissionParamsKey, "emission_params", collections.StringValue),
+		EmissionHistoryRaw:    collections.NewMap(sb, types.EmissionHistoryPrefix, "emission_history", collections.Int64Key, collections.StringValue),
+		DestinationMetricsRaw: collections.NewMap(sb, types.DestinationMetricsPrefix, "destination_metrics", collections.StringKey, collections.StringValue),
 	}
 
 	schema, err := sb.Build()
@@ -82,4 +85,41 @@ func NewKeeper(
 // GetAuthority returns the module's authority.
 func (k Keeper) GetAuthority() []byte {
 	return k.authority
+}
+
+// Helper methods for JSON serialization (temporary until proto implementation)
+
+// GetEmissionParams retrieves emission parameters from storage
+func (k Keeper) GetEmissionParams(ctx context.Context) (types.EmissionParams, error) {
+	jsonStr, err := k.EmissionParamsRaw.Get(ctx)
+	if err != nil {
+		return types.DefaultEmissionParams(), err
+	}
+
+	var params types.EmissionParams
+	if err := json.Unmarshal([]byte(jsonStr), &params); err != nil {
+		return types.DefaultEmissionParams(), err
+	}
+
+	return params, nil
+}
+
+// SetEmissionParams stores emission parameters to storage
+func (k Keeper) SetEmissionParams(ctx context.Context, params types.EmissionParams) error {
+	jsonBytes, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
+
+	return k.EmissionParamsRaw.Set(ctx, string(jsonBytes))
+}
+
+// SetEmissionHistory stores emission parameters history
+func (k Keeper) SetEmissionHistory(ctx context.Context, height int64, params types.EmissionParams) error {
+	jsonBytes, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
+
+	return k.EmissionHistoryRaw.Set(ctx, height, string(jsonBytes))
 }

@@ -43,7 +43,7 @@ func (k msgServer) UpdateEmissionSplit(ctx context.Context, msg *types.MsgUpdate
 
 	// Get current parameters for history tracking
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	currentParams, _ := k.EmissionParams.Get(ctx)
+	currentParams, _ := k.GetEmissionParams(ctx)
 
 	// Create new emission parameters
 	newParams := types.EmissionParams{
@@ -58,13 +58,13 @@ func (k msgServer) UpdateEmissionSplit(ctx context.Context, msg *types.MsgUpdate
 		return nil, errorsmod.Wrap(types.ErrInvalidDestination, err.Error())
 	}
 
-	// Store new parameters
-	if err := k.EmissionParams.Set(ctx, newParams); err != nil {
+	// Store new parameters using helper method
+	if err := k.SetEmissionParams(ctx, newParams); err != nil {
 		return nil, errorsmod.Wrap(err, "failed to set emission parameters")
 	}
 
-	// Store in history for audit trail
-	if err := k.EmissionHistory.Set(ctx, sdkCtx.BlockHeight(), newParams); err != nil {
+	// Store in history for audit trail using helper method
+	if err := k.SetEmissionHistory(ctx, sdkCtx.BlockHeight(), newParams); err != nil {
 		return nil, errorsmod.Wrap(err, "failed to store emission history")
 	}
 
