@@ -69,11 +69,32 @@ func DefaultParams() Params {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	return Params{}
+	return Params{
+		EmissionDestinations: "",
+		Enabled:              false,
+	}
 }
 
-// Validate validates the set of params
+// Validate validates the set of params.
 func (p Params) Validate() error {
+	// Basic validation only to avoid nil pointer issues
+	if p.Enabled && p.EmissionDestinations == "" {
+		return fmt.Errorf("emission_destinations cannot be empty when enabled")
+	}
+
+	// If destinations provided, just validate JSON format
+	if p.EmissionDestinations != "" {
+		var destinations []EmissionDestination
+		if err := json.Unmarshal([]byte(p.EmissionDestinations), &destinations); err != nil {
+			return fmt.Errorf("invalid emission_destinations JSON: %w", err)
+		}
+
+		// Basic validation - just check we have destinations
+		if len(destinations) == 0 {
+			return fmt.Errorf("no destinations provided")
+		}
+	}
+
 	return nil
 }
 

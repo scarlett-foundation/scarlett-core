@@ -10,4 +10,9 @@ option go_package = "scarlett-core/x/emissions/types";
 message Params {
   option (amino.name) = "scarlettcore/x/emissions/Params";
   option (gogoproto.equal) = true;
+
+  // emission_destinations defines the emission split configuration
+  string emission_destinations = 1;
+  // enabled controls whether governance-controlled emissions are active
+  bool enabled = 2;
 }

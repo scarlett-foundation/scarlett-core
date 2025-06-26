@@ -66,7 +66,6 @@ func NewKeeper(
 		stakingKeeper: stakingKeeper,
 		mintKeeper:    mintKeeper,
 
-		// Initialize collections - using string storage temporarily
 		Params:                collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		EmissionParamsRaw:     collections.NewItem(sb, types.EmissionParamsKey, "emission_params", collections.StringValue),
 		EmissionHistoryRaw:    collections.NewMap(sb, types.EmissionHistoryPrefix, "emission_history", collections.Int64Key, collections.StringValue),
