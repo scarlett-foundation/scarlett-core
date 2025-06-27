@@ -48,7 +48,6 @@ func NewKeeper(
 	bankKeeper bankkeeper.Keeper,
 	govKeeper govkeeper.Keeper,
 	stakingKeeper stakingkeeper.Keeper,
-	mintKeeper mintkeeper.Keeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -64,7 +63,6 @@ func NewKeeper(
 		bankKeeper:    bankKeeper,
 		govKeeper:     govKeeper,
 		stakingKeeper: stakingKeeper,
-		mintKeeper:    mintKeeper,
 
 		Params:                collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		EmissionParamsRaw:     collections.NewItem(sb, types.EmissionParamsKey, "emission_params", collections.StringValue),
@@ -79,6 +77,11 @@ func NewKeeper(
 	k.Schema = schema
 
 	return k
+}
+
+// SetMintKeeper sets the mint keeper for the emissions keeper.
+func (k *Keeper) SetMintKeeper(mk mintkeeper.Keeper) {
+	k.mintKeeper = mk
 }
 
 // GetAuthority returns the module's authority.

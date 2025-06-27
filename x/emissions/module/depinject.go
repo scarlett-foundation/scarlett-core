@@ -25,7 +25,7 @@ func (AppModule) IsOnePerModuleType() {}
 func init() {
 	appconfig.Register(
 		&types.Module{},
-		appconfig.Provide(ProvideModule),
+		appconfig.Provide(ProvideModule, provideEmissionsKeeperHooks),
 	)
 }
 
@@ -65,9 +65,16 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.BankKeeper,
 		*in.GovKeeper,
 		*in.StakingKeeper,
-		in.MintKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 
 	return ModuleOutputs{EmissionsKeeper: k, Module: m}
+}
+
+// provideEmissionsKeeperHooks sets the mint keeper for the emissions keeper.
+func provideEmissionsKeeperHooks(
+	k keeper.Keeper,
+	mk mintkeeper.Keeper,
+) {
+	k.SetMintKeeper(mk)
 }
