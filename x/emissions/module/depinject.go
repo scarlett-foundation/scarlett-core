@@ -25,7 +25,7 @@ func (AppModule) IsOnePerModuleType() {}
 func init() {
 	appconfig.Register(
 		&types.Module{},
-		appconfig.Provide(ProvideModule, provideEmissionsKeeperHooks),
+		appconfig.Provide(ProvideModule, ProvideEmissionsKeeperHooks),
 	)
 }
 
@@ -71,8 +71,8 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 	return ModuleOutputs{EmissionsKeeper: k, Module: m}
 }
 
-// provideEmissionsKeeperHooks sets the mint keeper for the emissions keeper.
-func provideEmissionsKeeperHooks(
+// ProvideEmissionsKeeperHooks sets the mint keeper for the emissions keeper.
+func ProvideEmissionsKeeperHooks(
 	k keeper.Keeper,
 	mk mintkeeper.Keeper,
 ) {
