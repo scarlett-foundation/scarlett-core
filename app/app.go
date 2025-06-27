@@ -151,8 +151,11 @@ func New(
 			depinject.Supply(
 				appOpts,
 				logger,
-				// supply our custom mint function as a value to override the default
-				ProvideMinerEmissionsMintFn(app.BankKeeper, app.EmissionsKeeper),
+				// supply our custom mint function using a lazy-loading provider
+				// this breaks the dependency cycle during initialization
+				ProvideMinerEmissionsMintFn(func() (bankkeeper.Keeper, emissionsmodulekeeper.Keeper) {
+					return app.BankKeeper, app.EmissionsKeeper
+				}),
 			),
 		)
 	)
