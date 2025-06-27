@@ -17,3 +17,6 @@ const (
 
 // ParamsKey is the prefix to retrieve all Params
 var ParamsKey = collections.NewPrefix("p_scarlettcore")
+
+// PendingGenesisBurnsKey is the prefix to retrieve pending genesis burns
+var PendingGenesisBurnsKey = collections.NewPrefix("pending_genesis_burns")

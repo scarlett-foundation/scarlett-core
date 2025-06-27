@@ -1,0 +1,280 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Genesis Burn Feature - Cursor Rules
+
+## Overview
+Implement a simple, one-time genesis validator stake burning mechanism that allows the founding validator to burn their entire stake in a single transaction, achieving immediate and complete decentralization with true Satoshi-style anonymity.
+
+## Architecture & Context
+
+### Current State Analysis
+- **Cosmos SDK Version**: v0.53.0
+- **Target Module**: `x/scarlettcore` (extend existing module)
+- **Target Flow**: Genesis → MsgBurnGenesisStake → Unbond All Stake → Burn All Tokens → Complete Decentralization
+- **Timeline**: Immediate execution (single transaction)
+- **Integration**: Uses existing `x/scarlettcore` burn functionality and `x/staking`
+
+### Implementation Strategy
+**Extend Existing Module Approach** (Same as TokenBurner):
+1. **Use Ignite CLI** to scaffold `MsgBurnGenesisStake` message in existing `x/scarlettcore` module
+2. **Integrate with Staking module** for complete stake unbonding
+3. **Integrate with existing burn functionality** from `x/scarlettcore`
+4. **Add genesis address validation** to ensure only genesis can execute
+5. **Single transaction execution** - no complex scheduling needed
+
+## Implementation Structure: Extend x/scarlettcore
+
+### Core Components Needed
+
+#### 1. Message Definition
+```go
+// proto/scarlettcore/v1/tx.proto
+message MsgBurnGenesisStake {
+  string creator = 1;  // Must be genesis validator address
+}
+
+message MsgBurnGenesisStakeResponse {
+  string unbonded_amount = 1;  // Amount that will be burned after unbonding
+  int64 unbonding_completion_time = 2;  // When tokens will be available for burning
+}
+```
+
+#### 2. Message Handler (Unbond-then-Burn Pattern)
+```go
+// x/scarlettcore/keeper/msg_burn_genesis_stake.go
+func (k msgServer) BurnGenesisStake(ctx context.Context, msg *types.MsgBurnGenesisStake) (*types.MsgBurnGenesisStakeResponse, error) {
+    // 1. Validate caller is genesis address (from module params)
+    // 2. Get genesis validator address and delegator address
+    // 3. Get total delegated amount
+    // 4. Unbond ALL staked tokens
+    // 5. Set up automatic burning when unbonding completes
+    // 6. Emit genesis burn event
+    // 7. Return unbonding details
+}
+```
+
+#### 3. Genesis Address Configuration
+```go
+// x/scarlettcore/types/params.go - Add to existing Params
+type Params struct {
+    // ... existing params
+    GenesisAddress string `protobuf:"bytes,2,opt,name=genesis_address,json=genesisAddress,proto3" json:"genesis_address,omitempty"`
+}
+```
+
+#### 4. Automatic Burn on Unbonding Completion
+```go
+// x/scarlettcore/module/module.go - Extend existing EndBlock
+func (am AppModule) EndBlock(ctx context.Context) error {
+    // Check for completed unbonding from genesis address
+    // Automatically burn those tokens using existing burn logic
+    return am.keeper.ProcessCompletedGenesisBurns(ctx)
+}
+```
+
+## Dependencies & Module Integration
+
+### Required Keeper Dependencies (Already Available)
+```go
+// x/scarlettcore/types/expected_keepers.go - Extend existing
+type StakingKeeper interface {
+    GetDelegation(ctx context.Context, delAddr, valAddr sdk.AccAddress) (types.Delegation, error)
+    Undelegate(ctx context.Context, delAddr, valAddr sdk.AccAddress, sharesAmount sdk.Dec) error
+    GetValidator(ctx context.Context, addr sdk.ValAddress) (types.Validator, error)
+    GetUnbondingDelegation(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) (types.UnbondingDelegation, error)
+}
+
+type BankKeeper interface {
+    BurnCoins(ctx context.Context, moduleName string, amt sdk.Coins) error
+    GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
+    SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+}
+```
+
+### App Integration (Minimal Changes)
+```go
+// Module account already has Burner permission from existing tokenburner feature
+// No additional app.go changes needed
+```
+
+## State Management
+
+### Minimal State Approach (MVP)
+**Extend existing collections in scarlettcore keeper**:
+```go
+// x/scarlettcore/keeper/keeper.go - Add to existing Keeper
+type Keeper struct {
+    // ... existing fields
+    
+    // Genesis burn tracking
+    PendingGenesisBurns collections.Map[string, types.PendingBurn] // Track unbonding->burn
+}
+
+type PendingBurn struct {
+    UnbondingId     uint64
+    Amount          string
+    CompletionTime  int64
+    Status          string // "unbonding", "ready_to_burn", "burned"
+}
+```
+
+## Event Definitions
+```go
+// Genesis-specific burn events
+const (
+    EventTypeBurnGenesisStake = "burn_genesis_stake"
+    EventTypeGenesisDecentralized = "genesis_decentralized"
+    
+    AttributeKeyGenesisAddress = "genesis_address"
+    AttributeKeyUnbondedAmount = "unbonded_amount"
+    AttributeKeyBurnedAmount   = "burned_amount"
+    AttributeKeyCompletionTime = "completion_time"
+)
+```
+
+## Implementation Steps (MVP Focus)
+
+### Phase 1: Ignite Scaffolding (5 minutes)
+1. **Scaffold genesis burn message**: `ignite scaffold message burn-genesis-stake --module scarlettcore`
+2. **Add genesis address to params**: Update params.proto and params.go
+3. **Extend existing keeper**: Add minimal state for tracking unbonding->burn
+
+### Phase 2: Core Implementation (45 minutes)
+1. **Implement burn handler** in generated file
+2. **Add genesis address validation** 
+3. **Integrate with staking unbonding**
+4. **Add EndBlock logic** for automatic burn completion
+5. **Extend existing burn functionality** for genesis-specific burning
+
+### Phase 3: Testing & Validation (30 minutes)
+1. **Unit test** the burn message handler
+2. **Test with local validator** setup
+3. **Verify complete unbonding** and subsequent burning
+4. **Test genesis address validation**
+
+### Phase 4: Genesis Configuration (15 minutes)
+1. **Set genesis address** in module params during chain initialization
+2. **Test complete flow** from genesis stake to complete burn
+3. **Verify validator can continue** operating until unbonding completes
+
+## Security Considerations
+
+### MVP Security Rules
+1. **Genesis-only execution** - Only configured genesis address can execute burn
+2. **One-time execution** - Prevent multiple executions via state tracking
+3. **Complete stake burn** - All genesis stake must be burned (no partial burns)
+4. **Network safety** - Ensure sufficient other validators before allowing execution
+5. **Immutable execution** - Cannot be reversed once initiated
+
+### Error Handling
+```go
+var (
+    ErrNotGenesisAddress        = errors.Register(ModuleName, 2001, "caller is not the configured genesis address")
+    ErrAlreadyExecuted         = errors.Register(ModuleName, 2002, "genesis burn already executed")
+    ErrInsufficientValidators  = errors.Register(ModuleName, 2003, "insufficient active validators for safe execution")
+    ErrNoStakeToburn          = errors.Register(ModuleName, 2004, "genesis address has no stake to burn")
+)
+```
+
+## Acceptance Criteria
+
+### ✅ **Functional Requirements**
+- [ ] **Single execution** - Genesis can burn all stake in one transaction
+- [ ] **Complete decentralization** - All genesis stake is burned (not redistributed)
+- [ ] **Automatic completion** - Burning happens automatically after unbonding period
+- [ ] **Genesis-only access** - Only genesis address can execute
+- [ ] **Network safety** - Execution only allowed with sufficient other validators
+
+### ✅ **Anonymity Requirements**
+- [ ] **Immediate irrelevance** - Genesis keys become useless after execution
+- [ ] **No ongoing involvement** - No further genesis participation needed
+- [ ] **Trustless completion** - Automatic burn after unbonding period
+
+### ✅ **Integration Requirements**
+- [ ] **Staking integration** - Seamless unbonding via staking module
+- [ ] **Burn integration** - Uses existing scarlettcore burn functionality
+- [ ] **Event emission** - All actions emit trackable events
+- [ ] **CLI integration** - Simple command for execution
+
+### ✅ **Safety Requirements**
+- [ ] **Validator count check** - Minimum 3 active validators required
+- [ ] **One-time execution** - Cannot be called multiple times
+- [ ] **Error handling** - Graceful failure for edge cases
+- [ ] **Network stability** - Chain continues operating normally
+
+## CLI Commands Structure
+```bash
+# Genesis burns all their stake (one-time execution)
+scarlett-cored tx scarlettcore burn-genesis-stake --from genesis-key
+
+# Query pending genesis burns
+scarlett-cored query scarlettcore pending-genesis-burns
+
+# Query if genesis burn was executed
+scarlett-cored query scarlettcore genesis-burn-status
+```
+
+## Key Files to Create/Modify
+
+### New Files (Minimal)
+1. `x/scarlettcore/keeper/msg_burn_genesis_stake.go` - Message handler (~80 lines)
+2. `x/scarlettcore/keeper/genesis_burn.go` - EndBlock processing (~50 lines)
+3. `x/scarlettcore/keeper/msg_burn_genesis_stake_test.go` - Unit tests
+
+### Modified Files (Minimal)
+1. `proto/scarlettcore/v1/tx.proto` - Add MsgBurnGenesisStake (~8 lines)
+2. `proto/scarlettcore/v1/params.proto` - Add genesis_address field (~2 lines)
+3. `x/scarlettcore/types/params.go` - Add genesis address validation (~10 lines)
+4. `x/scarlettcore/module/module.go` - Extend EndBlock (~5 lines)
+5. `x/scarlettcore/keeper/keeper.go` - Add PendingGenesisBurns collection (~3 lines)
+
+## Testing Requirements
+
+### Unit Test Coverage
+- Test successful genesis stake burning
+- Test non-genesis address rejection
+- Test multiple execution prevention
+- Test validator count validation
+- Test automatic burn completion
+
+### Integration Test
+- Deploy to local testnet with multiple validators
+- Execute genesis burn and verify unbonding
+- Wait for unbonding completion and verify automatic burn
+- Verify network continues operating with remaining validators
+
+## Benefits of This All-at-Once Approach
+
+✅ **True Satoshi Anonymity** - Genesis keys become irrelevant immediately  
+✅ **15-Minute Implementation** - Same complexity as tokenburner feature  
+✅ **Complete Decentralization** - All founder influence removed in one action  
+✅ **Strong Community Signal** - Ultimate commitment to decentralization  
+✅ **Minimal Code Surface** - Less bugs, easier to audit  
+✅ **Immediate Results** - No waiting for gradual execution  
+✅ **Trustless** - No ongoing genesis involvement needed  
+✅ **Simple Testing** - Single execution path to validate  
+
+## Risk Mitigation
+
+### Pre-Execution Checklist
+- [ ] Minimum 3 active validators with sufficient stake
+- [ ] Network running stably for at least 30 days
+- [ ] Community awareness of execution timeline
+- [ ] Testnet validation completed successfully
+
+### Execution Strategy
+1. **Announce intention** 1 week before execution
+2. **Verify validator readiness** on execution day
+3. **Execute during low-activity period** to minimize impact
+4. **Monitor network** during unbonding period
+
+## Future Enhancements (Post-MVP)
+- Multi-signature genesis burning (multiple genesis keys)
+- Partial burning option (burn percentage instead of all)
+- Time-locked execution (schedule for future execution)
+- Emergency halt mechanism (governance-controlled pause)
+
+This MVP provides the simplest possible path to complete genesis decentralization with maximum transparency and immediate anonymity.
