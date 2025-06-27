@@ -36,9 +36,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod:      "BurnGenesisStake",
-					Use:            "burn-genesis-stake ",
+					Use:            "burn-genesis-stake [amount]",
 					Short:          "Send a burn-genesis-stake tx",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "amount"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
