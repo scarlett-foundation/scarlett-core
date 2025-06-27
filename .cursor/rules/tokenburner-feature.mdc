@@ -1,0 +1,232 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# TokenBurner Custom Module Feature - Cursor Rules
+
+## Overview
+Implement a simple token burning mechanism that allows users to burn tokens from their own address, integrating with the existing Bank module for secure token destruction.
+
+## Architecture & Context
+
+### Current State Analysis
+- **Cosmos SDK Version**: v0.53.0
+- **Current Module**: `x/scarlettcore` (extend existing module)
+- **Target Flow**: User → MsgBurnTokens → Transfer to Module → Bank.BurnCoins → Token Destruction
+- **Bank Module Integration**: Uses Transfer-then-Burn pattern (Cosmos SDK best practice)
+
+### Implementation Strategy
+**Ignite + Extend Existing Module Approach**:
+1. **Use Ignite CLI** to scaffold `MsgBurnTokens` message in existing `x/scarlettcore` module
+2. **Integrate with Bank module's** Transfer-then-Burn pattern (SendCoinsFromAccountToModule + BurnCoins)
+3. **Add module account with Burner permission** for secure token destruction
+4. **Add validation logic** and event emission to generated handler
+5. **No separate module needed** - Ignite extends current functionality
+
+## Implementation Structure: Extend x/scarlettcore
+
+### Core Components Needed
+
+#### 1. Message Definition
+```go
+// proto/scarlettcore/v1/tx.proto
+message MsgBurnTokens {
+  string burner = 1;  // Address burning tokens
+  string amount = 2;  // Amount to burn (e.g., "1000stake")
+  string denom = 3;   // Token denomination
+}
+
+message MsgBurnTokensResponse {}
+```
+
+#### 2. Message Handler (Transfer-then-Burn Pattern)
+```go
+// x/scarlettcore/keeper/msg_burn_tokens.go
+func (k msgServer) BurnTokens(ctx context.Context, msg *types.MsgBurnTokens) (*types.MsgBurnTokensResponse, error) {
+    // 1. Validate burner address
+    // 2. Parse and validate amount
+    // 3. Check user balance
+    // 4. Transfer tokens from user to module account
+    // 5. Burn tokens from module account (requires Burner permission)
+    // 6. Emit burn event
+    // 7. Return success
+}
+```
+
+#### 3. Keeper Integration
+```go
+// x/scarlettcore/keeper/keeper.go - Add bank keeper reference
+type Keeper struct {
+    bankKeeper types.BankKeeper  // Add this field
+    // ... existing fields
+}
+```
+
+#### 4. Simple Query (Optional)
+```go
+// Query burn history by address (if needed for MVP)
+message QueryBurnHistoryRequest {
+  string address = 1;
+}
+```
+
+## Dependencies & Module Integration
+
+### Required Keeper Dependencies
+```go
+// x/scarlettcore/types/expected_keepers.go
+type BankKeeper interface {
+    BurnCoins(ctx context.Context, moduleName string, amt sdk.Coins) error
+    GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
+    SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+    GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins
+}
+```
+
+### App Integration
+```go
+// app/app.go - Wire bank keeper to scarlettcore keeper
+app.ScarlettcoreKeeper = scarlettcorekeeper.NewKeeper(
+    // ... existing params
+    app.BankKeeper,  // Add bank keeper
+)
+
+// Module account permissions - Add Burner permission
+moduleAccPerms = map[string][]string{
+    // ... existing permissions
+    "scarlettcore": {authtypes.Burner}, // Required for burning tokens
+}
+```
+
+## State Management
+
+### Minimal State Approach (MVP)
+**No custom state needed for MVP**:
+- Use existing Bank module for all balance tracking
+- Emit events for burn history (queryable via event logs)
+- Keep it simple - no custom storage
+
+### Optional: Future Burn History Storage
+```go
+// If needed later - simple burn record
+type BurnRecord struct {
+    Burner    string
+    Amount    string
+    Denom     string
+    Height    int64
+    Timestamp int64
+}
+```
+
+## Event Definitions
+```go
+// Simple burn event
+const (
+    EventTypeBurnTokens = "burn_tokens"
+    
+    AttributeKeyBurner = "burner"
+    AttributeKeyAmount = "amount"
+    AttributeKeyDenom  = "denom"
+)
+```
+
+## Implementation Steps (MVP Focus)
+
+### Phase 1: Ignite Scaffolding (15 minutes)
+1. **Scaffold the burn message**: `ignite scaffold message burn-tokens amount denom --module scarlettcore`
+2. **Add bank keeper dependency**: Update `x/scarlettcore/types/expected_keepers.go` with BankKeeper interface
+3. **Wire bank keeper**: Update keeper constructor in `app/app.go` to inject bank keeper
+
+### Phase 2: Core Implementation (30 minutes)
+1. **Implement burn logic** in generated `x/scarlettcore/keeper/msg_burn_tokens.go`
+2. **Add validation** (address, balance, amount format)
+3. **Integrate Transfer-then-Burn pattern** (SendCoinsFromAccountToModule + BurnCoins)
+4. **Add event emission** for burn tracking
+5. **Ensure module account has Burner permission** in app.go
+
+### Phase 3: Testing & Validation (30 minutes)
+1. Unit test the burn message handler
+2. Test with local chain - burn user tokens
+3. Verify tokens are actually destroyed (total supply decreases)
+4. Test error cases (insufficient balance, invalid address)
+
+### Phase 4: CLI Integration (Auto-Generated!)
+1. **CLI already generated** by Ignite: `scarlett-cored tx scarlettcore burn-tokens [amount] [denom] --from [address]`
+2. **Test CLI functionality** - should work out of the box
+
+## Security Considerations
+
+### MVP Security Rules
+1. **Users can only burn their own tokens** - validate burner address matches signer
+2. **Validate sufficient balance** - check before burning
+3. **Validate amount format** - prevent invalid amounts
+4. **Validate denomination** - ensure denom exists
+5. **No admin permissions needed** - pure user-initiated action
+
+### Error Handling
+```go
+var (
+    ErrInsufficientBalance = errors.Register(ModuleName, 2, "insufficient balance to burn")
+    ErrInvalidAmount       = errors.Register(ModuleName, 3, "invalid burn amount")
+    ErrInvalidDenom        = errors.Register(ModuleName, 4, "invalid denomination")
+)
+```
+
+## CLI Commands Structure
+```bash
+# Burn tokens from user's address
+scarlett-cored tx scarlettcore burn-tokens 1000stake --from myaddress
+
+# Query burn events (via standard event query)
+scarlett-cored query tx --events "burn_tokens.burner='cosmos1...'"
+```
+
+## Key Files to Create/Modify
+
+### New Files (Minimal)
+1. `x/scarlettcore/keeper/msg_burn_tokens.go` - Message handler (~50 lines)
+2. `x/scarlettcore/keeper/msg_burn_tokens_test.go` - Unit tests
+
+### Modified Files (Minimal)
+1. `proto/scarlettcore/v1/tx.proto` - Add MsgBurnTokens (~10 lines)
+2. `x/scarlettcore/types/expected_keepers.go` - Add BankKeeper interface (~5 lines)
+3. `x/scarlettcore/keeper/keeper.go` - Add bank keeper field (~3 lines)
+4. `x/scarlettcore/keeper/msg_server.go` - Register new message handler (~5 lines)
+5. `app/app.go` - Wire bank keeper (~1 line)
+
+## Testing Requirements
+
+### Unit Test Coverage
+- Test successful token burning
+- Test insufficient balance error
+- Test invalid amount error
+- Test address validation
+- Test event emission
+
+### Integration Test
+- Deploy to local chain
+- Create test account with tokens
+- Burn tokens via CLI
+- Verify balance decreased and total supply decreased
+
+## Benefits of This Ignite + MVP Approach
+
+✅ **Ignite Scaffolding** - Auto-generates boilerplate, proto, CLI, tests  
+✅ **Extend Existing Module** - No separate module needed  
+✅ **Minimal Manual Code** - ~50 lines of actual burn logic  
+✅ **Best Practices** - Ignite follows Cosmos SDK standards  
+✅ **Secure** - Users can only burn their own tokens  
+✅ **Leverages Bank Module** - No reinventing token mechanics  
+✅ **Event-Driven** - Burn history queryable via events  
+✅ **CLI Auto-Generated** - Perfect CLI integration out of the box  
+✅ **Test Scaffolding** - Unit test structure already created  
+
+## Future Enhancements (Post-MVP)
+- Burn history storage and queries
+- Burn limits/cooldowns
+- Multi-denom burns in single transaction
+- Burn statistics and analytics
+- Integration with governance (burn proposals)
+
+This MVP provides core token burning functionality with minimal complexity and maximum security. 

@@ -53,7 +53,7 @@ const (
 	// Name is the name of the application.
 	Name = "scarlett-core"
 	// AccountAddressPrefix is the prefix for accounts addresses.
-	AccountAddressPrefix = "cosmos"
+	AccountAddressPrefix = "scarlett"
 	// ChainCoinType is the coin type of the chain.
 	ChainCoinType = 118
 )
@@ -107,7 +107,7 @@ type App struct {
 
 func init() {
 
-	sdk.DefaultBondDenom = "stake"
+	sdk.DefaultBondDenom = "sclt"
 
 	var err error
 	clienthelpers.EnvPrefix = Name
@@ -155,6 +155,8 @@ func New(
 				// read the depinject documentation and depinject module wiring for more information
 				// on available options and how to use them.
 			),
+			// Provide our custom mint function for 50/50 emission splitting
+			depinject.Provide(ProvideMinerEmissionsMintFn),
 		)
 	)
 

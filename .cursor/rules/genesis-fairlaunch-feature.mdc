@@ -1,0 +1,278 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Genesis Fair Launch Custom Module Feature - Cursor Rules
+
+## Overview
+Implement a programmatic decentralization mechanism where the founding validator (genesis account) automatically unbonds their stake and burns tokens over a 3-month period, creating a fair, transparent transition to full decentralization.
+
+## Architecture & Context
+
+### Current State Analysis
+- **Cosmos SDK Version**: v0.53.0
+- **New Module**: `x/genesisfairlaunch` (standalone module)
+- **Target Flow**: Genesis → Scheduled Unbonding → Token Burning → Complete Decentralization
+- **Timeline**: 3 months (90 days) for full token burn completion
+- **Integration**: Works with existing `x/scarlettcore` burn functionality and `x/staking`
+
+### Implementation Strategy
+**Ignite + New Module Approach**:
+1. **Use Ignite CLI** to scaffold new `genesisfairlaunch` module
+2. **Integrate with Staking module** for automatic unbonding operations
+3. **Integrate with existing burn functionality** from `x/scarlettcore`
+4. **Use Begin/End Blocker** for automatic execution
+5. **No manual intervention** - purely programmatic
+
+## Implementation Structure: New x/genesisfairlaunch Module
+
+### Core Components Needed
+
+#### 1. Decentralization Schedule
+```go
+// Genesis fair launch schedule
+type DecentralizationSchedule struct {
+    GenesisAddress    string                 // Genesis validator address
+    StartHeight       int64                  // Block height to start unbonding
+    TotalDuration     int64                  // Total blocks for complete decentralization (90 days)
+    UnbondingEvents   []UnbondingEvent       // Scheduled unbonding events
+    Completed         bool                   // Whether decentralization is complete
+}
+
+type UnbondingEvent struct {
+    Height           int64     // Block height to execute
+    UnbondPercent    sdk.Dec   // Percentage of remaining stake to unbond
+    Status           string    // pending, executed, burned
+}
+```
+
+#### 2. Automatic Execution
+```go
+// Begin blocker - executed every block
+func (am AppModule) BeginBlock(ctx context.Context) error {
+    // 1. Check if current height matches unbonding schedule
+    // 2. Execute unbonding if scheduled
+    // 3. Check for completed unbonding periods
+    // 4. Execute token burning for matured unbondings
+    // 5. Update progress tracking
+}
+```
+
+#### 3. Integration with Existing Modules
+```go
+// Required keeper dependencies
+type StakingKeeper interface {
+    GetDelegation(ctx context.Context, delAddr, valAddr sdk.AccAddress) (types.Delegation, error)
+    Undelegate(ctx context.Context, delAddr, valAddr sdk.AccAddress, sharesAmount sdk.Dec) error
+}
+
+type ScarlettcoreKeeper interface {
+    BurnTokens(ctx context.Context, msg *types.MsgBurnTokens) (*types.MsgBurnTokensResponse, error)
+}
+```
+
+#### 4. Progress Tracking
+```go
+// Track decentralization progress
+type DecentralizationProgress struct {
+    TotalTokensBurned    sdk.Coins  // Total tokens burned so far
+    RemainingStake       sdk.Coins  // Genesis's remaining stake
+    CompletionPercent    sdk.Dec    // Progress percentage (0-100)
+    NextUnbondHeight     int64      // Next scheduled unbonding
+    EstimatedCompletion  int64      // Estimated completion height
+}
+```
+
+## Dependencies & Module Integration
+
+### Required Keeper Dependencies
+```go
+// x/genesisfairlaunch/types/expected_keepers.go
+type StakingKeeper interface {
+    GetDelegation(ctx context.Context, delAddr, valAddr sdk.AccAddress) (types.Delegation, error)
+    Undelegate(ctx context.Context, delAddr, valAddr sdk.AccAddress, sharesAmount sdk.Dec) error
+    GetValidator(ctx context.Context, addr sdk.ValAddress) (types.Validator, error)
+}
+
+type ScarlettcoreKeeper interface {
+    BurnTokens(ctx context.Context, msg *types.MsgBurnTokens) (*types.MsgBurnTokensResponse, error)
+}
+
+type BankKeeper interface {
+    GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
+    GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins
+}
+```
+
+### App Integration
+```go
+// app/app.go - Wire all keepers
+app.GenesisfairlaunchKeeper = genesisfairlaunchkeeper.NewKeeper(
+    // ... standard params
+    app.StakingKeeper,
+    app.ScarlettcoreKeeper,
+    app.BankKeeper,
+)
+```
+
+## State Management
+
+### Minimal State Approach
+```go
+// Core state items
+type Keeper struct {
+    DecentralizationSchedule collections.Item[types.DecentralizationSchedule]
+    UnbondingQueue          collections.Map[int64, types.UnbondingEvent]
+    Progress                collections.Item[types.DecentralizationProgress]
+}
+```
+
+## Event Definitions
+```go
+// Fair launch events
+const (
+    EventTypeUnbondingScheduled = "unbonding_scheduled"
+    EventTypeUnbondingExecuted  = "unbonding_executed"
+    EventTypeTokensBurned       = "tokens_burned"
+    EventTypeDecentralizationComplete = "decentralization_complete"
+    
+    AttributeKeyGenesis         = "genesis"
+    AttributeKeyAmount          = "amount"
+    AttributeKeyHeight          = "height"
+    AttributeKeyProgress        = "progress"
+    AttributeKeyRemainingStake  = "remaining_stake"
+)
+```
+
+## Implementation Steps (MVP Focus)
+
+### Phase 1: Ignite Scaffolding (20 minutes)
+1. **Scaffold new module**: `ignite scaffold module genesisfairlaunch`
+2. **Add schedule management**: Core types and state
+3. **Wire keeper dependencies**: Staking, Scarlettcore, Bank keepers
+4. **Add to app.go**: Module integration and keeper wiring
+
+### Phase 2: Core Implementation (45 minutes)
+1. **Implement Begin Blocker** for automatic execution
+2. **Add unbonding logic** with staking module integration
+3. **Add burning logic** using existing scarlettcore functionality
+4. **Create 3-month schedule** (90-day timeline)
+5. **Add progress tracking** and event emission
+
+### Phase 3: Testing & Validation (30 minutes)
+1. **Unit test** schedule execution and progress tracking
+2. **Integration test** with local chain and genesis configuration
+3. **Verify unbonding** and burning work together
+4. **Test edge cases** and error scenarios
+
+### Phase 4: Genesis Configuration (15 minutes)
+1. **Configure genesis state** with genesis address and schedule
+2. **Set initial stake** for genesis validator
+3. **Test complete flow** from genesis to decentralization
+
+## Security Considerations
+
+### MVP Security Rules
+1. **Genesis-only operations** - Only scheduled genesis address can be unbonded
+2. **Immutable schedule** - Cannot be modified once set (prevents manipulation)
+3. **Network safety** - Ensure sufficient validator diversity before unbonding
+4. **Gradual execution** - Prevent sudden network destabilization
+5. **Emergency halt** - Governance can pause in extreme circumstances
+
+### Error Handling
+```go
+var (
+    ErrScheduleNotFound        = errors.Register(ModuleName, 2, "decentralization schedule not found")
+    ErrInvalidUnbondingHeight  = errors.Register(ModuleName, 3, "invalid unbonding height")
+    ErrInsufficientStake       = errors.Register(ModuleName, 4, "insufficient stake for unbonding")
+    ErrDecentralizationComplete = errors.Register(ModuleName, 5, "decentralization already complete")
+)
+```
+
+## Acceptance Criteria
+
+### ✅ **Timeline Requirements**
+- [ ] **90-day completion**: All founder tokens burned within 3 months
+- [ ] **Daily schedule**: Unbonding events occur every ~3 days (30 events total)
+- [ ] **Gradual progress**: ~3.33% of remaining stake unbonded per event
+
+### ✅ **Functional Requirements**
+- [ ] **Automatic execution**: No manual intervention required
+- [ ] **Genesis anonymity**: Works without ongoing genesis account involvement
+- [ ] **Complete burning**: All unbonded tokens are burned (not redistributed)
+- [ ] **Progress visibility**: Real-time decentralization progress tracking
+- [ ] **Network safety**: Maintains network stability throughout process
+
+### ✅ **Integration Requirements**
+- [ ] **Staking integration**: Seamless unbonding via staking module
+- [ ] **Burn integration**: Uses existing scarlettcore burn functionality
+- [ ] **Genesis setup**: Configurable via genesis.json
+- [ ] **Event emission**: All actions emit trackable events
+
+### ✅ **Safety Requirements**
+- [ ] **Validator diversity**: Ensures sufficient non-genesis validators
+- [ ] **Emergency controls**: Governance can halt if needed
+- [ ] **Error handling**: Graceful failure and recovery
+- [ ] **State consistency**: No blockchain state corruption
+
+## Query Commands Structure
+```bash
+# Query decentralization progress
+scarlett-cored query genesisfairlaunch progress
+
+# Query remaining schedule
+scarlett-cored query genesisfairlaunch schedule
+
+# Query genesis stake status
+scarlett-cored query genesisfairlaunch genesis-status
+```
+
+## Key Files to Create/Modify
+
+### New Files (New Module)
+1. `x/genesisfairlaunch/keeper/schedule.go` - Schedule execution (~100 lines)
+2. `x/genesisfairlaunch/keeper/unbonding.go` - Unbonding logic (~80 lines)
+3. `x/genesisfairlaunch/keeper/burning.go` - Token burning integration (~50 lines)
+4. `x/genesisfairlaunch/types/schedule.go` - Schedule types (~60 lines)
+5. `x/genesisfairlaunch/types/expected_keepers.go` - Keeper interfaces (~30 lines)
+
+### Modified Files
+1. `app/app.go` - Add module and keeper wiring (~10 lines)
+2. `app/app_config.go` - Add module to configuration (~5 lines)
+
+## Testing Requirements
+
+### Unit Test Coverage
+- Test schedule creation and execution
+- Test unbonding calculations and execution
+- Test token burning integration
+- Test progress tracking accuracy
+- Test error scenarios and edge cases
+
+### Integration Test
+- Test complete 90-day simulation (accelerated)
+- Verify genesis stake reduces to zero
+- Verify all tokens are burned
+- Test genesis configuration
+- Verify network remains stable
+
+## Benefits of This Fair Launch Approach
+
+✅ **Transparent Decentralization** - Everyone knows the schedule upfront  
+✅ **Satoshi-like Anonymity** - Genesis keys become irrelevant over time  
+✅ **Programmatic Execution** - No human intervention or trust required  
+✅ **Token Deflation** - Total supply decreases, increasing scarcity  
+✅ **Network Security** - Gradual transition maintains stability  
+✅ **Community Trust** - Fair launch with visible commitment to decentralization  
+✅ **Immutable Schedule** - Cannot be manipulated once deployed  
+
+## Future Enhancements (Post-MVP)
+- Multiple genesis addresses support
+- Customizable unbonding schedules
+- Partial burning vs redistribution options
+- Governance-controlled schedule modifications
+- Advanced progress analytics
+- Integration with governance voting power
+
+This MVP provides complete programmatic decentralization with maximum transparency and fairness. 

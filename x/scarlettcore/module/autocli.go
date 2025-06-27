@@ -28,6 +28,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "UpdateParams",
 					Skip:      true, // skipped because authority gated
 				},
+				{
+					RpcMethod:      "BurnTokens",
+					Use:            "burn-tokens [amount] [denom]",
+					Short:          "Send a burn-tokens tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "amount"}, {ProtoField: "denom"}},
+				},
+				{
+					RpcMethod:      "BurnGenesisStake",
+					Use:            "burn-genesis-stake ",
+					Short:          "Send a burn-genesis-stake tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

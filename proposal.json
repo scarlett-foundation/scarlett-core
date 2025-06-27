@@ -1,0 +1,15 @@
+{
+  "messages": [
+    {
+      "@type": "/scarlettcore.scarlettcore.v1.MsgUpdateParams",
+      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700j4l5sjv",
+      "params": {
+        "genesis_address": "scarlett1wy6tx2tpx95yad3jk2kz2pz4hze76a7dj3jmrp"
+      }
+    }
+  ],
+  "metadata": "Set Alice as genesis address for testing genesis burn feature",
+  "deposit": "10000000sclt",
+  "title": "Set Genesis Address for Testing (Fresh Chain)",
+  "summary": "Configure Alice's address as the genesis address to test the genesis burn functionality with debug logging"
+} 
