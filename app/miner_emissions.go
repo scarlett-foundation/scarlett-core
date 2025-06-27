@@ -35,7 +35,7 @@ func ProvideDynamicEmissionsMintFn(emissionsKeeper emissionsmodulekeeper.Keeper,
 // ProvideMinerEmissionsMintFn provides a dynamic mint function that uses a provider
 // to lazily load keepers, preventing initialization dependency cycles.
 func ProvideMinerEmissionsMintFn(keeperProvider KeeperProvider) mintkeeper.MintFn {
-	return func(ctx sdk.Context, mk mintkeeper.Keeper) error {
+	return func(ctx sdk.Context, mk *mintkeeper.Keeper) error {
 		// Lazily load the keepers only when the mint function is actually called.
 		bankKeeper, emissionsKeeper := keeperProvider()
 		return GovernanceControlledMintFn(ctx, mk, bankKeeper, emissionsKeeper)
@@ -45,7 +45,7 @@ func ProvideMinerEmissionsMintFn(keeperProvider KeeperProvider) mintkeeper.MintF
 // GovernanceControlledMintFn is the core minting logic that uses governance parameters.
 func GovernanceControlledMintFn(
 	ctx sdk.Context,
-	mintKeeper mintkeeper.Keeper,
+	mintKeeper *mintkeeper.Keeper,
 	bankKeeper bankkeeper.Keeper,
 	emissionsKeeper emissionsmodulekeeper.Keeper,
 ) error {
@@ -71,7 +71,7 @@ func GovernanceControlledMintFn(
 	}
 
 	// 3. Get current minter state and parameters using keeper methods
-	minter, err := getMinterState(ctx, &mintKeeper)
+	minter, err := getMinterState(ctx, mintKeeper)
 	if err != nil {
 		return fmt.Errorf("failed to get minter state: %w", err)
 	}
@@ -82,13 +82,13 @@ func GovernanceControlledMintFn(
 	}
 
 	// 4. Calculate inflation and provisions using standard mint logic
-	if err := updateInflation(ctx, &mintKeeper, &minter, params); err != nil {
+	if err := updateInflation(ctx, mintKeeper, &minter, params); err != nil {
 		return fmt.Errorf("failed to update inflation: %w", err)
 	}
 
 	// 5. Calculate and mint this block's provision
 	blockProvisionCoin := minter.BlockProvision(params)
-	if err := mintTokens(ctx, &mintKeeper, blockProvisionCoin); err != nil {
+	if err := mintTokens(ctx, mintKeeper, blockProvisionCoin); err != nil {
 		return fmt.Errorf("failed to mint tokens: %w", err)
 	}
 
