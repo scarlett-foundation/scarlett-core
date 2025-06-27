@@ -157,8 +157,8 @@ func New(
 				// read the depinject documentation and depinject module wiring for more information
 				// on available options and how to use them.
 
-				// Use governance-controlled emissions mint function
-				depinject.Provide(ProvideDynamicEmissionsMintFn),
+				// Supply custom mint function for governance-controlled emissions
+				ProvideDynamicEmissionsMintFn,
 			),
 		)
 	)
@@ -225,6 +225,9 @@ func New(
 	if err := app.Load(loadLatest); err != nil {
 		panic(err)
 	}
+
+	// DEBUG: Verify our custom mint function is registered
+	app.Logger().Info("🔧🔧🔧 MINT KEEPER INITIALIZED 🔧🔧🔧")
 
 	return app
 }
