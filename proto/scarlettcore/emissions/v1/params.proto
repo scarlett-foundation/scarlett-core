@@ -1,0 +1,18 @@
+syntax = "proto3";
+package scarlettcore.emissions.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "scarlett-core/x/emissions/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "scarlettcore/x/emissions/Params";
+  option (gogoproto.equal) = true;
+
+  // emission_destinations defines the emission split configuration
+  string emission_destinations = 1;
+  // enabled controls whether governance-controlled emissions are active
+  bool enabled = 2;
+}

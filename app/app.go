@@ -46,6 +46,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"scarlett-core/docs"
+	emissionsmodulekeeper "scarlett-core/x/emissions/keeper"
 	scarlettcoremodulekeeper "scarlett-core/x/scarlettcore/keeper"
 )
 
@@ -99,6 +100,7 @@ type App struct {
 	TransferKeeper      ibctransferkeeper.Keeper
 
 	ScarlettcoreKeeper scarlettcoremodulekeeper.Keeper
+	EmissionsKeeper    emissionsmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -147,16 +149,14 @@ func New(
 		appConfig = depinject.Configs(
 			AppConfig(),
 			depinject.Supply(
-				appOpts, // supply app options
-				logger,  // supply logger
-				// here alternative options can be supplied to the DI container.
-				// those options can be used f.e to override the default behavior of some modules.
-				// for instance supplying a custom address codec for not using bech32 addresses.
-				// read the depinject documentation and depinject module wiring for more information
-				// on available options and how to use them.
+				appOpts,
+				logger,
+				// supply our custom mint function using a lazy-loading provider
+				// this breaks the dependency cycle during initialization
+				ProvideMinerEmissionsMintFn(func() (bankkeeper.Keeper, emissionsmodulekeeper.Keeper) {
+					return app.BankKeeper, app.EmissionsKeeper
+				}),
 			),
-			// Provide our custom mint function for 50/50 emission splitting
-			depinject.Provide(ProvideMinerEmissionsMintFn),
 		)
 	)
 
@@ -181,6 +181,7 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
 		&app.ScarlettcoreKeeper,
+		&app.EmissionsKeeper,
 	); err != nil {
 		panic(err)
 	}
@@ -221,6 +222,9 @@ func New(
 	if err := app.Load(loadLatest); err != nil {
 		panic(err)
 	}
+
+	// DEBUG: Verify our custom mint function is registered
+	app.Logger().Info("🔧🔧🔧 MINT KEEPER INITIALIZED 🔧🔧🔧")
 
 	return app
 }

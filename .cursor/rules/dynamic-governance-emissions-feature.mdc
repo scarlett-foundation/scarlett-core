@@ -1,0 +1,453 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Dynamic Governance-Controlled Emissions Feature - Cursor Rules
+
+## Overview
+Implement a dynamic emissions system where governance can control token distribution percentages, add/remove reward destinations, and adapt tokenomics through on-chain voting. Transform the current hardcoded 50/50 split into a fully governance-controlled, flexible emission system.
+
+## Architecture & Context
+
+### Current State Analysis
+- **Cosmos SDK Version**: v0.53.0
+- **Current System**: Hardcoded 50/50 split in `/app/emissions` package
+- **New Module**: `x/emissions` (full Ignite module with governance integration)
+- **Target Flow**: Governance Proposals → Parameter Updates → Dynamic Distribution
+- **Integration**: Replaces current static configuration while preserving distribution logic
+
+### Implementation Strategy
+**Ignite + New Module Approach**:
+1. **Use Ignite CLI** to scaffold new `emissions` module
+2. **Preserve existing logic** from `/app/emissions` as utility functions
+3. **Add governance integration** for parameter management
+4. **Use collections** for state management
+5. **Enable dynamic reconfiguration** through governance proposals
+
+## Implementation Structure: New x/emissions Module
+
+### Core Components Needed
+
+#### 1. Governance-Controlled Parameters
+```go
+// Dynamic emission configuration stored on-chain
+type EmissionParams struct {
+    Destinations []EmissionDestination `json:"destinations"`
+    Enabled      bool                  `json:"enabled"`
+    UpdatedBy    string               `json:"updated_by"`    // Last governance proposal
+    UpdatedAt    int64                `json:"updated_at"`    // Block height of last update
+}
+
+type EmissionDestination struct {
+    ModuleName    string         `json:"module_name"`
+    Weight        math.LegacyDec `json:"weight"`        // Percentage weight (0.0 to 1.0)
+    Description   string         `json:"description"`
+    Enabled       bool           `json:"enabled"`       // Can be disabled without removal
+    MinWeight     math.LegacyDec `json:"min_weight"`    // Governance safety bounds
+    MaxWeight     math.LegacyDec `json:"max_weight"`    // Governance safety bounds
+}
+```
+
+#### 2. Governance Message Types
+```go
+// Update emission split percentages
+type MsgUpdateEmissionSplit struct {
+    Authority    string                `json:"authority"`     // Gov module authority
+    Destinations []EmissionDestination `json:"destinations"`
+    Reason       string               `json:"reason"`        // Governance proposal reason
+}
+
+// Add new emission destination
+type MsgAddEmissionDestination struct {
+    Authority   string               `json:"authority"`
+    Destination EmissionDestination  `json:"destination"`
+    Reason      string              `json:"reason"`
+}
+
+// Remove emission destination
+type MsgRemoveEmissionDestination struct {
+    Authority  string `json:"authority"`
+    ModuleName string `json:"module_name"`
+    Reason     string `json:"reason"`
+}
+
+// Enable/disable destination without removal
+type MsgToggleEmissionDestination struct {
+    Authority  string `json:"authority"`
+    ModuleName string `json:"module_name"`
+    Enabled    bool   `json:"enabled"`
+    Reason     string `json:"reason"`
+}
+```
+
+#### 3. State Management with Collections
+```go
+// State management using collections
+type Keeper struct {
+    EmissionParams      collections.Item[types.EmissionParams]
+    EmissionHistory     collections.Map[int64, types.EmissionParams]  // Block height -> params
+    DestinationMetrics  collections.Map[string, types.DestinationStats] // Module -> stats
+    
+    // Keeper dependencies
+    bankKeeper     bankkeeper.Keeper
+    govKeeper      govkeeper.Keeper
+    stakingKeeper  stakingkeeper.Keeper
+}
+
+type DestinationStats struct {
+    ModuleName      string    `json:"module_name"`
+    TotalReceived   sdk.Coins `json:"total_received"`
+    LastAmount      sdk.Coins `json:"last_amount"`
+    LastUpdate      int64     `json:"last_update"`
+    ActiveSince     int64     `json:"active_since"`
+}
+```
+
+#### 4. Query Interface
+```go
+// Comprehensive query interface
+type QueryEmissionParamsResponse struct {
+    Params      EmissionParams      `json:"params"`
+    LastUpdated int64              `json:"last_updated"`
+    NextUpdate  *int64             `json:"next_update,omitempty"`
+}
+
+type QueryEmissionHistoryResponse struct {
+    History []EmissionHistoryEntry `json:"history"`
+}
+
+type QueryDestinationStatsResponse struct {
+    Stats []DestinationStats `json:"stats"`
+}
+```
+
+## Dependencies & Module Integration
+
+### Required Keeper Dependencies
+```go
+// x/emissions/types/expected_keepers.go
+type BankKeeper interface {
+    SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error
+    GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
+}
+
+type GovKeeper interface {
+    GetGovernanceAccount(ctx context.Context) sdk.AccAddress
+    GetParams(ctx context.Context) (govtypes.Params, error)
+}
+
+type StakingKeeper interface {
+    BondedRatio(ctx context.Context) (math.LegacyDec, error)
+    TotalBondedTokens(ctx context.Context) (math.Int, error)
+}
+
+type MintKeeper interface {
+    GetMinter(ctx context.Context) (minttypes.Minter, error)
+    GetParams(ctx context.Context) (minttypes.Params, error)
+}
+```
+
+### App Integration
+```go
+// app/app.go - Wire all keepers and replace old system
+app.EmissionsKeeper = emissionskeeper.NewKeeper(
+    appCodec,
+    runtime.NewKVStoreService(keys[emissionstypes.StoreKey]),
+    app.BankKeeper,
+    app.GovKeeper,
+    app.StakingKeeper,
+    app.MintKeeper,
+    authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+)
+
+// Replace old emission function
+depinject.Provide(app.EmissionsKeeper.ProvideDynamicMintFn),
+```
+
+## State Management & Safety
+
+### Governance Safety Mechanisms
+```go
+// Parameter validation with economic safety bounds
+type EmissionValidationRules struct {
+    MinValidatorReward    math.LegacyDec  // e.g., 0.30 (30% minimum to validators)
+    MaxSingleDestination  math.LegacyDec  // e.g., 0.70 (70% maximum to any destination)
+    MaxDestinations       uint32          // e.g., 10 maximum destinations
+    MinProposalDeposit    sdk.Coins       // Minimum deposit for emission proposals
+    VotingPeriod          time.Duration   // Voting period for emission changes
+}
+
+// Emergency controls
+type EmergencyControls struct {
+    EmergencyStop         bool    `json:"emergency_stop"`          // Halt all emissions
+    FallbackToDefault     bool    `json:"fallback_to_default"`     // Revert to 50/50 split
+    EmergencyAuthority    string  `json:"emergency_authority"`     // Emergency halt authority
+}
+```
+
+### Event Definitions
+```go
+// Governance and emission events
+const (
+    EventTypeEmissionParamsUpdated     = "emission_params_updated"
+    EventTypeDestinationAdded          = "emission_destination_added"
+    EventTypeDestinationRemoved        = "emission_destination_removed"
+    EventTypeDestinationToggled        = "emission_destination_toggled"
+    EventTypeEmissionDistributed       = "emission_distributed"
+    EventTypeEmergencyStop             = "emission_emergency_stop"
+    
+    AttributeKeyProposalID             = "proposal_id"
+    AttributeKeyOldParams              = "old_params"
+    AttributeKeyNewParams              = "new_params"
+    AttributeKeyDestination            = "destination"
+    AttributeKeyAmount                 = "amount"
+    AttributeKeyReason                 = "reason"
+    AttributeKeyEmergencyReason        = "emergency_reason"
+)
+```
+
+## Implementation Steps (MVP Focus)
+
+### Phase 1: Ignite Scaffolding (25 minutes)
+1. **Scaffold new module**: `ignite scaffold module emissions --yes`
+2. **Add governance messages**: 
+   ```bash
+   ignite scaffold message update-emission-split destinations:strings weights:strings reason:string --module emissions
+   ignite scaffold message add-emission-destination module:string weight:string description:string reason:string --module emissions
+   ignite scaffold message remove-emission-destination module:string reason:string --module emissions
+   ignite scaffold message toggle-emission-destination module:string enabled:bool reason:string --module emissions
+   ```
+3. **Add queries**:
+   ```bash
+   ignite scaffold query emission-params --module emissions
+   ignite scaffold query emission-history --module emissions  
+   ignite scaffold query destination-stats --module emissions
+   ```
+4. **Wire keeper dependencies**: Bank, Gov, Staking, Mint keepers
+5. **Add to app.go**: Module integration and keeper wiring
+6. **COMMIT**: `git add . && git commit -m "feat(emissions): scaffold dynamic emissions module with governance messages and queries"`
+
+### Phase 2: Core State Management (35 minutes)
+1. **Implement collections-based state management**
+2. **Add parameter validation with safety bounds**
+3. **Create emission parameter types and validation**
+4. **Implement governance message handlers**
+5. **Add query handlers for all endpoints**
+6. **COMMIT**: `git add . && git commit -m "feat(emissions): implement state management, validation, and governance handlers"`
+
+### Phase 3: Distribution Logic Integration (30 minutes)
+1. **Preserve existing `/app/emissions` distribution logic**
+2. **Create bridge between governance params and distribution**
+3. **Implement dynamic mint function using governance-controlled params**
+4. **Add comprehensive event emission**
+5. **Update `app/miner_emissions.go` to use new system**
+6. **COMMIT**: `git add . && git commit -m "feat(emissions): integrate dynamic params with distribution logic and update mint function"`
+
+### Phase 4: Safety & Emergency Controls (25 minutes)
+1. **Implement economic safety bounds validation**
+2. **Add emergency stop functionality**
+3. **Create fallback to default configuration**
+4. **Add governance proposal validation**
+5. **Implement parameter history tracking**
+6. **COMMIT**: `git add . && git commit -m "feat(emissions): add safety mechanisms, emergency controls, and parameter history"`
+
+### Phase 5: Testing & Validation (35 minutes)
+1. **Unit test governance message handlers**
+2. **Test parameter validation and safety bounds**
+3. **Integration test with governance proposals**
+4. **Test distribution logic with dynamic parameters**
+5. **Test emergency controls and fallback mechanisms**
+6. **COMMIT**: `git add . && git commit -m "feat(emissions): add comprehensive tests for governance, validation, and distribution"`
+
+### Phase 6: CLI & Documentation (20 minutes)
+1. **Test auto-generated CLI commands**
+2. **Create governance proposal examples**
+3. **Add parameter migration from old system**
+4. **Update documentation and usage examples**
+5. **Final integration testing**
+6. **COMMIT**: `git add . && git commit -m "feat(emissions): finalize CLI integration, add examples, and complete documentation"`
+
+## Security Considerations
+
+### MVP Security Rules
+1. **Governance-only updates** - Only governance can modify emission parameters
+2. **Economic safety bounds** - Minimum validator rewards, maximum single destination
+3. **Parameter validation** - Comprehensive validation of all parameter changes
+4. **Emergency controls** - Governance can halt emissions in emergencies
+5. **Audit trail** - Complete history of all parameter changes
+6. **Gradual transitions** - Optional transition periods for major changes
+
+### Error Handling
+```go
+var (
+    ErrInvalidDestination          = errors.Register(ModuleName, 2, "invalid emission destination")
+    ErrInvalidWeight               = errors.Register(ModuleName, 3, "invalid emission weight")
+    ErrExceedsMaxDestinations      = errors.Register(ModuleName, 4, "exceeds maximum destinations")
+    ErrBelowMinValidatorReward     = errors.Register(ModuleName, 5, "below minimum validator reward")
+    ErrExceedsMaxSingleDestination = errors.Register(ModuleName, 6, "exceeds maximum single destination")
+    ErrEmissionsStopped            = errors.Register(ModuleName, 7, "emissions are emergency stopped")
+    ErrUnauthorized                = errors.Register(ModuleName, 8, "unauthorized emission parameter change")
+)
+```
+
+## Acceptance Criteria
+
+### ✅ **Governance Integration Requirements**
+- [ ] **Proposal types**: All emission changes go through governance
+- [ ] **Parameter validation**: Economic safety bounds enforced
+- [ ] **Voting integration**: Standard governance voting process
+- [ ] **Authority checks**: Only governance can modify parameters
+
+### ✅ **Dynamic Configuration Requirements**
+- [ ] **Real-time updates**: Parameters update immediately after governance approval
+- [ ] **Multiple destinations**: Support for unlimited emission destinations
+- [ ] **Weight flexibility**: Any valid percentage split supported
+- [ ] **Module validation**: Ensure destination modules exist and are valid
+
+### ✅ **Safety & Security Requirements**
+- [ ] **Economic bounds**: Minimum validator rewards, maximum concentrations
+- [ ] **Emergency controls**: Governance can halt emissions
+- [ ] **Parameter history**: Complete audit trail of changes
+- [ ] **Rollback capability**: Can revert to previous configurations
+
+### ✅ **Integration Requirements**
+- [ ] **Backward compatibility**: Smooth transition from current system
+- [ ] **Event emission**: Rich events for all parameter changes
+- [ ] **Query interface**: Complete visibility into current and historical parameters
+- [ ] **CLI integration**: Easy governance proposal submission
+
+### ✅ **Performance Requirements**
+- [ ] **Efficient distribution**: No performance degradation from current system
+- [ ] **State efficiency**: Minimal state storage overhead
+- [ ] **Query performance**: Fast parameter and history queries
+- [ ] **Migration path**: Seamless upgrade from current system
+
+## Query Commands Structure
+```bash
+# Query current emission parameters
+scarlett-cored query emissions params
+
+# Query emission destination statistics
+scarlett-cored query emissions destination-stats
+
+# Query parameter change history
+scarlett-cored query emissions history --height 1000000
+
+# Submit governance proposal to update emissions
+scarlett-cored tx gov submit-proposal /path/to/emission-proposal.json
+
+# Vote on emission proposal
+scarlett-cored tx gov vote 1 yes --from validator
+```
+
+## Governance Proposal Examples
+```json
+{
+  "title": "Update Emission Split: 60% Validators, 40% AI Inference",
+  "description": "Adjust emission split to incentivize more validator participation",
+  "messages": [
+    {
+      "@type": "/scarlettcore.emissions.v1.MsgUpdateEmissionSplit",
+      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47",
+      "destinations": [
+        {
+          "module_name": "fee_collector",
+          "weight": "0.60",
+          "description": "Validator and delegator rewards",
+          "enabled": true
+        },
+        {
+          "module_name": "inferencerewards", 
+          "weight": "0.40",
+          "description": "AI inference provider rewards",
+          "enabled": true
+        }
+      ],
+      "reason": "Increase validator incentives based on network analysis"
+    }
+  ],
+  "deposit": "10000000sclt"
+}
+```
+
+## Key Files to Create/Modify
+
+### New Files (New Module)
+1. `x/emissions/keeper/msg_server.go` - Governance message handlers (~150 lines)
+2. `x/emissions/keeper/query.go` - Query handlers (~100 lines)  
+3. `x/emissions/keeper/params.go` - Parameter management (~120 lines)
+4. `x/emissions/keeper/distribution.go` - Distribution logic integration (~80 lines)
+5. `x/emissions/types/params.go` - Parameter types and validation (~100 lines)
+6. `x/emissions/types/messages.go` - Governance message types (~80 lines)
+7. `x/emissions/types/expected_keepers.go` - Keeper interfaces (~40 lines)
+
+### Modified Files
+1. `app/app.go` - Add module and keeper wiring (~15 lines)
+2. `app/app_config.go` - Add module to configuration (~5 lines)
+3. `app/miner_emissions.go` - Update to use dynamic params (~20 lines)
+
+### Preserved Files (As Utility)
+1. `app/emissions/splitter.go` - Keep as utility for distribution logic
+2. `app/emissions/config.go` - Keep for backward compatibility
+3. `app/emissions/events.go` - Keep and extend for new events
+
+## Testing Requirements
+
+### Unit Test Coverage
+- Test all governance message handlers
+- Test parameter validation and safety bounds
+- Test emergency controls and fallback mechanisms
+- Test query handlers and state management
+- Test distribution logic with dynamic parameters
+
+### Integration Test
+- Test complete governance proposal flow
+- Test parameter updates and immediate effect
+- Test backward compatibility and migration
+- Test emergency scenarios and recovery
+- Test performance with multiple destinations
+
+### Governance Test Scenarios
+- Test economic safety bound enforcement
+- Test unauthorized access prevention
+- Test emergency stop and recovery
+- Test parameter history and audit trail
+- Test complex multi-destination configurations
+
+## Benefits of Dynamic Governance-Controlled Emissions
+
+✅ **Democratic Control** - Community decides emission parameters through governance  
+✅ **Economic Flexibility** - Adapt tokenomics as network evolves  
+✅ **Transparent Changes** - All modifications go through public governance process  
+✅ **Safety Mechanisms** - Economic bounds prevent harmful configurations  
+✅ **Emergency Controls** - Governance can respond to crises quickly  
+✅ **Audit Trail** - Complete history of all parameter changes  
+✅ **Module Flexibility** - Easy to add new reward destinations  
+✅ **Backward Compatible** - Smooth transition from current system  
+
+## Future Enhancements (Post-MVP)
+- Time-weighted parameter transitions
+- Automated parameter adjustments based on metrics
+- Multi-signature emergency controls
+- Integration with governance voting power
+- Advanced economic modeling and simulation
+- Cross-chain emission coordination
+
+## Git Commit Strategy
+Each phase must be committed separately with descriptive commit messages following the pattern:
+- `feat(emissions): [description of changes]`
+- Always include tests in the same commit as the feature
+- Use `git add .` to stage all changes before committing
+- Never proceed to next phase without committing current phase
+
+## Auto-Attachment Configuration
+This rule should be automatically attached to all conversations about:
+- Dynamic emissions
+- Governance-controlled parameters  
+- Token distribution modifications
+- Emission system updates
+- Governance proposal development
+- Economic parameter changes
+
+This comprehensive implementation provides complete governance control over emissions while maintaining the performance and reliability of the current system.
