@@ -1,9 +1,11 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
@@ -26,17 +28,154 @@ func ProvideDynamicEmissionsMintFn(emissionsKeeper emissionsmodulekeeper.Keeper,
 	}
 }
 
-// DEPRECATED: Legacy functions kept for backward compatibility during transition
-
-// ProvideMinerEmissionsMintFn is a depinject provider for our custom mint function (LEGACY)
-// This is kept for backward compatibility but should be replaced with ProvideDynamicEmissionsMintFn
-func ProvideMinerEmissionsMintFn(bankKeeper bankkeeper.Keeper) mintkeeper.MintFn {
-	return MinerEmissionsSplitMintFnFactory(bankKeeper)
+// ProvideMinerEmissionsMintFn is a depinject provider for our custom mint function with governance integration
+func ProvideMinerEmissionsMintFn(bankKeeper bankkeeper.Keeper, emissionsKeeper emissionsmodulekeeper.Keeper) mintkeeper.MintFn {
+	return GovernanceControlledMintFnFactory(bankKeeper, emissionsKeeper)
 }
+
+// GovernanceControlledMintFnFactory creates a custom mint function that reads governance parameters
+func GovernanceControlledMintFnFactory(bk bankkeeper.Keeper, ek emissionsmodulekeeper.Keeper) mintkeeper.MintFn {
+	return func(ctx sdk.Context, k *mintkeeper.Keeper) error {
+		return GovernanceControlledMintFn(ctx, k, bk, ek)
+	}
+}
+
+// GovernanceControlledMintFn implements governance-controlled emission splitting
+// It reads parameters from the x/emissions module and uses the working emission splitter
+func GovernanceControlledMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkeeper.Keeper, ek emissionsmodulekeeper.Keeper) error {
+	ctx.Logger().Info("🔥🔥🔥 GOVERNANCE-CONTROLLED MINT FUNCTION CALLED 🔥🔥🔥", "height", ctx.BlockHeight())
+
+	// 1. Get governance-controlled emission parameters
+	config, err := getGovernanceEmissionConfig(ctx, ek)
+	if err != nil {
+		ctx.Logger().Error("Failed to get governance emission config, using default", "error", err)
+		// Fallback to default config if governance parameters not available
+		config = emissions.DefaultEmissionsConfig()
+	}
+
+	ctx.Logger().Info("📊 Using emission configuration",
+		"enabled", config.Enabled,
+		"destinations", len(config.Destinations),
+	)
+
+	// 2. Initialize modular emissions system with governance config
+	splitter, err := emissions.NewEmissionSplitter(config, bk)
+	if err != nil {
+		return fmt.Errorf("failed to create emission splitter: %w", err)
+	}
+
+	// 3. Get current minter state and parameters using keeper methods
+	minter, err := getMinterState(ctx, k)
+	if err != nil {
+		return fmt.Errorf("failed to get minter state: %w", err)
+	}
+
+	params, err := k.Params.Get(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get mint params: %w", err)
+	}
+
+	// 4. Calculate inflation and provisions using standard mint logic
+	if err := updateInflation(ctx, k, &minter, params); err != nil {
+		return fmt.Errorf("failed to update inflation: %w", err)
+	}
+
+	// 5. Calculate and mint this block's provision
+	blockProvisionCoin := minter.BlockProvision(params)
+	if err := mintTokens(ctx, k, blockProvisionCoin); err != nil {
+		return fmt.Errorf("failed to mint tokens: %w", err)
+	}
+
+	ctx.Logger().Info("💰 Minted tokens for distribution",
+		"amount", blockProvisionCoin.Amount.String(),
+		"denom", blockProvisionCoin.Denom,
+	)
+
+	// 6. Distribute minted tokens using governance-controlled splitter
+	if err := splitter.DistributeTokens(ctx, params.MintDenom, blockProvisionCoin.Amount); err != nil {
+		return fmt.Errorf("failed to distribute tokens: %w", err)
+	}
+
+	// 7. Update minter state in the store
+	if err := k.Minter.Set(ctx, minter); err != nil {
+		return fmt.Errorf("failed to update minter state: %w", err)
+	}
+
+	// 8. Emit comprehensive events
+	distributions, _ := splitter.CalculateDistribution(blockProvisionCoin.Amount)
+	bondedRatio, _ := k.BondedRatio(ctx)
+
+	emissions.EmitEmissionSplitEvent(
+		ctx,
+		blockProvisionCoin.Amount,
+		distributions,
+		config,
+		minter,
+		bondedRatio,
+	)
+
+	ctx.Logger().Info("✅ Governance-controlled emission distribution complete")
+	return nil
+}
+
+// getGovernanceEmissionConfig reads governance parameters and converts them to EmissionsConfig
+func getGovernanceEmissionConfig(ctx sdk.Context, ek emissionsmodulekeeper.Keeper) (emissions.EmissionsConfig, error) {
+	// Get governance parameters from emissions module
+	params, err := ek.Params.Get(ctx)
+	if err != nil {
+		return emissions.EmissionsConfig{}, fmt.Errorf("failed to get emissions params: %w", err)
+	}
+
+	// If emissions not enabled, return disabled config
+	if !params.Enabled {
+		return emissions.EmissionsConfig{Enabled: false}, nil
+	}
+
+	// Parse emission destinations from JSON
+	var destinations []emissionDestination
+	if err := json.Unmarshal([]byte(params.EmissionDestinations), &destinations); err != nil {
+		return emissions.EmissionsConfig{}, fmt.Errorf("failed to parse emission destinations: %w", err)
+	}
+
+	// Convert to emissions package format
+	config := emissions.EmissionsConfig{
+		Enabled:      true,
+		Destinations: make([]emissions.EmissionDestination, len(destinations)),
+	}
+
+	for i, dest := range destinations {
+		if !dest.Enabled {
+			continue // Skip disabled destinations
+		}
+
+		weight, err := math.LegacyNewDecFromStr(dest.Weight)
+		if err != nil {
+			return emissions.EmissionsConfig{}, fmt.Errorf("invalid weight for %s: %w", dest.ModuleName, err)
+		}
+
+		config.Destinations[i] = emissions.EmissionDestination{
+			ModuleName:  dest.ModuleName,
+			Weight:      weight,
+			Description: dest.Description,
+		}
+	}
+
+	return config, nil
+}
+
+// emissionDestination represents the JSON structure from governance parameters
+type emissionDestination struct {
+	ModuleName  string `json:"module_name"`
+	Weight      string `json:"weight"`
+	Description string `json:"description"`
+	Enabled     bool   `json:"enabled"`
+}
+
+// LEGACY FUNCTIONS (kept for backward compatibility during transition)
 
 // MinerEmissionsSplitMintFnFactory creates a custom mint function with the required dependencies (LEGACY)
 // This follows the depinject pattern for Cosmos SDK v0.53.0 but uses hardcoded parameters.
-// DEPRECATED: Use the dynamic governance-controlled version instead.
+// DEPRECATED: Use the governance-controlled version instead.
 func MinerEmissionsSplitMintFnFactory(bk bankkeeper.Keeper) mintkeeper.MintFn {
 	return func(ctx sdk.Context, k *mintkeeper.Keeper) error {
 		return MinerEmissionsSplitMintFn(ctx, k, bk)
@@ -45,7 +184,7 @@ func MinerEmissionsSplitMintFnFactory(bk bankkeeper.Keeper) mintkeeper.MintFn {
 
 // MinerEmissionsSplitMintFn implements custom emission splitting using the modular emissions package (LEGACY)
 // It's designed to be used as a custom MintFn with the x/mint module keeper.
-// DEPRECATED: This function uses hardcoded emission parameters. Use the dynamic governance-controlled
+// DEPRECATED: This function uses hardcoded emission parameters. Use the governance-controlled
 // version from x/emissions module instead.
 func MinerEmissionsSplitMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkeeper.Keeper) error {
 	// 1. Initialize modular emissions system with hardcoded config
@@ -103,7 +242,7 @@ func MinerEmissionsSplitMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkee
 	return nil
 }
 
-// LEGACY HELPER FUNCTIONS (kept for backward compatibility)
+// HELPER FUNCTIONS
 
 // getMinterState retrieves and validates the current minter state
 func getMinterState(ctx sdk.Context, k *mintkeeper.Keeper) (minttypes.Minter, error) {
