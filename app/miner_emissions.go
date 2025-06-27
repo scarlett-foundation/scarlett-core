@@ -51,13 +51,56 @@ func GovernanceControlledMintFn(
 ) error {
 	ctx.Logger().Info("🔥🔥🔥 GOVERNANCE-CONTROLLED MINT FUNCTION CALLED 🔥🔥🔥", "height", ctx.BlockHeight())
 
-	// 1. Get governance-controlled emission parameters
-	config, err := getGovernanceEmissionConfig(ctx, emissionsKeeper)
-	if err != nil {
-		ctx.Logger().Error("Failed to get governance emission config, using default", "error", err)
-		// Fallback to default config if governance parameters not available
+	var config emissions.EmissionsConfig
+
+	// 1. Try to get parameters from governance
+	emissionParams, err := emissionsKeeper.Params.Get(ctx)
+	// If parameters don't exist or are explicitly disabled, use the default 50/50 split.
+	if err != nil || !emissionParams.Enabled {
+		if err != nil {
+			ctx.Logger().Info("Could not get governance parameters, falling back to default 50/50 split", "error", err)
+		} else {
+			ctx.Logger().Info("Governance emissions are explicitly disabled, falling back to default 50/50 split")
+		}
 		config = emissions.DefaultEmissionsConfig()
+	} else {
+		// Governance parameters exist and are enabled, so we parse and use them.
+		ctx.Logger().Info("Using governance-defined emission parameters")
+		var destinations []struct {
+			ModuleName  string `json:"module_name"`
+			Weight      string `json:"weight"`
+			Description string `json:"description"`
+			Enabled     bool   `json:"enabled"`
+		}
+
+		if err := json.Unmarshal([]byte(emissionParams.EmissionDestinations), &destinations); err != nil {
+			ctx.Logger().Error("Failed to parse governance emission destinations JSON, falling back to default", "error", err)
+			config = emissions.DefaultEmissionsConfig()
+		} else {
+			parsedConfig := emissions.EmissionsConfig{
+				Enabled:      true,
+				Destinations: make([]emissions.EmissionDestination, 0, len(destinations)),
+			}
+			for _, dest := range destinations {
+				if !dest.Enabled {
+					continue // Skip disabled destinations in the governance config
+				}
+				weight, err := math.LegacyNewDecFromStr(dest.Weight)
+				if err != nil {
+					ctx.Logger().Error("Invalid weight in governance destination, falling back to default", "module", dest.ModuleName, "error", err)
+					config = emissions.DefaultEmissionsConfig()
+					goto end_parse // Exit loop and use default config
+				}
+				parsedConfig.Destinations = append(parsedConfig.Destinations, emissions.EmissionDestination{
+					ModuleName:  dest.ModuleName,
+					Weight:      weight,
+					Description: dest.Description,
+				})
+			}
+			config = parsedConfig
+		}
 	}
+end_parse:
 
 	ctx.Logger().Info("📊 Using emission configuration",
 		"enabled", config.Enabled,
@@ -76,18 +119,18 @@ func GovernanceControlledMintFn(
 		return fmt.Errorf("failed to get minter state: %w", err)
 	}
 
-	params, err := mintKeeper.Params.Get(ctx)
+	mintParams, err := mintKeeper.Params.Get(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get mint params: %w", err)
 	}
 
 	// 4. Calculate inflation and provisions using standard mint logic
-	if err := updateInflation(ctx, mintKeeper, &minter, params); err != nil {
+	if err := updateInflation(ctx, mintKeeper, &minter, mintParams); err != nil {
 		return fmt.Errorf("failed to update inflation: %w", err)
 	}
 
 	// 5. Calculate and mint this block's provision
-	blockProvisionCoin := minter.BlockProvision(params)
+	blockProvisionCoin := minter.BlockProvision(mintParams)
 	if err := mintTokens(ctx, mintKeeper, blockProvisionCoin); err != nil {
 		return fmt.Errorf("failed to mint tokens: %w", err)
 	}
@@ -98,7 +141,7 @@ func GovernanceControlledMintFn(
 	)
 
 	// 6. Distribute minted tokens using governance-controlled splitter
-	if err := splitter.DistributeTokens(ctx, params.MintDenom, blockProvisionCoin.Amount); err != nil {
+	if err := splitter.DistributeTokens(ctx, mintParams.MintDenom, blockProvisionCoin.Amount); err != nil {
 		return fmt.Errorf("failed to distribute tokens: %w", err)
 	}
 
