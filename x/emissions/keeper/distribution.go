@@ -17,7 +17,7 @@ import (
 func (k Keeper) ProvideDynamicMintFn() mintkeeper.MintFn {
 	return func(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
 		// CRITICAL DEBUG: This should appear if our function is being called
-		ctx.Logger().Error("🚨🚨🚨 CUSTOM MINT FUNCTION CALLED 🚨🚨🚨", "height", ctx.BlockHeight())
+		ctx.Logger().Info("🚨🚨🚨 CUSTOM MINT FUNCTION CALLED 🚨🚨🚨", "height", ctx.BlockHeight())
 		return k.DynamicEmissionsMintFn(ctx, mintKeeper)
 	}
 }
@@ -25,7 +25,7 @@ func (k Keeper) ProvideDynamicMintFn() mintkeeper.MintFn {
 // DynamicEmissionsMintFn implements the MintFn interface for governance-controlled emissions
 func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
 	// DEBUG: Log that our function is being called
-	ctx.Logger().Info("🔥 GOVERNANCE-CONTROLLED EMISSIONS ACTIVE 🔥",
+	ctx.Logger().Info("🔥🔥🔥 GOVERNANCE-CONTROLLED EMISSIONS ACTIVE 🔥🔥🔥",
 		"block_height", ctx.BlockHeight(),
 		"module", "emissions",
 		"function", "DynamicEmissionsMintFn")

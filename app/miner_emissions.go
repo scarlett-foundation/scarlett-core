@@ -3,18 +3,27 @@ package app
 import (
 	"fmt"
 
+	"cosmossdk.io/log"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	"scarlett-core/app/emissions"
-	emissionskeeper "scarlett-core/x/emissions/keeper"
+	emissionsmodulekeeper "scarlett-core/x/emissions/keeper"
 )
 
-// ProvideDynamicEmissionsMintFn is a depinject provider for our dynamic governance-controlled mint function
-func ProvideDynamicEmissionsMintFn(emissionsKeeper emissionskeeper.Keeper) mintkeeper.MintFn {
-	return emissionsKeeper.ProvideDynamicMintFn()
+// ProvideDynamicEmissionsMintFn provides a dynamic mint function using the emissions keeper
+func ProvideDynamicEmissionsMintFn(emissionsKeeper emissionsmodulekeeper.Keeper, logger log.Logger) mintkeeper.MintFn {
+	// CRITICAL DEBUG: Log that dependency injection is working
+	logger.Info("🔧🔧🔧 DEPENDENCY INJECTION: ProvideDynamicEmissionsMintFn CALLED 🔧🔧🔧")
+
+	return func(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
+		// CRITICAL DEBUG: This should appear if our function is being called
+		ctx.Logger().Info("🚨🚨🚨 CUSTOM MINT FUNCTION CALLED 🚨🚨🚨", "height", ctx.BlockHeight())
+		return emissionsKeeper.DynamicEmissionsMintFn(ctx, mintKeeper)
+	}
 }
 
 // DEPRECATED: Legacy functions kept for backward compatibility during transition
