@@ -149,16 +149,11 @@ func New(
 		appConfig = depinject.Configs(
 			AppConfig(),
 			depinject.Supply(
-				appOpts, // supply app options
-				logger,  // supply logger
-				// here alternative options can be supplied to the DI container.
-				// those options can be used f.e to override the default behavior of some modules.
-				// for instance supplying a custom address codec for not using bech32 addresses.
-				// read the depinject documentation and depinject module wiring for more information
-				// on available options and how to use them.
+				appOpts,
+				logger,
+				// supply our custom mint function as a value to override the default
+				ProvideMinerEmissionsMintFn(app.BankKeeper, app.EmissionsKeeper),
 			),
-			// Provide our custom mint function for governance-controlled emissions
-			depinject.Provide(ProvideMinerEmissionsMintFn),
 		)
 	)
 
