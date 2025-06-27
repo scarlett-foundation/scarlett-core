@@ -156,10 +156,9 @@ func New(
 				// for instance supplying a custom address codec for not using bech32 addresses.
 				// read the depinject documentation and depinject module wiring for more information
 				// on available options and how to use them.
-
-				// Supply custom mint function for governance-controlled emissions
-				ProvideDynamicEmissionsMintFn,
 			),
+			// Provide our custom mint function for governance-controlled emissions
+			depinject.Provide(ProvideMinerEmissionsMintFn),
 		)
 	)
 
