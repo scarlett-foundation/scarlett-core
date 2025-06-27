@@ -14,9 +14,18 @@ import (
 func (k msgServer) BurnGenesisStake(goCtx context.Context, msg *types.MsgBurnGenesisStake) (*types.MsgBurnGenesisStakeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	ctx.Logger().Info("DEBUG: Starting BurnGenesisStake handler")
+	ctx.Logger().Info("DEBUG: Starting BurnGenesisStake handler", "amount", msg.Amount)
 
-	// 1. Get module parameters
+	// 1. Parse and validate the burn amount
+	burnCoin, err := sdk.ParseCoinNormalized(msg.Amount)
+	if err != nil {
+		ctx.Logger().Error("DEBUG: Failed to parse amount", "amount", msg.Amount, "error", err)
+		return nil, errorsmod.Wrapf(types.ErrInvalidAmount, "failed to parse amount: %s", err)
+	}
+
+	ctx.Logger().Info("DEBUG: Parsed burn amount", "amount", burnCoin.String())
+
+	// 2. Get module parameters
 	params, err := k.Params.Get(ctx)
 	if err != nil {
 		ctx.Logger().Error("DEBUG: Failed to get params", "error", err)
@@ -25,30 +34,19 @@ func (k msgServer) BurnGenesisStake(goCtx context.Context, msg *types.MsgBurnGen
 
 	ctx.Logger().Info("DEBUG: Got params", "genesis_address", params.GenesisAddress)
 
-	// 2. Validate genesis address is configured
+	// 3. Validate genesis address is configured
 	if params.GenesisAddress == "" {
 		ctx.Logger().Error("DEBUG: Genesis address not configured")
 		return nil, errorsmod.Wrap(types.ErrNotGenesisAddress, "genesis address not configured in module parameters")
 	}
 
-	// 3. Validate caller is the genesis address
+	// 4. Validate caller is the genesis address
 	if msg.Creator != params.GenesisAddress {
 		ctx.Logger().Error("DEBUG: Caller is not genesis address", "caller", msg.Creator, "genesis_address", params.GenesisAddress)
 		return nil, errorsmod.Wrapf(types.ErrNotGenesisAddress, "caller is not the configured genesis address")
 	}
 
 	ctx.Logger().Info("DEBUG: Caller validation passed")
-
-	// 4. Check if already executed by looking for existing pending burns for this address
-	// Use a simple hash of genesis address as key
-	addressKey := uint64(0) // Simple key for now - in production would hash the address
-	alreadyExecuted, err := k.PendingGenesisBurns.Get(ctx, addressKey)
-	if err == nil && alreadyExecuted > 0 {
-		ctx.Logger().Error("DEBUG: Already executed")
-		return nil, errorsmod.Wrap(types.ErrAlreadyExecuted, "genesis stake burn already executed")
-	}
-
-	ctx.Logger().Info("DEBUG: One-time check passed")
 
 	// 5. Get all validators for safety check
 	validators, err := k.stakingKeeper.GetAllValidators(ctx)
@@ -73,7 +71,7 @@ func (k msgServer) BurnGenesisStake(goCtx context.Context, msg *types.MsgBurnGen
 		return nil, errorsmod.Wrap(types.ErrInsufficientValidators, "need at least 1 active validator for safe execution")
 	}
 
-	// 7. Find ONLY Alice's own validator and unbond ONLY her self-delegation
+	// 7. Find ONLY Alice's own validator and unbond ONLY the specified amount from her self-delegation
 	genesisAddr, err := k.addressCodec.StringToBytes(params.GenesisAddress)
 	if err != nil {
 		ctx.Logger().Error("DEBUG: Failed to decode genesis address", "error", err)
@@ -129,33 +127,58 @@ func (k msgServer) BurnGenesisStake(goCtx context.Context, msg *types.MsgBurnGen
 
 	ctx.Logger().Info("DEBUG: Found Alice's self-delegation", "shares", delegation.Shares.String())
 
-	// 9. Unbond ONLY Alice's self-delegation
-	ctx.Logger().Info("DEBUG: About to unbond Alice's self-delegation")
+	// 9. Calculate shares to unbond based on requested amount
+	validator, err := k.stakingKeeper.GetValidator(ctx, valAddr)
+	if err != nil {
+		ctx.Logger().Error("DEBUG: Failed to get validator", "error", err)
+		return nil, errorsmod.Wrap(err, "failed to get validator")
+	}
 
-	unbondTime, unbondedAmount, err := k.stakingKeeper.Undelegate(ctx, sdk.AccAddress(genesisAddr), valAddr, delegation.Shares)
+	// Convert burn amount to shares - check if requested amount exceeds available tokens
+	availableTokens := validator.TokensFromShares(delegation.Shares)
+	if burnCoin.Amount.GT(availableTokens.TruncateInt()) {
+		ctx.Logger().Error("DEBUG: Requested amount exceeds available stake", "requested", burnCoin.Amount.String(), "available", availableTokens.TruncateInt().String())
+		return nil, errorsmod.Wrapf(types.ErrInvalidAmount, "requested amount (%s) exceeds available stake (%s)", burnCoin.String(), availableTokens.TruncateInt().String())
+	}
+
+	// Calculate actual shares to unbond (convert amount to shares)
+	actualSharesToUnbond, err := validator.SharesFromTokens(burnCoin.Amount)
+	if err != nil {
+		ctx.Logger().Error("DEBUG: Failed to convert amount to shares", "error", err)
+		return nil, errorsmod.Wrap(err, "failed to convert amount to shares")
+	}
+
+	ctx.Logger().Info("DEBUG: Calculated shares to unbond", "requested_amount", burnCoin.String(), "shares_to_unbond", actualSharesToUnbond.String(), "total_shares", delegation.Shares.String())
+
+	// 10. Unbond the specified amount from Alice's self-delegation
+	ctx.Logger().Info("DEBUG: About to unbond specified amount from Alice's self-delegation")
+
+	unbondTime, unbondedAmount, err := k.stakingKeeper.Undelegate(ctx, sdk.AccAddress(genesisAddr), valAddr, actualSharesToUnbond)
 	if err != nil {
 		ctx.Logger().Error("DEBUG: Undelegate failed", "error", err)
 		return nil, errorsmod.Wrapf(err, "failed to undelegate genesis self-delegation")
 	}
 
-	ctx.Logger().Info("DEBUG: Successfully unbonded Alice's self-delegation", "unbonded", unbondedAmount.String(), "completion_time", unbondTime.String())
+	ctx.Logger().Info("DEBUG: Successfully unbonded amount from Alice's self-delegation", "unbonded", unbondedAmount.String(), "completion_time", unbondTime.String())
 
-	// 10. Mark as executed to prevent re-execution
+	// 11. Store pending burn info (we can now have multiple pending burns)
 	completionTime := unbondTime.Unix()
-	if err := k.PendingGenesisBurns.Set(ctx, addressKey, completionTime); err != nil {
-		ctx.Logger().Error("DEBUG: Failed to set execution flag", "error", err)
-		return nil, errorsmod.Wrap(err, "failed to mark genesis burn as executed")
+	// Use completion time as key to allow multiple pending burns
+	if err := k.PendingGenesisBurns.Set(ctx, uint64(completionTime), completionTime); err != nil {
+		ctx.Logger().Error("DEBUG: Failed to set pending burn", "error", err)
+		return nil, errorsmod.Wrap(err, "failed to store pending burn information")
 	}
 
-	ctx.Logger().Info("DEBUG: Set execution flag")
+	ctx.Logger().Info("DEBUG: Stored pending burn info")
 
-	// 11. Emit event
+	// 12. Emit event
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeBurnGenesisStake,
 			sdk.NewAttribute(types.AttributeKeyGenesisAddress, params.GenesisAddress),
 			sdk.NewAttribute(types.AttributeKeyUnbondedAmount, unbondedAmount.String()),
 			sdk.NewAttribute(types.AttributeKeyCompletionTime, fmt.Sprintf("%d", completionTime)),
+			sdk.NewAttribute("requested_amount", burnCoin.String()),
 		),
 	)
 
