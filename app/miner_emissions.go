@@ -16,6 +16,10 @@ import (
 	emissionsmodulekeeper "scarlett-core/x/emissions/keeper"
 )
 
+// KeeperProvider defines a function that returns the necessary keepers.
+// This is used to break a dependency cycle during initialization.
+type KeeperProvider func() (bankkeeper.Keeper, emissionsmodulekeeper.Keeper)
+
 // ProvideDynamicEmissionsMintFn provides a dynamic mint function using the emissions keeper
 func ProvideDynamicEmissionsMintFn(emissionsKeeper emissionsmodulekeeper.Keeper, logger log.Logger) mintkeeper.MintFn {
 	// CRITICAL DEBUG: Log that dependency injection is working
@@ -28,25 +32,27 @@ func ProvideDynamicEmissionsMintFn(emissionsKeeper emissionsmodulekeeper.Keeper,
 	}
 }
 
-// ProvideMinerEmissionsMintFn is a depinject provider for our custom mint function with governance integration
-func ProvideMinerEmissionsMintFn(bankKeeper bankkeeper.Keeper, emissionsKeeper emissionsmodulekeeper.Keeper) mintkeeper.MintFn {
-	return GovernanceControlledMintFnFactory(bankKeeper, emissionsKeeper)
-}
-
-// GovernanceControlledMintFnFactory creates a custom mint function that reads governance parameters
-func GovernanceControlledMintFnFactory(bk bankkeeper.Keeper, ek emissionsmodulekeeper.Keeper) mintkeeper.MintFn {
-	return func(ctx sdk.Context, k *mintkeeper.Keeper) error {
-		return GovernanceControlledMintFn(ctx, k, bk, ek)
+// ProvideMinerEmissionsMintFn provides a dynamic mint function that uses a provider
+// to lazily load keepers, preventing initialization dependency cycles.
+func ProvideMinerEmissionsMintFn(keeperProvider KeeperProvider) mintkeeper.MintFn {
+	return func(ctx sdk.Context, mk mintkeeper.Keeper) error {
+		// Lazily load the keepers only when the mint function is actually called.
+		bankKeeper, emissionsKeeper := keeperProvider()
+		return GovernanceControlledMintFn(ctx, mk, bankKeeper, emissionsKeeper)
 	}
 }
 
-// GovernanceControlledMintFn implements governance-controlled emission splitting
-// It reads parameters from the x/emissions module and uses the working emission splitter
-func GovernanceControlledMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankkeeper.Keeper, ek emissionsmodulekeeper.Keeper) error {
+// GovernanceControlledMintFn is the core minting logic that uses governance parameters.
+func GovernanceControlledMintFn(
+	ctx sdk.Context,
+	mintKeeper mintkeeper.Keeper,
+	bankKeeper bankkeeper.Keeper,
+	emissionsKeeper emissionsmodulekeeper.Keeper,
+) error {
 	ctx.Logger().Info("🔥🔥🔥 GOVERNANCE-CONTROLLED MINT FUNCTION CALLED 🔥🔥🔥", "height", ctx.BlockHeight())
 
 	// 1. Get governance-controlled emission parameters
-	config, err := getGovernanceEmissionConfig(ctx, ek)
+	config, err := getGovernanceEmissionConfig(ctx, emissionsKeeper)
 	if err != nil {
 		ctx.Logger().Error("Failed to get governance emission config, using default", "error", err)
 		// Fallback to default config if governance parameters not available
@@ -59,30 +65,30 @@ func GovernanceControlledMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankke
 	)
 
 	// 2. Initialize modular emissions system with governance config
-	splitter, err := emissions.NewEmissionSplitter(config, bk)
+	splitter, err := emissions.NewEmissionSplitter(config, bankKeeper)
 	if err != nil {
 		return fmt.Errorf("failed to create emission splitter: %w", err)
 	}
 
 	// 3. Get current minter state and parameters using keeper methods
-	minter, err := getMinterState(ctx, k)
+	minter, err := getMinterState(ctx, &mintKeeper)
 	if err != nil {
 		return fmt.Errorf("failed to get minter state: %w", err)
 	}
 
-	params, err := k.Params.Get(ctx)
+	params, err := mintKeeper.Params.Get(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get mint params: %w", err)
 	}
 
 	// 4. Calculate inflation and provisions using standard mint logic
-	if err := updateInflation(ctx, k, &minter, params); err != nil {
+	if err := updateInflation(ctx, &mintKeeper, &minter, params); err != nil {
 		return fmt.Errorf("failed to update inflation: %w", err)
 	}
 
 	// 5. Calculate and mint this block's provision
 	blockProvisionCoin := minter.BlockProvision(params)
-	if err := mintTokens(ctx, k, blockProvisionCoin); err != nil {
+	if err := mintTokens(ctx, &mintKeeper, blockProvisionCoin); err != nil {
 		return fmt.Errorf("failed to mint tokens: %w", err)
 	}
 
@@ -97,13 +103,13 @@ func GovernanceControlledMintFn(ctx sdk.Context, k *mintkeeper.Keeper, bk bankke
 	}
 
 	// 7. Update minter state in the store
-	if err := k.Minter.Set(ctx, minter); err != nil {
+	if err := mintKeeper.Minter.Set(ctx, minter); err != nil {
 		return fmt.Errorf("failed to update minter state: %w", err)
 	}
 
 	// 8. Emit comprehensive events
 	distributions, _ := splitter.CalculateDistribution(blockProvisionCoin.Amount)
-	bondedRatio, _ := k.BondedRatio(ctx)
+	bondedRatio, _ := mintKeeper.BondedRatio(ctx)
 
 	emissions.EmitEmissionSplitEvent(
 		ctx,
