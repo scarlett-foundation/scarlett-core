@@ -42,9 +42,7 @@ func (q queryServer) ListRegisteredModules(ctx context.Context, req *types.Query
 	}
 
 	// Extract modules from pagination result
-	for _, result := range results {
-		modules = append(modules, result)
-	}
+	modules = append(modules, results...)
 
 	return &types.QueryListRegisteredModulesResponse{
 		Modules:    modules,
