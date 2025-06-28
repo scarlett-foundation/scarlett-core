@@ -36,6 +36,18 @@ service Query {
     option (google.api.http).get = "/scarlett-core/emissions/v1/destination_stats";
   
   }
+
+  // ListRegisteredModules Queries all registered modules in the emissions registry.
+  rpc ListRegisteredModules (QueryListRegisteredModulesRequest) returns (QueryListRegisteredModulesResponse) {
+    option (google.api.http).get = "/scarlett-core/emissions/v1/registered_modules";
+  
+  }
+
+  // GetRegisteredModule Queries a specific registered module by name.
+  rpc GetRegisteredModule (QueryGetRegisteredModuleRequest) returns (QueryGetRegisteredModuleResponse) {
+    option (google.api.http).get = "/scarlett-core/emissions/v1/registered_modules/{module_name}";
+  
+  }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
@@ -64,4 +76,37 @@ message QueryDestinationStatsRequest {}
 
 // QueryDestinationStatsResponse defines the QueryDestinationStatsResponse message.
 message QueryDestinationStatsResponse {}
+
+// QueryListRegisteredModulesRequest defines the request for listing all registered modules.
+message QueryListRegisteredModulesRequest {
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// RegisteredModuleInfo defines the information about a registered module for queries.
+message RegisteredModuleInfo {
+  string module_name = 1;
+  string creator = 2;
+  string description = 3;
+  string status = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+// QueryListRegisteredModulesResponse defines the response for listing all registered modules.
+message QueryListRegisteredModulesResponse {
+  repeated RegisteredModuleInfo modules = 1;
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetRegisteredModuleRequest defines the request for getting a specific registered module.
+message QueryGetRegisteredModuleRequest {
+  string module_name = 1;
+}
+
+// QueryGetRegisteredModuleResponse defines the response for getting a specific registered module.
+message QueryGetRegisteredModuleResponse {
+  RegisteredModuleInfo module = 1;
+}
 
