@@ -29,6 +29,9 @@ service Msg {
 
   // ToggleEmissionDestination defines the ToggleEmissionDestination RPC.
   rpc ToggleEmissionDestination(MsgToggleEmissionDestination) returns (MsgToggleEmissionDestinationResponse);
+
+  // RegisterModule defines the RegisterModule RPC.
+  rpc RegisterModule(MsgRegisterModule) returns (MsgRegisterModuleResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -99,3 +102,14 @@ message MsgToggleEmissionDestination {
 
 // MsgToggleEmissionDestinationResponse defines the MsgToggleEmissionDestinationResponse message.
 message MsgToggleEmissionDestinationResponse {}
+
+// MsgRegisterModule defines the MsgRegisterModule message.
+message MsgRegisterModule {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string module_name = 2;
+  string description = 3;
+}
+
+// MsgRegisterModuleResponse defines the MsgRegisterModuleResponse message.
+message MsgRegisterModuleResponse {}

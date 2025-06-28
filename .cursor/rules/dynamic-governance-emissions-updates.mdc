@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Dynamic Governance Emissions Feature Implementation - Step-by-Step Guide
 

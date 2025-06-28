@@ -26,4 +26,9 @@ var (
 	ErrExceedsMaxWeight       = errors.Register(ModuleName, 1113, "emission weight exceeds maximum bound")
 	ErrEmergencyActive        = errors.Register(ModuleName, 1114, "emergency controls are active")
 	ErrInvalidEmergencyParams = errors.Register(ModuleName, 1115, "invalid emergency parameters")
+
+	// Module registry errors
+	ErrModuleAlreadyRegistered = errors.Register(ModuleName, 1116, "module is already registered")
+	ErrModuleNotRegistered     = errors.Register(ModuleName, 1117, "module is not registered")
+	ErrInvalidModuleName       = errors.Register(ModuleName, 1118, "invalid module name")
 )
