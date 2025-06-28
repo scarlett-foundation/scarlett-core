@@ -1,0 +1,18 @@
+{
+  "title": "EMERGENCY STOP: Halt All Token Emissions",
+  "description": "Activate emergency stop to immediately halt all token minting and distribution due to detected security vulnerability in emissions logic. This emergency action will prevent further token emissions until the issue is resolved.",
+  "summary": "Emergency governance action to halt all emissions immediately",
+  "messages": [
+    {
+      "@type": "/scarlettcore.emissions.v1.MsgUpdateParams",
+      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700j4l5sjv",
+      "params": {
+        "emission_destinations": "[{\"module_name\":\"fee_collector\",\"weight\":\"0.50\",\"description\":\"Validator and delegator rewards\",\"enabled\":true},{\"module_name\":\"inferencerewards\",\"weight\":\"0.50\",\"description\":\"AI inference provider rewards\",\"enabled\":true}]",
+        "enabled": true,
+        "emergency_stop": true,
+        "emergency_reason": "Security vulnerability detected in emissions distribution logic - immediate halt required"
+      }
+    }
+  ],
+  "deposit": "10000000sclt"
+} 
