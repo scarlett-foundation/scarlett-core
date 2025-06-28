@@ -1,0 +1,135 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Open Module Registration Feature Implementation - Step-by-Step Guide
+
+## Overview
+Implement the Open Module Registration feature to enable permissionless module registration with community-controlled funding through the existing `x/emissions` module. This creates a foundation for ecosystem growth while maintaining governance oversight.
+
+## ⚠️ CRITICAL IMPLEMENTATION REQUIREMENTS
+- **PRESERVE current functionality** - existing emissions and governance integration must continue working
+- **MAINTAIN security** - only valid module accounts can be registered
+- **GOVERNANCE-ONLY funding** - registration enables eligibility, governance controls activation
+- **NO breaking changes** - chain must continue running identically during implementation
+- **REGISTRY validation** - governance proposals must validate against registered modules
+
+## Implementation Steps
+
+### Phase 1: Core Registration Infrastructure
+
+#### Step 1.1: Add Registration Message to Proto
+**Objective**: Define MsgRegisterModule message for permissionless registration
+**Files**: Modify `proto/scarlettcore/emissions/v1/tx.proto`
+**Action**: Add `MsgRegisterModule` RPC and message definitions with module_name, description, and creator fields
+**Verification**: User builds chain and proto generation succeeds
+**Commit**: `feat(emissions): add module registration message to proto`
+
+#### Step 1.2: Create Registration Types and Storage
+**Objective**: Add RegisteredModule type and registry storage
+**Files**: Create `x/emissions/types/registry.go` and update `x/emissions/types/keys.go`
+**Action**: 
+- Add `RegisteredModule` struct with status tracking
+- Add registry collection key for state storage
+- Add validation functions for module registration
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): add module registry types and storage`
+
+#### Step 1.3: Implement Registration Handler
+**Objective**: Create message handler for module registration
+**Files**: Create `x/emissions/keeper/msg_server_register_module.go`
+**Action**:
+- Validate module account exists on-chain
+- Check for duplicate registrations
+- Store registered module with REGISTERED status
+- Emit registration events
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): implement module registration handler`
+
+### Phase 2: Governance Integration
+
+#### Step 2.1: Add Registry Validation to Governance
+**Objective**: Validate governance proposals against module registry
+**Files**: Modify `x/emissions/keeper/msg_server_update_emission_split.go`
+**Action**: Add validation that all proposed destination modules are registered
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): add registry validation to governance proposals`
+
+#### Step 2.2: Add Registry Query Functionality
+**Objective**: Enable querying of registered modules
+**Files**: Add queries to `proto/scarlettcore/emissions/v1/query.proto` and implement in keeper
+**Action**: Add `ListRegisteredModules` and `GetRegisteredModule` queries
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): add registry query functionality`
+
+## Build Verification Protocol
+
+### After Each Step:
+1. **Agent completes code changes**
+2. **Agent asks user**: "Please run `ignite chain serve --reset-once --verbose` in your terminal and let me know if it succeeds"
+3. **User confirms**: Build status (success/failure)
+4. **If failure**: Agent analyzes and fixes issues before proceeding
+5. **If success**: Agent creates commit with specified message and proceeds
+
+### User Commands to Run:
+```bash
+ignite chain serve --reset-once --verbose
+```
+
+### Agent Must Never:
+- ❌ Run build or ignite commands themselves
+- ❌ Assume build success
+- ❌ Proceed without user confirmation
+- ❌ Skip verification steps
+
+## Safety Requirements Preservation
+
+### Registration Validation (EXACT Implementation)
+```go
+// Module account validation in registration handler
+moduleAccount := k.authKeeper.GetModuleAccount(ctx, req.ModuleName)
+if moduleAccount == nil {
+    return nil, types.ErrInvalidDestination.Wrapf("module account '%s' does not exist", req.ModuleName)
+}
+```
+
+### Governance Validation (EXACT Implementation)
+```go
+// Registry validation in governance proposals
+for _, destination := range req.Destinations {
+    if !k.IsModuleRegistered(ctx, destination) {
+        return nil, types.ErrInvalidDestination.Wrapf("destination module '%s' is not registered", destination)
+    }
+}
+```
+
+## Rollback Plan
+If any step fails:
+1. **Git revert** the last commit
+2. **Analyze** the specific build failure
+3. **Fix** the issue causing the failure
+4. **Re-attempt** the step
+5. **Never proceed** without successful build
+
+## Success Criteria
+
+### ✅ Core Registration
+- ✅ Developers can register modules permissionlessly via `MsgRegisterModule`
+- ✅ Registration validates module account exists on-chain
+- ✅ Registry prevents duplicate module registrations
+- ✅ Registration events emitted for discoverability
+
+### ✅ Governance Integration
+- ✅ Governance proposals validate all destinations are registered
+- ✅ Only registered modules can receive emission funding
+- ✅ Registry queries available for community visibility
+- ✅ Two-phase process: register → govern → activate funding
+
+## Auto-Attachment Configuration
+This rule should be automatically attached for:
+- Open module registration implementation
+- Emissions module registry features
+- Governance validation updates
+- Permissionless ecosystem development
+- Module account validation workflows

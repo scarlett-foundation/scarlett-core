@@ -26,6 +26,7 @@ type Keeper struct {
 	authority []byte
 
 	// Keeper dependencies for emission distribution
+	authKeeper    types.AuthKeeper
 	bankKeeper    bankkeeper.Keeper
 	govKeeper     govkeeper.Keeper
 	stakingKeeper stakingkeeper.Keeper
@@ -38,6 +39,7 @@ type Keeper struct {
 	EmissionParamsRaw     collections.Item[string]
 	EmissionHistoryRaw    collections.Map[int64, string]
 	DestinationMetricsRaw collections.Map[string, string]
+	ModuleRegistryRaw     collections.Map[string, string]
 }
 
 func NewKeeper(
@@ -45,6 +47,7 @@ func NewKeeper(
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
+	authKeeper types.AuthKeeper,
 	bankKeeper bankkeeper.Keeper,
 	govKeeper govkeeper.Keeper,
 	stakingKeeper stakingkeeper.Keeper,
@@ -60,6 +63,7 @@ func NewKeeper(
 		cdc:           cdc,
 		addressCodec:  addressCodec,
 		authority:     authority,
+		authKeeper:    authKeeper,
 		bankKeeper:    bankKeeper,
 		govKeeper:     govKeeper,
 		stakingKeeper: stakingKeeper,
@@ -68,6 +72,7 @@ func NewKeeper(
 		EmissionParamsRaw:     collections.NewItem(sb, types.EmissionParamsKey, "emission_params", collections.StringValue),
 		EmissionHistoryRaw:    collections.NewMap(sb, types.EmissionHistoryPrefix, "emission_history", collections.Int64Key, collections.StringValue),
 		DestinationMetricsRaw: collections.NewMap(sb, types.DestinationMetricsPrefix, "destination_metrics", collections.StringKey, collections.StringValue),
+		ModuleRegistryRaw:     collections.NewMap(sb, types.ModuleRegistryPrefix, "module_registry", collections.StringKey, collections.StringValue),
 	}
 
 	schema, err := sb.Build()
@@ -124,4 +129,53 @@ func (k Keeper) SetEmissionHistory(ctx context.Context, height int64, params typ
 	}
 
 	return k.EmissionHistoryRaw.Set(ctx, height, string(jsonBytes))
+}
+
+// Module Registry Helper Methods
+
+// IsModuleRegistered checks if a module is registered in the registry
+func (k Keeper) IsModuleRegistered(ctx context.Context, moduleName string) bool {
+	_, err := k.ModuleRegistryRaw.Get(ctx, moduleName)
+	return err == nil
+}
+
+// GetRegisteredModule retrieves a registered module from the registry
+func (k Keeper) GetRegisteredModule(ctx context.Context, moduleName string) (types.RegisteredModule, error) {
+	jsonStr, err := k.ModuleRegistryRaw.Get(ctx, moduleName)
+	if err != nil {
+		return types.RegisteredModule{}, types.ErrModuleNotRegistered.Wrapf("module '%s' not found", moduleName)
+	}
+
+	var module types.RegisteredModule
+	if err := json.Unmarshal([]byte(jsonStr), &module); err != nil {
+		return types.RegisteredModule{}, fmt.Errorf("failed to unmarshal registered module: %w", err)
+	}
+
+	return module, nil
+}
+
+// SetRegisteredModule stores a registered module in the registry
+func (k Keeper) SetRegisteredModule(ctx context.Context, module types.RegisteredModule) error {
+	jsonBytes, err := json.Marshal(module)
+	if err != nil {
+		return fmt.Errorf("failed to marshal registered module: %w", err)
+	}
+
+	return k.ModuleRegistryRaw.Set(ctx, module.ModuleName, string(jsonBytes))
+}
+
+// GetAllRegisteredModules retrieves all registered modules from the registry
+func (k Keeper) GetAllRegisteredModules(ctx context.Context) ([]types.RegisteredModule, error) {
+	var modules []types.RegisteredModule
+
+	err := k.ModuleRegistryRaw.Walk(ctx, nil, func(key string, value string) (bool, error) {
+		var module types.RegisteredModule
+		if err := json.Unmarshal([]byte(value), &module); err != nil {
+			return false, fmt.Errorf("failed to unmarshal registered module '%s': %w", key, err)
+		}
+		modules = append(modules, module)
+		return false, nil
+	})
+
+	return modules, err
 }
