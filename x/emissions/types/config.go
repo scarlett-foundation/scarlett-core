@@ -1,4 +1,4 @@
-package emissions
+package types
 
 import (
 	"fmt"
@@ -6,24 +6,11 @@ import (
 	"cosmossdk.io/math"
 )
 
-// EmissionDestination represents a single destination for minted tokens
-type EmissionDestination struct {
-	ModuleName  string         `json:"module_name"`
-	Weight      math.LegacyDec `json:"weight"` // Percentage weight (0.0 to 1.0)
-	Description string         `json:"description"`
-}
-
 // EmissionsConfig holds the configuration for custom emission splitting
 type EmissionsConfig struct {
 	Destinations []EmissionDestination `json:"destinations"`
 	Enabled      bool                  `json:"enabled"`
 }
-
-// Constants for module names
-const (
-	InferenceRewardsModuleName = "inferencerewards"
-	FeeCollectorModuleName     = "fee_collector"
-)
 
 // DefaultEmissionsConfig returns the default 50/50 split configuration
 func DefaultEmissionsConfig() EmissionsConfig {
@@ -34,11 +21,17 @@ func DefaultEmissionsConfig() EmissionsConfig {
 				ModuleName:  FeeCollectorModuleName,
 				Weight:      math.LegacyNewDecWithPrec(50, 2), // 0.50 (50%)
 				Description: "Traditional staking rewards distributed to validators and delegators",
+				Enabled:     true,
+				MinWeight:   math.LegacyNewDecWithPrec(30, 2), // 30% minimum
+				MaxWeight:   math.LegacyNewDecWithPrec(70, 2), // 70% maximum
 			},
 			{
 				ModuleName:  InferenceRewardsModuleName,
 				Weight:      math.LegacyNewDecWithPrec(50, 2), // 0.50 (50%)
 				Description: "AI/ML computing rewards for miners and inference providers",
+				Enabled:     true,
+				MinWeight:   math.LegacyNewDecWithPrec(30, 2), // 30% minimum
+				MaxWeight:   math.LegacyNewDecWithPrec(70, 2), // 70% maximum
 			},
 		},
 	}

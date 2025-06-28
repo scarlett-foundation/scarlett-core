@@ -9,9 +9,185 @@ import (
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
-	"scarlett-core/app/emissions"
 	"scarlett-core/x/emissions/types"
 )
+
+// MintAndDistributeEmissions is the consolidated autonomous emissions method
+// that replaces all complex logic from both keeper and app layers
+func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeeper.Keeper) error {
+	// EXACT PRESERVED LOGGING: Combine both entry patterns
+	ctx.Logger().Info("🔥🔥🔥 GOVERNANCE-CONTROLLED MINT FUNCTION CALLED 🔥🔥🔥", "height", ctx.BlockHeight())
+	ctx.Logger().Info("🔥🔥🔥 GOVERNANCE-CONTROLLED EMISSIONS ACTIVE 🔥🔥🔥",
+		"block_height", ctx.BlockHeight(),
+		"module", "emissions",
+		"function", "MintAndDistributeEmissions")
+
+	// 1. Get governance parameters (EXACT PRESERVED LOGGING)
+	emissionParams, err := k.Params.Get(ctx)
+	if err != nil || !emissionParams.Enabled {
+		if err != nil {
+			ctx.Logger().Info("Could not get governance parameters, falling back to default 50/50 split", "error", err)
+		} else {
+			ctx.Logger().Info("Governance emissions are explicitly disabled, falling back to default 50/50 split")
+		}
+		return k.applyFallbackConfiguration(ctx, mintKeeper)
+	} else {
+		ctx.Logger().Info("Using governance-defined emission parameters")
+		ctx.Logger().Info("📋 Governance parameters retrieved",
+			"enabled", emissionParams.Enabled,
+			"destinations", emissionParams.EmissionDestinations)
+	}
+
+	// 2. Parse governance destinations (EXACT PRESERVED LOGGING)
+	var destinations []struct {
+		ModuleName  string `json:"module_name"`
+		Weight      string `json:"weight"`
+		Description string `json:"description"`
+		Enabled     bool   `json:"enabled"`
+	}
+
+	if err := json.Unmarshal([]byte(emissionParams.EmissionDestinations), &destinations); err != nil {
+		ctx.Logger().Error("Failed to parse governance emission destinations JSON, falling back to default", "error", err)
+		return k.applyFallbackConfiguration(ctx, mintKeeper)
+	}
+
+	ctx.Logger().Info("✅ Parsed governance destinations",
+		"num_destinations", len(destinations),
+		"destinations", destinations)
+
+	// 3. Convert to emissions config (EXACT PRESERVED LOGGING)
+	var emissionDestinations []types.EmissionDestination
+	for _, dest := range destinations {
+		if !dest.Enabled {
+			continue // Skip disabled destinations
+		}
+		weight, err := math.LegacyNewDecFromStr(dest.Weight)
+		if err != nil {
+			ctx.Logger().Error("Invalid weight in governance destination, falling back to default", "module", dest.ModuleName, "error", err)
+			return k.applyFallbackConfiguration(ctx, mintKeeper)
+		}
+		emissionDestinations = append(emissionDestinations, types.EmissionDestination{
+			ModuleName:  dest.ModuleName,
+			Weight:      weight,
+			Description: dest.Description,
+			Enabled:     true,
+			MinWeight:   math.LegacyNewDecWithPrec(30, 2), // 30% minimum
+			MaxWeight:   math.LegacyNewDecWithPrec(70, 2), // 70% maximum
+		})
+	}
+
+	config := k.convertGovernanceToEmissionsConfig(emissionDestinations)
+	ctx.Logger().Info("📊 Using emission configuration",
+		"enabled", config.Enabled,
+		"destinations", len(config.Destinations))
+
+	// 4. Create emission splitter (EXACT PRESERVED LOGGING)
+	splitter, err := types.NewEmissionSplitter(config, k.bankKeeper)
+	if err != nil {
+		return fmt.Errorf("failed to create emission splitter: %w", err)
+	}
+	ctx.Logger().Info("✅ Emission splitter created successfully")
+
+	// 5. Get minter state and parameters (EXACT PRESERVED LOGGING)
+	minter, err := k.getMinterState(ctx, mintKeeper)
+	if err != nil {
+		return err
+	}
+
+	ctx.Logger().Info("📊 Minter state retrieved",
+		"inflation", minter.Inflation.String(),
+		"annual_provisions", minter.AnnualProvisions.String())
+
+	mintParams, err := mintKeeper.Params.Get(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get mint params: %w", err)
+	}
+
+	ctx.Logger().Info("⚙️ Mint parameters retrieved",
+		"mint_denom", mintParams.MintDenom,
+		"inflation_rate_change", mintParams.InflationRateChange.String(),
+		"inflation_max", mintParams.InflationMax.String(),
+		"inflation_min", mintParams.InflationMin.String(),
+		"goal_bonded", mintParams.GoalBonded.String(),
+		"blocks_per_year", mintParams.BlocksPerYear)
+
+	// 6. Calculate inflation and provisions (EXACT PRESERVED LOGGING)
+	if err := k.updateInflation(ctx, &minter, mintParams, mintKeeper); err != nil {
+		return fmt.Errorf("failed to update inflation: %w", err)
+	}
+
+	ctx.Logger().Info("📈 Inflation updated",
+		"new_inflation", minter.Inflation.String(),
+		"new_annual_provisions", minter.AnnualProvisions.String())
+
+	// 7. Calculate and mint block provision (EXACT PRESERVED LOGGING)
+	blockProvisionCoin := minter.BlockProvision(mintParams)
+	ctx.Logger().Info("💰 Block provision calculated",
+		"block_provision", blockProvisionCoin.String(),
+		"amount", blockProvisionCoin.Amount.String(),
+		"denom", blockProvisionCoin.Denom)
+
+	if blockProvisionCoin.Amount.IsZero() {
+		ctx.Logger().Info("⚠️ Zero block provision, skipping mint and distribution")
+		return nil
+	}
+
+	coins := sdk.NewCoins(blockProvisionCoin)
+	if err := mintKeeper.MintCoins(ctx, coins); err != nil {
+		return fmt.Errorf("failed to mint tokens: %w", err)
+	}
+
+	ctx.Logger().Info("✅ Tokens minted successfully",
+		"minted_coins", coins.String())
+	ctx.Logger().Info("💰 Minted tokens for distribution",
+		"amount", blockProvisionCoin.Amount.String(),
+		"denom", blockProvisionCoin.Denom)
+
+	// 8. Calculate distribution (EXACT PRESERVED LOGGING)
+	distributions, err := splitter.CalculateDistribution(blockProvisionCoin.Amount)
+	if err != nil {
+		return fmt.Errorf("failed to calculate distribution: %w", err)
+	}
+
+	ctx.Logger().Info("📊 Distribution calculated",
+		"num_distributions", len(distributions))
+
+	// EXACT PRESERVED LOGGING: Per-destination details
+	for i, dist := range distributions {
+		ctx.Logger().Info("💸 Distribution detail",
+			"index", i,
+			"module", dist.ModuleName,
+			"amount", dist.Amount.String(),
+			"description", dist.Description)
+	}
+
+	// 9. Execute distribution (EXACT PRESERVED LOGGING)
+	if err := splitter.DistributeTokens(ctx, mintParams.MintDenom, blockProvisionCoin.Amount); err != nil {
+		return fmt.Errorf("failed to distribute tokens: %w", err)
+	}
+
+	ctx.Logger().Info("✅ Tokens distributed successfully")
+
+	// 10. Update minter state (EXACT PRESERVED LOGGING)
+	if err := mintKeeper.Minter.Set(ctx, minter); err != nil {
+		return fmt.Errorf("failed to update minter state: %w", err)
+	}
+
+	ctx.Logger().Info("✅ Minter state updated successfully")
+
+	// 11. Emit comprehensive events and final success (EXACT PRESERVED LOGGING)
+	bondedRatio, _ := k.stakingKeeper.BondedRatio(ctx)
+	types.EmitEmissionSplitEvent(ctx, blockProvisionCoin.Amount, distributions, config, minter, bondedRatio)
+
+	// EXACT PRESERVED LOGGING: Both success completion patterns
+	ctx.Logger().Info("✅ Governance-controlled emission distribution complete")
+	ctx.Logger().Info("🎉 GOVERNANCE-CONTROLLED EMISSIONS COMPLETED SUCCESSFULLY 🎉",
+		"block_height", ctx.BlockHeight(),
+		"total_minted", blockProvisionCoin.String(),
+		"num_distributions", len(distributions))
+
+	return nil
+}
 
 // ProvideDynamicMintFn creates a dynamic mint function that uses governance-controlled emission parameters
 func (k Keeper) ProvideDynamicMintFn() mintkeeper.MintFn {
@@ -78,7 +254,7 @@ func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context, mintKeeper *mintkeeper.K
 		"num_destinations", len(emissionsConfig.Destinations))
 
 	// 4. Create emission splitter using existing logic
-	splitter, err := emissions.NewEmissionSplitter(emissionsConfig, k.bankKeeper)
+	splitter, err := types.NewEmissionSplitter(emissionsConfig, k.bankKeeper)
 	if err != nil {
 		ctx.Logger().Error("❌ Failed to create emission splitter",
 			"error", err.Error())
@@ -207,21 +383,24 @@ func (k Keeper) DynamicEmissionsMintFn(ctx sdk.Context, mintKeeper *mintkeeper.K
 }
 
 // convertGovernanceToEmissionsConfig converts governance parameters to emissions config
-func (k Keeper) convertGovernanceToEmissionsConfig(destinations []types.EmissionDestination) emissions.EmissionsConfig {
-	var emissionDestinations []emissions.EmissionDestination
+func (k Keeper) convertGovernanceToEmissionsConfig(destinations []types.EmissionDestination) types.EmissionsConfig {
+	var emissionDestinations []types.EmissionDestination
 
 	for _, dest := range destinations {
 		if !dest.Enabled {
 			continue
 		}
-		emissionDestinations = append(emissionDestinations, emissions.EmissionDestination{
+		emissionDestinations = append(emissionDestinations, types.EmissionDestination{
 			ModuleName:  dest.ModuleName,
 			Weight:      dest.Weight,
 			Description: dest.Description,
+			Enabled:     dest.Enabled,
+			MinWeight:   dest.MinWeight,
+			MaxWeight:   dest.MaxWeight,
 		})
 	}
 
-	return emissions.EmissionsConfig{
+	return types.EmissionsConfig{
 		Enabled:      true,
 		Destinations: emissionDestinations,
 	}
@@ -280,7 +459,7 @@ func (k Keeper) updateDestinationMetrics(ctx sdk.Context, destinations []types.E
 func (k Keeper) emitDynamicEmissionEvent(
 	ctx sdk.Context,
 	totalAmount math.Int,
-	distributions []emissions.Distribution,
+	distributions []types.Distribution,
 	emissionParams types.Params,
 	minter minttypes.Minter,
 	bondedRatio math.LegacyDec,
@@ -350,8 +529,8 @@ func (k Keeper) applyFallbackConfiguration(ctx sdk.Context, mintKeeper *mintkeep
 		"reason", "governance_params_unavailable")
 
 	// 1. Use hardcoded default 50/50 configuration
-	config := emissions.DefaultEmissionsConfig()
-	splitter, err := emissions.NewEmissionSplitter(config, k.bankKeeper)
+	config := types.DefaultEmissionsConfig()
+	splitter, err := types.NewEmissionSplitter(config, k.bankKeeper)
 	if err != nil {
 		ctx.Logger().Error("❌ Failed to create fallback emission splitter",
 			"error", err.Error())
@@ -460,7 +639,7 @@ func (k Keeper) applyFallbackConfiguration(ctx sdk.Context, mintKeeper *mintkeep
 
 	// Also emit standard events for compatibility
 	bondedRatio, _ := k.stakingKeeper.BondedRatio(ctx)
-	emissions.EmitEmissionSplitEvent(
+	types.EmitEmissionSplitEvent(
 		ctx,
 		blockProvisionCoin.Amount,
 		distributions,
