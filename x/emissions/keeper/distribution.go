@@ -446,75 +446,10 @@ func (k Keeper) updateInflation(ctx sdk.Context, minter *minttypes.Minter, param
 }
 
 // updateDestinationMetrics updates statistics for each emission destination
-func (k Keeper) updateDestinationMetrics(ctx sdk.Context, destinations []types.EmissionDestination, totalAmount math.Int, denom string) error {
-	// Calculate distribution amounts
-	for _, dest := range destinations {
-		if !dest.Enabled {
-			continue
-		}
-
-		// Calculate amount for this destination
-		destAmount := math.LegacyNewDecFromInt(totalAmount).Mul(dest.Weight).TruncateInt()
-		coins := sdk.NewCoins(sdk.NewCoin(denom, destAmount))
-
-		// Update metrics (simplified for now - will implement full metrics later)
-		// This is a placeholder for the full metrics implementation
-		_ = coins // Use the calculated coins
-	}
-
-	return nil
-}
-
-// emitDynamicEmissionEvent emits a comprehensive event for dynamic emission distribution
-func (k Keeper) emitDynamicEmissionEvent(
-	ctx sdk.Context,
-	totalAmount math.Int,
-	distributions []types.Distribution,
-	emissionParams types.Params,
-	minter minttypes.Minter,
-	bondedRatio math.LegacyDec,
-) {
-	// Build event attributes
-	attributes := []sdk.Attribute{
-		sdk.NewAttribute(minttypes.AttributeKeyBondedRatio, bondedRatio.String()),
-		sdk.NewAttribute(minttypes.AttributeKeyInflation, minter.Inflation.String()),
-		sdk.NewAttribute(minttypes.AttributeKeyAnnualProvisions, minter.AnnualProvisions.String()),
-		sdk.NewAttribute(types.AttributeKeyAmount, totalAmount.String()),
-		sdk.NewAttribute("num_destinations", fmt.Sprintf("%d", len(distributions))),
-		sdk.NewAttribute("governance_controlled", "true"),
-	}
-
-	// Add distribution details
-	for i, dist := range distributions {
-		prefix := fmt.Sprintf("destination_%d", i)
-		attributes = append(attributes,
-			sdk.NewAttribute(prefix+"_module", dist.ModuleName),
-			sdk.NewAttribute(prefix+"_amount", dist.Amount.String()),
-			sdk.NewAttribute(prefix+"_description", dist.Description),
-		)
-	}
-
-	// Emit the dynamic emission event
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(types.EventTypeEmissionDistributed, attributes...),
-	)
-
-	// Also emit the standard mint event for compatibility
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			minttypes.EventTypeMint,
-			sdk.NewAttribute(minttypes.AttributeKeyBondedRatio, bondedRatio.String()),
-			sdk.NewAttribute(minttypes.AttributeKeyInflation, minter.Inflation.String()),
-			sdk.NewAttribute(minttypes.AttributeKeyAnnualProvisions, minter.AnnualProvisions.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, totalAmount.String()),
-		),
-	)
-}
-
 // EMERGENCY CONTROL FUNCTIONS
 
 // handleEmergencyStop processes emergency stop conditions
-func (k Keeper) handleEmergencyStop(ctx sdk.Context, params types.Params) error {
+func (k Keeper) handleEmergencyStop(ctx sdk.Context, _ types.Params) error {
 	ctx.Logger().Info("🛑 Emergency stop is active, halting emissions",
 		"reason", "emergency_stop", "height", ctx.BlockHeight())
 
