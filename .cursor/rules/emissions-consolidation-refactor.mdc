@@ -1,0 +1,250 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Emissions Module Consolidation Refactor - Step-by-Step Implementation
+
+## Overview
+Consolidate all emissions logic from app layer (`app/emissions/`, `app/miner_emissions.go`) into the autonomous `x/emissions` module while preserving exact functionality, dependency injection patterns, and logging.
+
+## ⚠️ CRITICAL PRESERVATION REQUIREMENTS
+- **ZERO functional changes** - identical token distribution, events, logging
+- **PRESERVE dependency injection pattern** - keep `KeeperProvider` and lazy loading
+- **EXACT logging preservation** - all emoji patterns, messages, and attributes  
+- **NO breaking changes** - chain must continue running identically
+
+## Implementation Steps
+
+### Phase 1: Move Types and Configuration Logic
+
+#### Step 1.1: Create config.go in x/emissions/types
+**Objective**: Move EmissionsConfig and EmissionDestination types from app layer
+**Files**: Create `x/emissions/types/config.go`
+**Action**: Copy EXACT types and functions from `app/emissions/config.go`
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): move emission config types to x/emissions/types`
+
+#### Step 1.2: Create splitter.go in x/emissions/types  
+**Objective**: Move EmissionSplitter logic from app layer
+**Files**: Create `x/emissions/types/splitter.go`
+**Action**: Copy EXACT EmissionSplitter struct and methods from `app/emissions/splitter.go`
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): move emission splitter logic to x/emissions/types`
+
+#### Step 1.3: Enhance events.go in x/emissions/types
+**Objective**: Consolidate all emission event logic
+**Files**: Modify `x/emissions/types/events.go`
+**Action**: Add EmitEmissionSplitEvent function from `app/emissions/events.go`
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): consolidate emission events in x/emissions/types`
+
+### Phase 2: Create Consolidated Keeper Method
+
+#### Step 2.1: Implement MintAndDistributeEmissions method
+**Objective**: Create autonomous keeper method that replaces all complex logic
+**Files**: Enhance `x/emissions/keeper/distribution.go`
+**Action**: 
+- Create `MintAndDistributeEmissions(ctx, mintKeeper) error` method
+- Consolidate logic from `app/miner_emissions.go` GovernanceControlledMintFn
+- Preserve ALL current logging statements EXACTLY (🔥🔥🔥, 🚨🚨🚨, 💰, 💸, etc.)
+- Include all governance parameter handling and fallback logic
+- Import new types from `x/emissions/types`
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): implement consolidated MintAndDistributeEmissions keeper method`
+
+#### Step 2.2: Add helper methods to keeper
+**Objective**: Move utility functions from app layer to keeper
+**Files**: Enhance `x/emissions/keeper/distribution.go`
+**Action**:
+- Move `getMinterState`, `updateInflation` helper functions
+- Move `convertGovernanceToEmissionsConfig` logic  
+- Preserve EXACT function signatures and logic
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): add emission helper methods to keeper`
+
+### Phase 3: Update App Integration (Preserve DI Pattern)
+
+#### Step 3.1: Simplify provider function in app/miner_emissions.go
+**Objective**: Replace complex logic with simple call to consolidated method
+**Files**: Modify `app/miner_emissions.go`
+**Action**:
+- KEEP `KeeperProvider` type and `ProvideMinerEmissionsMintFn` function signature EXACTLY
+- Replace `GovernanceControlledMintFn` call with `emissionsKeeper.MintAndDistributeEmissions(ctx, mk)`
+- Remove all helper functions and complex logic (moved to keeper)
+- PRESERVE lazy loading pattern: `_, emissionsKeeper := keeperProvider()`
+- Update imports to use `x/emissions/types` instead of `app/emissions`
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): simplify provider function while preserving DI pattern`
+
+#### Step 3.2: Update app.go imports if needed
+**Objective**: Clean up any references to old app/emissions package
+**Files**: Check and potentially modify `app/app.go`
+**Action**: Remove any unused imports related to `app/emissions` package
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): clean up app.go imports after consolidation`
+
+### Phase 4: Clean Up Redundant Files
+
+#### Step 4.1: Delete app/emissions directory
+**Objective**: Remove redundant app layer emissions code
+**Files**: Delete entire `app/emissions/` directory
+**Action**: `rm -rf app/emissions/`
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): remove redundant app/emissions directory`
+
+#### Step 4.2: Clean up app/miner_emissions.go
+**Objective**: Remove unused functions while preserving critical DI pattern
+**Files**: Modify `app/miner_emissions.go`
+**Action**:
+- Remove `GovernanceControlledMintFn` and all helper functions
+- Remove `emissionDestination` struct and related logic
+- Remove all unused imports
+- KEEP `KeeperProvider` type and `ProvideMinerEmissionsMintFn` function
+- KEEP all necessary imports for dependency injection
+- Result: File should be ~50 lines (down from 338 lines)
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): clean up miner_emissions.go while preserving DI pattern`
+
+### Phase 5: Final Validation
+
+#### Step 5.1: Final build verification
+**Objective**: Ensure refactored code builds and functions identically
+**Files**: All modified files
+**Action**:
+- User runs final build check
+- Verify no compilation errors or warnings
+- Verify all imports resolve correctly
+**Verification**: User confirms build success
+**Commit**: `feat(emissions): finalize consolidation refactor with successful build`
+
+#### Step 5.2: Runtime testing preparation
+**Objective**: Prepare for runtime testing of consolidated emissions
+**Files**: Documentation
+**Action**: Update documentation to reflect new consolidated architecture
+**Verification**: User builds chain and confirms success
+**Commit**: `docs(emissions): update documentation for consolidated architecture`
+
+## Build Verification Protocol
+
+### After Each Step:
+1. **Agent completes code changes**
+2. **Agent asks user**: "Please run `make build` in your terminal and let me know if it succeeds"
+3. **User confirms**: Build status (success/failure)
+4. **If failure**: Agent analyzes and fixes issues before proceeding
+5. **If success**: Agent creates commit with specified message and proceeds
+
+### User Commands to Run:
+```bash
+make build
+echo "Build exit code: $?"
+```
+
+### Agent Must Never:
+- ❌ Run build or ignite commands themselves
+- ❌ Assume build success
+- ❌ Proceed without user confirmation
+- ❌ Skip verification steps
+
+## Exact Logging Patterns to Preserve
+
+### Function Entry/Exit (EXACT):
+```go
+ctx.Logger().Info("🔥🔥🔥 GOVERNANCE-CONTROLLED MINT FUNCTION CALLED 🔥🔥🔥", "height", ctx.BlockHeight())
+ctx.Logger().Info("🚨🚨🚨 CUSTOM MINT FUNCTION CALLED 🚨🚨🚨", "height", ctx.BlockHeight())
+ctx.Logger().Info("🎉 GOVERNANCE-CONTROLLED EMISSIONS COMPLETED SUCCESSFULLY 🎉")
+```
+
+### Parameter Logging (EXACT):
+```go
+ctx.Logger().Info("Could not get governance parameters, falling back to default 50/50 split", "error", err)
+ctx.Logger().Info("📊 Using emission configuration", "enabled", config.Enabled, "destinations", len(config.Destinations))
+```
+
+### Distribution Logging (EXACT):
+```go
+ctx.Logger().Info("💰 Minted tokens for distribution", "amount", blockProvisionCoin.Amount.String(), "denom", blockProvisionCoin.Denom)
+ctx.Logger().Info("💸 Distribution detail", "index", i, "module", dist.ModuleName, "amount", dist.Amount.String())
+```
+
+## Dependency Injection Pattern (MUST PRESERVE EXACTLY)
+
+### Current Pattern (KEEP IDENTICAL):
+```go
+type KeeperProvider func() (bankkeeper.Keeper, emissionsmodulekeeper.Keeper)
+
+func ProvideMinerEmissionsMintFn(keeperProvider KeeperProvider) mintkeeper.MintFn {
+    return func(ctx sdk.Context, mk *mintkeeper.Keeper) error {
+        _, emissionsKeeper := keeperProvider()
+        return emissionsKeeper.MintAndDistributeEmissions(ctx, mk)
+    }
+}
+```
+
+### app.go Supply (UNCHANGED):
+```go
+ProvideMinerEmissionsMintFn(func() (bankkeeper.Keeper, emissionsmodulekeeper.Keeper) {
+    return app.BankKeeper, app.EmissionsKeeper
+}),
+```
+
+## Expected File Structure After Refactor
+
+### Before:
+```
+app/
+├── emissions/          # 278 lines total - DELETE
+│   ├── config.go      # 85 lines
+│   ├── events.go      # 68 lines  
+│   ├── splitter.go    # 125 lines
+│   └── README.md
+├── miner_emissions.go  # 338 lines - SIMPLIFY to 50 lines
+└── app.go             # UNCHANGED
+
+x/emissions/
+├── keeper/
+│   └── distribution.go # 500 lines - ENHANCE
+└── types/
+    └── events.go      # 26 lines - ENHANCE
+```
+
+### After:
+```
+app/
+├── miner_emissions.go  # 50 lines - SIMPLIFIED DI pattern only
+└── app.go             # UNCHANGED - same dependency injection
+
+x/emissions/
+├── keeper/
+│   └── distribution.go # 650+ lines - consolidated autonomous method
+└── types/
+    ├── config.go      # 85 lines - from app/emissions/config.go
+    ├── events.go      # 94 lines - enhanced with all events
+    └── splitter.go    # 125 lines - from app/emissions/splitter.go
+```
+
+## Rollback Plan
+If any step fails:
+1. **Git revert** the last commit
+2. **Analyze** the specific build failure
+3. **Fix** the issue causing the failure
+4. **Re-attempt** the step
+5. **Never proceed** without successful build
+
+## Success Criteria
+- ✅ Chain builds successfully after each step
+- ✅ All dependency injection patterns preserved exactly
+- ✅ All logging statements preserved verbatim (emojis, messages, attributes)
+- ✅ Zero functional changes to token distribution
+- ✅ All events emitted identically
+- ✅ Clean, maintainable consolidated architecture
+- ✅ ~566 lines of code moved/consolidated with zero net addition
+
+## Auto-Attachment Configuration
+This rule should be automatically attached for:
+- Emissions module refactoring
+- Code consolidation tasks
+- Dependency injection preservation
+- Module architecture changes
+- App layer to module migration
+- Build verification workflows
