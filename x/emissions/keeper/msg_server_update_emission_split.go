@@ -33,7 +33,7 @@ func (k msgServer) UpdateEmissionSplit(goCtx context.Context, msg *types.MsgUpda
 	}
 
 	// 3. Parse and validate destinations from governance proposal
-	destinations, err := k.parseDestinations(msg.Destinations, msg.Weights)
+	destinations, err := k.parseDestinations(goCtx, msg.Destinations, msg.Weights)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse destinations: %w", err)
 	}
@@ -76,7 +76,7 @@ func (k msgServer) UpdateEmissionSplit(goCtx context.Context, msg *types.MsgUpda
 }
 
 // parseDestinations converts string arrays from governance proposal to EmissionDestination structs
-func (k msgServer) parseDestinations(moduleNames, weights []string) ([]types.EmissionDestination, error) {
+func (k msgServer) parseDestinations(goCtx context.Context, moduleNames, weights []string) ([]types.EmissionDestination, error) {
 	if len(moduleNames) != len(weights) {
 		return nil, fmt.Errorf("mismatched destinations and weights count: %d vs %d", len(moduleNames), len(weights))
 	}
@@ -85,10 +85,24 @@ func (k msgServer) parseDestinations(moduleNames, weights []string) ([]types.Emi
 		return nil, types.ErrNoDestinations
 	}
 
+	// Core modules that are exempt from registry requirements
+	coreModules := map[string]bool{
+		"fee_collector":  true, // Validator and delegator rewards
+		"distribution":   true, // Distribution module
+		"community_pool": true, // Community pool
+	}
+
 	destinations := make([]types.EmissionDestination, len(moduleNames))
 	rules := types.DefaultValidationRules()
 
 	for i, moduleName := range moduleNames {
+		// 🔒 REGISTRY VALIDATION: Ensure all non-core modules are registered
+		if !coreModules[moduleName] {
+			if !k.Keeper.IsModuleRegistered(goCtx, moduleName) {
+				return nil, types.ErrModuleNotRegistered.Wrapf("destination module '%s' is not registered - modules must be registered before being eligible for emissions", moduleName)
+			}
+		}
+
 		// Parse weight from string
 		weight, err := math.LegacyNewDecFromStr(weights[i])
 		if err != nil {
