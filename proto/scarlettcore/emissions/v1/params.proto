@@ -15,4 +15,8 @@ message Params {
   string emission_destinations = 1;
   // enabled controls whether governance-controlled emissions are active
   bool enabled = 2;
+  // emergency_stop enables governance to immediately halt all emissions
+  bool emergency_stop = 3;
+  // emergency_reason provides context for emergency stop activation
+  string emergency_reason = 4;
 }

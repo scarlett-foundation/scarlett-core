@@ -72,17 +72,29 @@ func NewParams() Params {
 	return Params{
 		EmissionDestinations: "",
 		Enabled:              false,
+		EmergencyStop:        false,
+		EmergencyReason:      "",
 	}
 }
 
 // Validate validates the set of params.
 func (p Params) Validate() error {
-	// Basic validation only to avoid nil pointer issues
+	// 1. Validate emergency parameters first
+	if err := ValidateEmergencyParams(p.EmergencyStop, p.EmergencyReason); err != nil {
+		return err
+	}
+
+	// 2. If emergency stop is active, skip other validations (emergency overrides all)
+	if p.EmergencyStop {
+		return nil
+	}
+
+	// 3. Basic validation only to avoid nil pointer issues
 	if p.Enabled && p.EmissionDestinations == "" {
 		return fmt.Errorf("emission_destinations cannot be empty when enabled")
 	}
 
-	// If destinations provided, just validate JSON format
+	// 4. If destinations provided, just validate JSON format
 	if p.EmissionDestinations != "" {
 		var destinations []EmissionDestination
 		if err := json.Unmarshal([]byte(p.EmissionDestinations), &destinations); err != nil {
@@ -93,6 +105,21 @@ func (p Params) Validate() error {
 		if len(destinations) == 0 {
 			return fmt.Errorf("no destinations provided")
 		}
+	}
+
+	return nil
+}
+
+// ValidateEmergencyParams validates emergency stop parameters
+func ValidateEmergencyParams(emergencyStop bool, emergencyReason string) error {
+	// If emergency stop is active, reason should be provided for transparency
+	if emergencyStop && emergencyReason == "" {
+		return fmt.Errorf("emergency_reason must be provided when emergency_stop is active")
+	}
+
+	// If emergency stop is not active, reason should be empty to avoid confusion
+	if !emergencyStop && emergencyReason != "" {
+		return fmt.Errorf("emergency_reason should be empty when emergency_stop is not active")
 	}
 
 	return nil

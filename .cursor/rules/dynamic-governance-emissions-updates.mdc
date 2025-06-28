@@ -1,0 +1,99 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Dynamic Governance Emissions Feature Implementation - Step-by-Step Guide
+
+## Overview
+Complete the Dynamic Governance Emissions feature implementation by adding emergency controls, economic safety bounds, historical metrics, and comprehensive testing to achieve full community-controlled tokenomics.
+
+## ⚠️ CRITICAL IMPLEMENTATION REQUIREMENTS
+- **PRESERVE current functionality** - existing governance integration must continue working
+- **MAINTAIN economic safety** - never allow configurations that could damage the network
+- **COMPREHENSIVE testing** - all features must be thoroughly tested before deployment
+- **NO breaking changes** - chain must continue running identically during implementation
+- **GOVERNANCE-ONLY control** - only governance module can modify parameters
+
+## Implementation Steps
+
+### Phase 1: Emergency Controls Implementation
+
+#### Step 1.1: Add Emergency Parameters to Proto
+**Objective**: Extend governance parameters to include emergency stop controls
+**Files**: Modify `proto/scarlettcore/emissions/v1/params.proto`
+**Action**: Add emergency stop fields to EmissionParams message
+**Verification**: User builds chain and proto generation succeeds
+**Commit**: `feat(emissions): add emergency stop parameters to governance proto`
+
+#### Step 1.2: Update Parameter Types
+**Objective**: Add emergency stop fields to Go types and validation
+**Files**: Modify `x/emissions/types/params.go`
+**Action**: 
+- Add `EmergencyStop bool` and `EmergencyReason string` fields
+- Update validation to handle emergency parameters
+- Add `ValidateEmergencyParams()` function
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): add emergency stop fields to parameter types`
+
+#### Step 1.3: Wire Emergency Stop Logic
+**Objective**: Integrate emergency stop into main emission function
+**Files**: Modify `x/emissions/keeper/distribution.go`
+**Action**:
+- Uncomment and integrate `handleEmergencyStop` check in `MintAndDistributeEmissions`
+- Add emergency parameter validation in governance parameter section
+- Ensure emergency stop immediately halts emissions with proper logging
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(emissions): integrate emergency stop logic into emissions flow`
+
+## Build Verification Protocol
+
+### After Each Step:
+1. **Agent completes code changes**
+2. **Agent asks user**: "Please run `ignite chain serve --reset-once --verbose` in your terminal and let me know if it succeeds"
+3. **User confirms**: Build status (success/failure)
+4. **If failure**: Agent analyzes and fixes issues before proceeding
+5. **If success**: Agent creates commit with specified message and proceeds
+
+### User Commands to Run:
+```bash
+ignite chain serve --reset-once --verbose
+
+# For testing phases:
+ignite chain serve --reset-once --verbose
+```
+
+### Agent Must Never:
+- ❌ Run build or test commands themselves
+- ❌ Assume build/test success
+- ❌ Proceed without user confirmation
+- ❌ Skip verification steps
+
+## Safety Requirements Preservation
+
+### Emergency Controls (EXACT Implementation)
+```go
+// Emergency stop check in MintAndDistributeEmissions
+if emissionParams.EmergencyStop {
+    ctx.Logger().Info("🛑 EMERGENCY STOP ACTIVE - HALTING ALL EMISSIONS 🛑",
+        "reason", emissionParams.EmergencyReason,
+        "block_height", ctx.BlockHeight())
+    return k.handleEmergencyStop(ctx, emissionParams)
+}
+```
+
+## Rollback Plan
+If any step fails:
+1. **Git revert** the last commit
+2. **Analyze** the specific build/test failure
+3. **Fix** the issue causing the failure
+4. **Re-attempt** the step
+5. **Never proceed** without successful build and tests
+
+## Success Criteria
+
+### ✅ Emergency Controls
+- ✅ Governance can halt emissions through emergency stop parameter
+- ✅ Emergency stop immediately prevents all token minting and distribution
+- ✅ Comprehensive logging and events for emergency situations
+- ✅ Recovery procedures documented and tested

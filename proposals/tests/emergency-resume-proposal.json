@@ -1,0 +1,18 @@
+{
+  "title": "RESUME EMISSIONS: Security Issue Resolved",
+  "description": "Resume normal token emissions after security vulnerability has been patched and verified. This proposal restores the standard 50/50 emission split between validators and AI inference providers.",
+  "summary": "Resume normal emissions after emergency stop resolution",
+  "messages": [
+    {
+      "@type": "/scarlettcore.emissions.v1.MsgUpdateParams",
+      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700j4l5sjv",
+      "params": {
+        "emission_destinations": "[{\"module_name\":\"fee_collector\",\"weight\":\"0.50\",\"description\":\"Validator and delegator rewards\",\"enabled\":true},{\"module_name\":\"inferencerewards\",\"weight\":\"0.50\",\"description\":\"AI inference provider rewards\",\"enabled\":true}]",
+        "enabled": true,
+        "emergency_stop": false,
+        "emergency_reason": ""
+      }
+    }
+  ],
+  "deposit": "10000000sclt"
+} 
