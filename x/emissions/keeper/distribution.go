@@ -35,10 +35,20 @@ func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeep
 		ctx.Logger().Info("Using governance-defined emission parameters")
 		ctx.Logger().Info("📋 Governance parameters retrieved",
 			"enabled", emissionParams.Enabled,
-			"destinations", emissionParams.EmissionDestinations)
+			"destinations", emissionParams.EmissionDestinations,
+			"emergency_stop", emissionParams.EmergencyStop,
+			"emergency_reason", emissionParams.EmergencyReason)
 	}
 
-	// 2. Parse governance destinations (EXACT PRESERVED LOGGING)
+	// 2. Check for emergency stop activation (CRITICAL SAFETY CHECK)
+	if emissionParams.EmergencyStop {
+		ctx.Logger().Info("🛑 EMERGENCY STOP ACTIVE - HALTING ALL EMISSIONS 🛑",
+			"reason", emissionParams.EmergencyReason,
+			"block_height", ctx.BlockHeight())
+		return k.handleEmergencyStop(ctx, emissionParams)
+	}
+
+	// 3. Parse governance destinations (EXACT PRESERVED LOGGING)
 	var destinations []struct {
 		ModuleName  string `json:"module_name"`
 		Weight      string `json:"weight"`
@@ -55,7 +65,7 @@ func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeep
 		"num_destinations", len(destinations),
 		"destinations", destinations)
 
-	// 3. Convert to emissions config (EXACT PRESERVED LOGGING)
+	// 4. Convert to emissions config (EXACT PRESERVED LOGGING)
 	var emissionDestinations []types.EmissionDestination
 	for _, dest := range destinations {
 		if !dest.Enabled {
@@ -81,14 +91,14 @@ func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeep
 		"enabled", config.Enabled,
 		"destinations", len(config.Destinations))
 
-	// 4. Create emission splitter (EXACT PRESERVED LOGGING)
+	// 5. Create emission splitter (EXACT PRESERVED LOGGING)
 	splitter, err := types.NewEmissionSplitter(config, k.bankKeeper)
 	if err != nil {
 		return fmt.Errorf("failed to create emission splitter: %w", err)
 	}
 	ctx.Logger().Info("✅ Emission splitter created successfully")
 
-	// 5. Get minter state and parameters (EXACT PRESERVED LOGGING)
+	// 6. Get minter state and parameters (EXACT PRESERVED LOGGING)
 	minter, err := k.getMinterState(ctx, mintKeeper)
 	if err != nil {
 		return err
@@ -111,7 +121,7 @@ func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeep
 		"goal_bonded", mintParams.GoalBonded.String(),
 		"blocks_per_year", mintParams.BlocksPerYear)
 
-	// 6. Calculate inflation and provisions (EXACT PRESERVED LOGGING)
+	// 7. Calculate inflation and provisions (EXACT PRESERVED LOGGING)
 	if err := k.updateInflation(ctx, &minter, mintParams, mintKeeper); err != nil {
 		return fmt.Errorf("failed to update inflation: %w", err)
 	}
@@ -120,7 +130,7 @@ func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeep
 		"new_inflation", minter.Inflation.String(),
 		"new_annual_provisions", minter.AnnualProvisions.String())
 
-	// 7. Calculate and mint block provision (EXACT PRESERVED LOGGING)
+	// 8. Calculate and mint block provision (EXACT PRESERVED LOGGING)
 	blockProvisionCoin := minter.BlockProvision(mintParams)
 	ctx.Logger().Info("💰 Block provision calculated",
 		"block_provision", blockProvisionCoin.String(),
@@ -143,7 +153,7 @@ func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeep
 		"amount", blockProvisionCoin.Amount.String(),
 		"denom", blockProvisionCoin.Denom)
 
-	// 8. Calculate distribution (EXACT PRESERVED LOGGING)
+	// 9. Calculate distribution (EXACT PRESERVED LOGGING)
 	distributions, err := splitter.CalculateDistribution(blockProvisionCoin.Amount)
 	if err != nil {
 		return fmt.Errorf("failed to calculate distribution: %w", err)
@@ -161,21 +171,21 @@ func (k Keeper) MintAndDistributeEmissions(ctx sdk.Context, mintKeeper *mintkeep
 			"description", dist.Description)
 	}
 
-	// 9. Execute distribution (EXACT PRESERVED LOGGING)
+	// 10. Execute distribution (EXACT PRESERVED LOGGING)
 	if err := splitter.DistributeTokens(ctx, mintParams.MintDenom, blockProvisionCoin.Amount); err != nil {
 		return fmt.Errorf("failed to distribute tokens: %w", err)
 	}
 
 	ctx.Logger().Info("✅ Tokens distributed successfully")
 
-	// 10. Update minter state (EXACT PRESERVED LOGGING)
+	// 11. Update minter state (EXACT PRESERVED LOGGING)
 	if err := mintKeeper.Minter.Set(ctx, minter); err != nil {
 		return fmt.Errorf("failed to update minter state: %w", err)
 	}
 
 	ctx.Logger().Info("✅ Minter state updated successfully")
 
-	// 11. Emit comprehensive events and final success (EXACT PRESERVED LOGGING)
+	// 12. Emit comprehensive events and final success (EXACT PRESERVED LOGGING)
 	bondedRatio, _ := k.stakingKeeper.BondedRatio(ctx)
 	types.EmitEmissionSplitEvent(ctx, blockProvisionCoin.Amount, distributions, config, minter, bondedRatio)
 
