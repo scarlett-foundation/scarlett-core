@@ -28,4 +28,7 @@ var (
 
 	// DestinationMetricsPrefix is the prefix for destination metrics
 	DestinationMetricsPrefix = collections.NewPrefix("destination_metrics")
+
+	// ModuleRegistryPrefix is the prefix for the module registry
+	ModuleRegistryPrefix = collections.NewPrefix("module_registry")
 )
