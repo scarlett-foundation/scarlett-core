@@ -6,7 +6,7 @@ package types
 import (
 	context "context"
 	fmt "fmt"
-	_ "github.com/cosmos/cosmos-sdk/types/query"
+	query "github.com/cosmos/cosmos-sdk/types/query"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
@@ -336,6 +336,281 @@ func (m *QueryDestinationStatsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryDestinationStatsResponse proto.InternalMessageInfo
 
+// QueryListRegisteredModulesRequest defines the request for listing all registered modules.
+type QueryListRegisteredModulesRequest struct {
+	// pagination defines an optional pagination for the request.
+	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryListRegisteredModulesRequest) Reset()         { *m = QueryListRegisteredModulesRequest{} }
+func (m *QueryListRegisteredModulesRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryListRegisteredModulesRequest) ProtoMessage()    {}
+func (*QueryListRegisteredModulesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_88f0ec2b1eac5e40, []int{8}
+}
+func (m *QueryListRegisteredModulesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryListRegisteredModulesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryListRegisteredModulesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryListRegisteredModulesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryListRegisteredModulesRequest.Merge(m, src)
+}
+func (m *QueryListRegisteredModulesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryListRegisteredModulesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryListRegisteredModulesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryListRegisteredModulesRequest proto.InternalMessageInfo
+
+func (m *QueryListRegisteredModulesRequest) GetPagination() *query.PageRequest {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// RegisteredModuleInfo defines the information about a registered module for queries.
+type RegisteredModuleInfo struct {
+	ModuleName  string `protobuf:"bytes,1,opt,name=module_name,json=moduleName,proto3" json:"module_name,omitempty"`
+	Creator     string `protobuf:"bytes,2,opt,name=creator,proto3" json:"creator,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Status      string `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt   string `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   string `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+}
+
+func (m *RegisteredModuleInfo) Reset()         { *m = RegisteredModuleInfo{} }
+func (m *RegisteredModuleInfo) String() string { return proto.CompactTextString(m) }
+func (*RegisteredModuleInfo) ProtoMessage()    {}
+func (*RegisteredModuleInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_88f0ec2b1eac5e40, []int{9}
+}
+func (m *RegisteredModuleInfo) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *RegisteredModuleInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_RegisteredModuleInfo.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *RegisteredModuleInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RegisteredModuleInfo.Merge(m, src)
+}
+func (m *RegisteredModuleInfo) XXX_Size() int {
+	return m.Size()
+}
+func (m *RegisteredModuleInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_RegisteredModuleInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RegisteredModuleInfo proto.InternalMessageInfo
+
+func (m *RegisteredModuleInfo) GetModuleName() string {
+	if m != nil {
+		return m.ModuleName
+	}
+	return ""
+}
+
+func (m *RegisteredModuleInfo) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *RegisteredModuleInfo) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+func (m *RegisteredModuleInfo) GetStatus() string {
+	if m != nil {
+		return m.Status
+	}
+	return ""
+}
+
+func (m *RegisteredModuleInfo) GetCreatedAt() string {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return ""
+}
+
+func (m *RegisteredModuleInfo) GetUpdatedAt() string {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return ""
+}
+
+// QueryListRegisteredModulesResponse defines the response for listing all registered modules.
+type QueryListRegisteredModulesResponse struct {
+	Modules []*RegisteredModuleInfo `protobuf:"bytes,1,rep,name=modules,proto3" json:"modules,omitempty"`
+	// pagination defines the pagination in the response.
+	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryListRegisteredModulesResponse) Reset()         { *m = QueryListRegisteredModulesResponse{} }
+func (m *QueryListRegisteredModulesResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryListRegisteredModulesResponse) ProtoMessage()    {}
+func (*QueryListRegisteredModulesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_88f0ec2b1eac5e40, []int{10}
+}
+func (m *QueryListRegisteredModulesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryListRegisteredModulesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryListRegisteredModulesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryListRegisteredModulesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryListRegisteredModulesResponse.Merge(m, src)
+}
+func (m *QueryListRegisteredModulesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryListRegisteredModulesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryListRegisteredModulesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryListRegisteredModulesResponse proto.InternalMessageInfo
+
+func (m *QueryListRegisteredModulesResponse) GetModules() []*RegisteredModuleInfo {
+	if m != nil {
+		return m.Modules
+	}
+	return nil
+}
+
+func (m *QueryListRegisteredModulesResponse) GetPagination() *query.PageResponse {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryGetRegisteredModuleRequest defines the request for getting a specific registered module.
+type QueryGetRegisteredModuleRequest struct {
+	ModuleName string `protobuf:"bytes,1,opt,name=module_name,json=moduleName,proto3" json:"module_name,omitempty"`
+}
+
+func (m *QueryGetRegisteredModuleRequest) Reset()         { *m = QueryGetRegisteredModuleRequest{} }
+func (m *QueryGetRegisteredModuleRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetRegisteredModuleRequest) ProtoMessage()    {}
+func (*QueryGetRegisteredModuleRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_88f0ec2b1eac5e40, []int{11}
+}
+func (m *QueryGetRegisteredModuleRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetRegisteredModuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetRegisteredModuleRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetRegisteredModuleRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetRegisteredModuleRequest.Merge(m, src)
+}
+func (m *QueryGetRegisteredModuleRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetRegisteredModuleRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetRegisteredModuleRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetRegisteredModuleRequest proto.InternalMessageInfo
+
+func (m *QueryGetRegisteredModuleRequest) GetModuleName() string {
+	if m != nil {
+		return m.ModuleName
+	}
+	return ""
+}
+
+// QueryGetRegisteredModuleResponse defines the response for getting a specific registered module.
+type QueryGetRegisteredModuleResponse struct {
+	Module *RegisteredModuleInfo `protobuf:"bytes,1,opt,name=module,proto3" json:"module,omitempty"`
+}
+
+func (m *QueryGetRegisteredModuleResponse) Reset()         { *m = QueryGetRegisteredModuleResponse{} }
+func (m *QueryGetRegisteredModuleResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetRegisteredModuleResponse) ProtoMessage()    {}
+func (*QueryGetRegisteredModuleResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_88f0ec2b1eac5e40, []int{12}
+}
+func (m *QueryGetRegisteredModuleResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetRegisteredModuleResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetRegisteredModuleResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetRegisteredModuleResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetRegisteredModuleResponse.Merge(m, src)
+}
+func (m *QueryGetRegisteredModuleResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetRegisteredModuleResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetRegisteredModuleResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetRegisteredModuleResponse proto.InternalMessageInfo
+
+func (m *QueryGetRegisteredModuleResponse) GetModule() *RegisteredModuleInfo {
+	if m != nil {
+		return m.Module
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "scarlettcore.emissions.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "scarlettcore.emissions.v1.QueryParamsResponse")
@@ -345,6 +620,11 @@ func init() {
 	proto.RegisterType((*QueryEmissionHistoryResponse)(nil), "scarlettcore.emissions.v1.QueryEmissionHistoryResponse")
 	proto.RegisterType((*QueryDestinationStatsRequest)(nil), "scarlettcore.emissions.v1.QueryDestinationStatsRequest")
 	proto.RegisterType((*QueryDestinationStatsResponse)(nil), "scarlettcore.emissions.v1.QueryDestinationStatsResponse")
+	proto.RegisterType((*QueryListRegisteredModulesRequest)(nil), "scarlettcore.emissions.v1.QueryListRegisteredModulesRequest")
+	proto.RegisterType((*RegisteredModuleInfo)(nil), "scarlettcore.emissions.v1.RegisteredModuleInfo")
+	proto.RegisterType((*QueryListRegisteredModulesResponse)(nil), "scarlettcore.emissions.v1.QueryListRegisteredModulesResponse")
+	proto.RegisterType((*QueryGetRegisteredModuleRequest)(nil), "scarlettcore.emissions.v1.QueryGetRegisteredModuleRequest")
+	proto.RegisterType((*QueryGetRegisteredModuleResponse)(nil), "scarlettcore.emissions.v1.QueryGetRegisteredModuleResponse")
 }
 
 func init() {
@@ -352,37 +632,56 @@ func init() {
 }
 
 var fileDescriptor_88f0ec2b1eac5e40 = []byte{
-	// 473 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0xcd, 0xae, 0xd2, 0x40,
-	0x18, 0x86, 0x3b, 0x26, 0x90, 0x38, 0x26, 0xfe, 0x8c, 0x2c, 0xb4, 0x42, 0xd1, 0x46, 0x8d, 0x41,
-	0xdb, 0x49, 0x41, 0xfc, 0xd9, 0x12, 0x4c, 0x5c, 0x2a, 0xee, 0x74, 0x41, 0x06, 0x9c, 0xd4, 0x26,
-	0xb4, 0x53, 0x3a, 0x03, 0x91, 0xad, 0x57, 0x60, 0xc2, 0x4d, 0xb8, 0x74, 0xe1, 0xc2, 0x85, 0x17,
-	0xc0, 0xca, 0x90, 0xb8, 0x71, 0x75, 0x72, 0x02, 0x27, 0x39, 0xb7, 0x71, 0xc2, 0x74, 0xca, 0xa1,
-	0x40, 0xf9, 0xd9, 0x34, 0xd3, 0x79, 0xdf, 0xf7, 0xfb, 0x9e, 0x7e, 0x33, 0x29, 0x7c, 0xc4, 0xbb,
-	0x24, 0xea, 0x51, 0x21, 0xba, 0x2c, 0xa2, 0x98, 0xfa, 0x1e, 0xe7, 0x1e, 0x0b, 0x38, 0x1e, 0x3a,
-	0xb8, 0x3f, 0xa0, 0xd1, 0xc8, 0x0e, 0x23, 0x26, 0x18, 0xba, 0xbb, 0x6a, 0xb3, 0x97, 0x36, 0x7b,
-	0xe8, 0xe8, 0xb7, 0x88, 0xef, 0x05, 0x0c, 0xcb, 0x67, 0xec, 0xd6, 0x2b, 0x5d, 0xc6, 0x7d, 0xc6,
-	0x71, 0x87, 0x70, 0x1a, 0x97, 0xc1, 0x43, 0xa7, 0x43, 0x05, 0x71, 0x70, 0x48, 0x5c, 0x2f, 0x20,
-	0xc2, 0x63, 0x81, 0xf2, 0x16, 0x5c, 0xe6, 0x32, 0xb9, 0xc4, 0x8b, 0x95, 0xda, 0x2d, 0xba, 0x8c,
-	0xb9, 0x3d, 0x8a, 0x49, 0xe8, 0x61, 0x12, 0x04, 0x4c, 0xc8, 0x08, 0x57, 0xea, 0xe3, 0x6c, 0xe8,
-	0x90, 0x44, 0xc4, 0x57, 0x3e, 0xb3, 0x00, 0xd1, 0xfb, 0x45, 0xf7, 0x77, 0x72, 0xb3, 0x45, 0xfb,
-	0x03, 0xca, 0x85, 0xf9, 0x09, 0xde, 0x4e, 0xed, 0xf2, 0x90, 0x05, 0x9c, 0xa2, 0x26, 0xcc, 0xc7,
-	0xe1, 0x3b, 0xe0, 0x3e, 0x78, 0x72, 0xad, 0xfa, 0xc0, 0xce, 0xfc, 0x66, 0x3b, 0x8e, 0x36, 0xae,
-	0x4e, 0x4e, 0xca, 0xda, 0x8f, 0xf3, 0x9f, 0x15, 0xd0, 0x52, 0x59, 0xb3, 0x08, 0x75, 0x59, 0xfc,
-	0x8d, 0xb2, 0xa7, 0x5b, 0x97, 0xe0, 0xbd, 0xad, 0x6a, 0x8c, 0xb0, 0x21, 0xbf, 0xf5, 0xb8, 0x60,
-	0xd1, 0x28, 0x49, 0x1b, 0xb0, 0xb8, 0x5d, 0x56, 0xf1, 0x44, 0x6f, 0x52, 0x2e, 0xd4, 0x90, 0x3f,
-	0x08, 0x22, 0x96, 0xdd, 0xcb, 0xb0, 0x94, 0xa1, 0xc7, 0x05, 0xaa, 0x7f, 0x73, 0x30, 0x27, 0x1d,
-	0x68, 0x0c, 0x60, 0x3e, 0x86, 0x43, 0xd6, 0x8e, 0x39, 0x6c, 0x4e, 0x57, 0xb7, 0x0f, 0xb5, 0x2b,
-	0xe8, 0xca, 0xb7, 0x7f, 0x67, 0xe3, 0x2b, 0x0f, 0x91, 0x89, 0x93, 0x9c, 0x95, 0x75, 0xaa, 0xe8,
-	0x17, 0x80, 0xd7, 0xd3, 0xa3, 0x43, 0xf5, 0x7d, 0xed, 0xb6, 0x1e, 0x84, 0xfe, 0xe2, 0xd8, 0x98,
-	0xa2, 0xad, 0x49, 0x5a, 0x0b, 0x3d, 0xdd, 0x45, 0x9b, 0xbc, 0xb4, 0x15, 0xf6, 0x6f, 0x00, 0x6f,
-	0xac, 0x9d, 0x19, 0x3a, 0x18, 0x20, 0x7d, 0x07, 0xf4, 0x97, 0x47, 0xe7, 0x14, 0xf9, 0x73, 0x49,
-	0x6e, 0xa3, 0x67, 0x07, 0x91, 0x7f, 0x51, 0x98, 0x7f, 0x00, 0xbc, 0xb9, 0x7e, 0x5d, 0xd0, 0x5e,
-	0x86, 0x8c, 0x0b, 0xa8, 0xbf, 0x3a, 0x3e, 0xa8, 0xe8, 0xeb, 0x92, 0x1e, 0x23, 0x6b, 0x17, 0xfd,
-	0xe7, 0xcb, 0x74, 0x9b, 0x2f, 0xe2, 0x8d, 0xd7, 0x93, 0x99, 0x01, 0xa6, 0x33, 0x03, 0x9c, 0xce,
-	0x0c, 0xf0, 0x7d, 0x6e, 0x68, 0xd3, 0xb9, 0xa1, 0xfd, 0x9f, 0x1b, 0xda, 0xc7, 0x72, 0xba, 0xce,
-	0xd7, 0x95, 0x4a, 0x62, 0x14, 0x52, 0xde, 0xc9, 0xcb, 0x5f, 0x48, 0xed, 0x22, 0x00, 0x00, 0xff,
-	0xff, 0x19, 0x1f, 0x8b, 0x70, 0x21, 0x05, 0x00, 0x00,
+	// 773 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x56, 0xdf, 0x4e, 0x13, 0x4d,
+	0x14, 0xef, 0xc0, 0x47, 0xf9, 0x38, 0x4d, 0xbe, 0x4f, 0x07, 0x34, 0x75, 0x85, 0x16, 0x36, 0x8a,
+	0x04, 0xed, 0x8e, 0x05, 0xc1, 0x7f, 0x68, 0x02, 0x41, 0x91, 0x44, 0x0d, 0xd6, 0x3b, 0xbd, 0x68,
+	0x86, 0x76, 0xac, 0x1b, 0xd8, 0x9d, 0x65, 0x67, 0x4a, 0x24, 0xc6, 0x1b, 0x9f, 0xc0, 0x84, 0x97,
+	0xf0, 0xd2, 0x0b, 0x2f, 0xb8, 0xf0, 0x01, 0x30, 0xf1, 0x82, 0x44, 0x2f, 0xbc, 0x32, 0x06, 0x4c,
+	0x7c, 0x01, 0x1f, 0xc0, 0x74, 0x76, 0x16, 0xba, 0xd0, 0xdd, 0x52, 0x6e, 0x48, 0xe7, 0xfc, 0xce,
+	0xef, 0x9c, 0xdf, 0x99, 0x33, 0xfb, 0x0b, 0x70, 0x51, 0x54, 0xa8, 0xbf, 0xca, 0xa4, 0xac, 0x70,
+	0x9f, 0x11, 0xe6, 0xd8, 0x42, 0xd8, 0xdc, 0x15, 0x64, 0xbd, 0x48, 0xd6, 0xea, 0xcc, 0xdf, 0xb0,
+	0x3c, 0x9f, 0x4b, 0x8e, 0xcf, 0x35, 0xa7, 0x59, 0xfb, 0x69, 0xd6, 0x7a, 0xd1, 0x38, 0x4d, 0x1d,
+	0xdb, 0xe5, 0x44, 0xfd, 0x0d, 0xb2, 0x8d, 0xf1, 0x0a, 0x17, 0x0e, 0x17, 0x64, 0x99, 0x0a, 0x16,
+	0x94, 0x21, 0xeb, 0xc5, 0x65, 0x26, 0x69, 0x91, 0x78, 0xb4, 0x66, 0xbb, 0x54, 0xda, 0xdc, 0xd5,
+	0xb9, 0x03, 0x35, 0x5e, 0xe3, 0xea, 0x27, 0x69, 0xfc, 0xd2, 0xd1, 0xc1, 0x1a, 0xe7, 0xb5, 0x55,
+	0x46, 0xa8, 0x67, 0x13, 0xea, 0xba, 0x5c, 0x2a, 0x8a, 0xd0, 0xe8, 0x68, 0xbc, 0x68, 0x8f, 0xfa,
+	0xd4, 0xd1, 0x79, 0xe6, 0x00, 0xe0, 0x27, 0x8d, 0xee, 0x4b, 0x2a, 0x58, 0x62, 0x6b, 0x75, 0x26,
+	0xa4, 0xf9, 0x1c, 0xfa, 0x23, 0x51, 0xe1, 0x71, 0x57, 0x30, 0x3c, 0x0f, 0xe9, 0x80, 0x9c, 0x45,
+	0xc3, 0x68, 0x2c, 0x33, 0x31, 0x62, 0xc5, 0xce, 0x6c, 0x05, 0xd4, 0xb9, 0xbe, 0xed, 0x1f, 0xf9,
+	0xd4, 0xfb, 0xdf, 0x1f, 0xc6, 0x51, 0x49, 0x73, 0xcd, 0x41, 0x30, 0x54, 0xf1, 0x7b, 0x3a, 0x3d,
+	0xda, 0x7a, 0x08, 0xce, 0xb7, 0x44, 0x03, 0x09, 0x47, 0xe0, 0x07, 0xb6, 0x90, 0xdc, 0xdf, 0x08,
+	0xd9, 0x39, 0x18, 0x6c, 0x0d, 0x6b, 0x7a, 0x88, 0xcf, 0x33, 0x21, 0xf5, 0x25, 0x3f, 0x95, 0x54,
+	0xee, 0x77, 0xcf, 0xc3, 0x50, 0x0c, 0xae, 0x0b, 0xac, 0xc0, 0x88, 0x4a, 0x78, 0x68, 0x0b, 0x59,
+	0x62, 0x35, 0x5b, 0x48, 0xe6, 0xb3, 0xea, 0x23, 0x5e, 0xad, 0xaf, 0xb2, 0xb0, 0x0a, 0xbe, 0x0f,
+	0x70, 0xb0, 0x44, 0x7d, 0x57, 0xa3, 0x56, 0xb0, 0x71, 0xab, 0xb1, 0x71, 0x2b, 0x78, 0x38, 0x7a,
+	0xe3, 0xd6, 0x12, 0xad, 0x31, 0xcd, 0x2d, 0x35, 0x31, 0xcd, 0xcf, 0x08, 0x06, 0x0e, 0x37, 0x59,
+	0x74, 0x5f, 0x70, 0x9c, 0x87, 0x8c, 0xa3, 0x4e, 0x65, 0x97, 0x3a, 0x4c, 0x75, 0xe8, 0x2b, 0x41,
+	0x10, 0x7a, 0x4c, 0x1d, 0x86, 0xb3, 0xd0, 0x5b, 0xf1, 0x19, 0x95, 0xdc, 0xcf, 0x76, 0x29, 0x30,
+	0x3c, 0xe2, 0x61, 0xc8, 0x54, 0x99, 0xa8, 0xf8, 0xb6, 0xa7, 0xc4, 0x75, 0x2b, 0xb4, 0x39, 0x84,
+	0xcf, 0x42, 0x5a, 0x48, 0x2a, 0xeb, 0x22, 0xfb, 0x8f, 0x02, 0xf5, 0x09, 0x0f, 0x01, 0xa8, 0x22,
+	0xac, 0x5a, 0xa6, 0x32, 0xdb, 0xa3, 0xb0, 0x3e, 0x1d, 0x99, 0x95, 0x0d, 0xb8, 0xee, 0x55, 0x43,
+	0x38, 0x1d, 0xc0, 0x3a, 0x32, 0x2b, 0xcd, 0x2d, 0x04, 0x66, 0xd2, 0xcd, 0xe9, 0x27, 0xb6, 0x08,
+	0xbd, 0xc1, 0x18, 0x8d, 0x37, 0xd6, 0x3d, 0x96, 0x99, 0x20, 0x09, 0x6f, 0xac, 0xd5, 0xdd, 0x94,
+	0x42, 0x3e, 0x5e, 0x88, 0x6c, 0xa1, 0x4b, 0x6d, 0xe1, 0x52, 0xdb, 0x2d, 0x04, 0x3a, 0x22, 0x6b,
+	0x98, 0x83, 0xbc, 0x52, 0xbe, 0xc0, 0x8e, 0x08, 0x0f, 0x37, 0xde, 0x6e, 0x21, 0xe6, 0x0a, 0x0c,
+	0xc7, 0xd7, 0xd0, 0xb3, 0x2f, 0x40, 0x3a, 0x60, 0xe8, 0x27, 0xd3, 0xf1, 0xe8, 0x9a, 0x3e, 0xf1,
+	0xe7, 0x5f, 0xe8, 0x51, 0xdd, 0xf0, 0x26, 0x82, 0x74, 0xf0, 0x05, 0xe1, 0x42, 0x42, 0xb5, 0xa3,
+	0x16, 0x60, 0x58, 0xc7, 0x4d, 0xd7, 0x1f, 0xc6, 0xf8, 0xdb, 0xaf, 0xbf, 0x36, 0xbb, 0x2e, 0x60,
+	0x93, 0x84, 0xbc, 0x42, 0x9c, 0xf5, 0xe0, 0x8f, 0x08, 0xfe, 0x8b, 0x7e, 0xdf, 0x78, 0xaa, 0x5d,
+	0xbb, 0x96, 0x6e, 0x61, 0x4c, 0x77, 0x4a, 0xd3, 0x6a, 0x27, 0x95, 0xda, 0x02, 0xbe, 0x9c, 0xa4,
+	0x36, 0x3c, 0x94, 0xb5, 0xec, 0x2d, 0x04, 0xff, 0x1f, 0x32, 0x16, 0x7c, 0x6c, 0x01, 0x51, 0xa3,
+	0x32, 0xae, 0x77, 0xcc, 0xd3, 0xca, 0xaf, 0x29, 0xe5, 0x16, 0xbe, 0x72, 0x2c, 0xe5, 0x2f, 0xb5,
+	0xcc, 0x4f, 0x08, 0x4e, 0x1d, 0xf6, 0x34, 0xdc, 0x56, 0x43, 0x8c, 0x4b, 0x1a, 0x37, 0x3a, 0x27,
+	0x6a, 0xf5, 0x53, 0x4a, 0x3d, 0xc1, 0x85, 0x24, 0xf5, 0xd5, 0x03, 0x76, 0x59, 0x28, 0xa5, 0x5f,
+	0x10, 0x9c, 0x69, 0xe9, 0x1b, 0x78, 0xa6, 0x9d, 0x94, 0x24, 0xa3, 0x36, 0xee, 0x9c, 0x90, 0xad,
+	0xa7, 0x99, 0x56, 0xd3, 0x5c, 0xc5, 0x56, 0xd2, 0x34, 0xfe, 0x3e, 0xbd, 0x1c, 0x3a, 0xd3, 0x37,
+	0x04, 0xfd, 0x2d, 0x8c, 0x00, 0xdf, 0x6a, 0x27, 0x27, 0xde, 0x81, 0x8c, 0xdb, 0x27, 0xe2, 0xea,
+	0x41, 0xe6, 0xd5, 0x20, 0x77, 0xf1, 0x4c, 0x67, 0x83, 0x90, 0xd7, 0x4d, 0xa6, 0xf7, 0x66, 0xee,
+	0xe6, 0xf6, 0x6e, 0x0e, 0xed, 0xec, 0xe6, 0xd0, 0xcf, 0xdd, 0x1c, 0x7a, 0xb7, 0x97, 0x4b, 0xed,
+	0xec, 0xe5, 0x52, 0xdf, 0xf7, 0x72, 0xa9, 0x67, 0xf9, 0x68, 0xd9, 0x57, 0x4d, 0x85, 0xe5, 0x86,
+	0xc7, 0xc4, 0x72, 0x5a, 0xfd, 0x37, 0x32, 0xf9, 0x37, 0x00, 0x00, 0xff, 0xff, 0x64, 0x38, 0xfd,
+	0xaa, 0x6c, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -405,6 +704,10 @@ type QueryClient interface {
 	EmissionHistory(ctx context.Context, in *QueryEmissionHistoryRequest, opts ...grpc.CallOption) (*QueryEmissionHistoryResponse, error)
 	// DestinationStats Queries a list of DestinationStats items.
 	DestinationStats(ctx context.Context, in *QueryDestinationStatsRequest, opts ...grpc.CallOption) (*QueryDestinationStatsResponse, error)
+	// ListRegisteredModules Queries all registered modules in the emissions registry.
+	ListRegisteredModules(ctx context.Context, in *QueryListRegisteredModulesRequest, opts ...grpc.CallOption) (*QueryListRegisteredModulesResponse, error)
+	// GetRegisteredModule Queries a specific registered module by name.
+	GetRegisteredModule(ctx context.Context, in *QueryGetRegisteredModuleRequest, opts ...grpc.CallOption) (*QueryGetRegisteredModuleResponse, error)
 }
 
 type queryClient struct {
@@ -451,6 +754,24 @@ func (c *queryClient) DestinationStats(ctx context.Context, in *QueryDestination
 	return out, nil
 }
 
+func (c *queryClient) ListRegisteredModules(ctx context.Context, in *QueryListRegisteredModulesRequest, opts ...grpc.CallOption) (*QueryListRegisteredModulesResponse, error) {
+	out := new(QueryListRegisteredModulesResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.emissions.v1.Query/ListRegisteredModules", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetRegisteredModule(ctx context.Context, in *QueryGetRegisteredModuleRequest, opts ...grpc.CallOption) (*QueryGetRegisteredModuleResponse, error) {
+	out := new(QueryGetRegisteredModuleResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.emissions.v1.Query/GetRegisteredModule", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
@@ -461,6 +782,10 @@ type QueryServer interface {
 	EmissionHistory(context.Context, *QueryEmissionHistoryRequest) (*QueryEmissionHistoryResponse, error)
 	// DestinationStats Queries a list of DestinationStats items.
 	DestinationStats(context.Context, *QueryDestinationStatsRequest) (*QueryDestinationStatsResponse, error)
+	// ListRegisteredModules Queries all registered modules in the emissions registry.
+	ListRegisteredModules(context.Context, *QueryListRegisteredModulesRequest) (*QueryListRegisteredModulesResponse, error)
+	// GetRegisteredModule Queries a specific registered module by name.
+	GetRegisteredModule(context.Context, *QueryGetRegisteredModuleRequest) (*QueryGetRegisteredModuleResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -478,6 +803,12 @@ func (*UnimplementedQueryServer) EmissionHistory(ctx context.Context, req *Query
 }
 func (*UnimplementedQueryServer) DestinationStats(ctx context.Context, req *QueryDestinationStatsRequest) (*QueryDestinationStatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DestinationStats not implemented")
+}
+func (*UnimplementedQueryServer) ListRegisteredModules(ctx context.Context, req *QueryListRegisteredModulesRequest) (*QueryListRegisteredModulesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRegisteredModules not implemented")
+}
+func (*UnimplementedQueryServer) GetRegisteredModule(ctx context.Context, req *QueryGetRegisteredModuleRequest) (*QueryGetRegisteredModuleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRegisteredModule not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -556,6 +887,42 @@ func _Query_DestinationStats_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_ListRegisteredModules_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryListRegisteredModulesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ListRegisteredModules(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.emissions.v1.Query/ListRegisteredModules",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ListRegisteredModules(ctx, req.(*QueryListRegisteredModulesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetRegisteredModule_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetRegisteredModuleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetRegisteredModule(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.emissions.v1.Query/GetRegisteredModule",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetRegisteredModule(ctx, req.(*QueryGetRegisteredModuleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scarlettcore.emissions.v1.Query",
@@ -576,6 +943,14 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DestinationStats",
 			Handler:    _Query_DestinationStats_Handler,
+		},
+		{
+			MethodName: "ListRegisteredModules",
+			Handler:    _Query_ListRegisteredModules_Handler,
+		},
+		{
+			MethodName: "GetRegisteredModule",
+			Handler:    _Query_GetRegisteredModule_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -776,6 +1151,220 @@ func (m *QueryDestinationStatsResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryListRegisteredModulesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryListRegisteredModulesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryListRegisteredModulesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *RegisteredModuleInfo) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *RegisteredModuleInfo) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RegisteredModuleInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.UpdatedAt) > 0 {
+		i -= len(m.UpdatedAt)
+		copy(dAtA[i:], m.UpdatedAt)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.UpdatedAt)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.CreatedAt) > 0 {
+		i -= len(m.CreatedAt)
+		copy(dAtA[i:], m.CreatedAt)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.CreatedAt)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Status) > 0 {
+		i -= len(m.Status)
+		copy(dAtA[i:], m.Status)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Status)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ModuleName) > 0 {
+		i -= len(m.ModuleName)
+		copy(dAtA[i:], m.ModuleName)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.ModuleName)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryListRegisteredModulesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryListRegisteredModulesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryListRegisteredModulesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Modules) > 0 {
+		for iNdEx := len(m.Modules) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Modules[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetRegisteredModuleRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetRegisteredModuleRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetRegisteredModuleRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ModuleName) > 0 {
+		i -= len(m.ModuleName)
+		copy(dAtA[i:], m.ModuleName)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.ModuleName)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetRegisteredModuleResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetRegisteredModuleResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetRegisteredModuleResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Module != nil {
+		{
+			size, err := m.Module.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -858,6 +1447,97 @@ func (m *QueryDestinationStatsResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	return n
+}
+
+func (m *QueryListRegisteredModulesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *RegisteredModuleInfo) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ModuleName)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Status)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.CreatedAt)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.UpdatedAt)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryListRegisteredModulesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Modules) > 0 {
+		for _, e := range m.Modules {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetRegisteredModuleRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ModuleName)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetRegisteredModuleResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Module != nil {
+		l = m.Module.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
 	return n
 }
 
@@ -1279,6 +1959,622 @@ func (m *QueryDestinationStatsResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: QueryDestinationStatsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryListRegisteredModulesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryListRegisteredModulesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryListRegisteredModulesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *RegisteredModuleInfo) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RegisteredModuleInfo: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RegisteredModuleInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ModuleName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ModuleName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Status = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CreatedAt = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UpdatedAt = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryListRegisteredModulesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryListRegisteredModulesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryListRegisteredModulesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Modules", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Modules = append(m.Modules, &RegisteredModuleInfo{})
+			if err := m.Modules[len(m.Modules)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetRegisteredModuleRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetRegisteredModuleRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetRegisteredModuleRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ModuleName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ModuleName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetRegisteredModuleResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetRegisteredModuleResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetRegisteredModuleResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Module", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Module == nil {
+				m.Module = &RegisteredModuleInfo{}
+			}
+			if err := m.Module.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
