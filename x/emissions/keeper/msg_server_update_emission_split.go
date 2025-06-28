@@ -87,9 +87,10 @@ func (k msgServer) parseDestinations(goCtx context.Context, moduleNames, weights
 
 	// Core modules that are exempt from registry requirements
 	coreModules := map[string]bool{
-		"fee_collector":  true, // Validator and delegator rewards
-		"distribution":   true, // Distribution module
-		"community_pool": true, // Community pool
+		"fee_collector":    true, // Validator and delegator rewards
+		"distribution":     true, // Distribution module
+		"community_pool":   true, // Community pool
+		"inferencerewards": true, // AI inference provider rewards (core functionality)
 	}
 
 	destinations := make([]types.EmissionDestination, len(moduleNames))
