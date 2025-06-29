@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
@@ -75,6 +76,14 @@ func (k msgServer) UpdateEmissionSplit(goCtx context.Context, msg *types.MsgUpda
 	return &types.MsgUpdateEmissionSplitResponse{}, nil
 }
 
+// isContractAddress determines if a destination is a contract address vs a module name
+func (k msgServer) isContractAddress(destination string) bool {
+	// Contract addresses start with "scarlett1" and are longer than typical module names
+	// Typical module names: "fee_collector", "distribution", "staking", etc.
+	// Contract addresses: "scarlett1abcd..." (45+ characters)
+	return strings.HasPrefix(destination, "scarlett1") && len(destination) >= 45
+}
+
 // parseDestinations converts string arrays from governance proposal to EmissionDestination structs
 func (k msgServer) parseDestinations(goCtx context.Context, moduleNames, weights []string) ([]types.EmissionDestination, error) {
 	if len(moduleNames) != len(weights) {
@@ -96,10 +105,18 @@ func (k msgServer) parseDestinations(goCtx context.Context, moduleNames, weights
 	rules := types.DefaultValidationRules()
 
 	for i, moduleName := range moduleNames {
-		// 🔒 REGISTRY VALIDATION: Ensure all non-core modules are registered
+		// 🔒 REGISTRY VALIDATION: Ensure all non-core destinations are registered
 		if !coreModules[moduleName] {
-			if !k.Keeper.IsModuleRegistered(goCtx, moduleName) {
-				return nil, types.ErrModuleNotRegistered.Wrapf("destination module '%s' is not registered - modules must be registered before being eligible for emissions", moduleName)
+			if k.isContractAddress(moduleName) {
+				// Handle contract address validation
+				if err := k.validateContractDestination(goCtx, moduleName); err != nil {
+					return nil, fmt.Errorf("contract validation failed for %s: %w", moduleName, err)
+				}
+			} else {
+				// Handle module validation (existing logic)
+				if !k.Keeper.IsModuleRegistered(goCtx, moduleName) {
+					return nil, types.ErrModuleNotRegistered.Wrapf("destination module '%s' is not registered - modules must be registered before being eligible for emissions", moduleName)
+				}
 			}
 		}
 
@@ -113,14 +130,40 @@ func (k msgServer) parseDestinations(goCtx context.Context, moduleNames, weights
 		destinations[i] = types.EmissionDestination{
 			ModuleName:  moduleName,
 			Weight:      weight,
-			Description: k.getModuleDescription(moduleName),
+			Description: k.getDestinationDescription(goCtx, moduleName),
 			Enabled:     true,
-			MinWeight:   k.getMinWeightForModule(moduleName, rules),
+			MinWeight:   k.getMinWeightForDestination(moduleName, rules),
 			MaxWeight:   rules.MaxSingleDestination,
 		}
 	}
 
 	return destinations, nil
+}
+
+// validateContractDestination performs comprehensive validation for contract destinations
+func (k msgServer) validateContractDestination(goCtx context.Context, contractAddr string) error {
+	// 1. Validate contract address format
+	if _, err := sdk.AccAddressFromBech32(contractAddr); err != nil {
+		return fmt.Errorf("invalid contract address format: %w", err)
+	}
+
+	// 2. Check if contract is registered in the emissions registry
+	if !k.Keeper.IsModuleRegistered(goCtx, contractAddr) {
+		return types.ErrModuleNotRegistered.Wrapf("contract '%s' is not registered - contracts must be registered before being eligible for emissions", contractAddr)
+	}
+
+	// 3. Get contract registration details for additional validation
+	registeredModule, err := k.Keeper.GetRegisteredModule(goCtx, contractAddr)
+	if err != nil {
+		return fmt.Errorf("failed to get contract registration details: %w", err)
+	}
+
+	// 4. Validate contract registration is active
+	if registeredModule.Status != types.ModuleStatusRegistered {
+		return fmt.Errorf("contract '%s' registration is not active (status: %s)", contractAddr, string(registeredModule.Status))
+	}
+
+	return nil
 }
 
 // validateGovernanceProposal performs additional governance-specific validations
@@ -179,28 +222,40 @@ func (k msgServer) validateDangerousConfigurations(params types.EmissionParams) 
 	return nil
 }
 
-// getModuleDescription returns a human-readable description for known modules
-func (k msgServer) getModuleDescription(moduleName string) string {
-	descriptions := map[string]string{
+// getDestinationDescription returns a human-readable description for modules and contracts
+func (k msgServer) getDestinationDescription(goCtx context.Context, destination string) string {
+	// Handle known module descriptions
+	moduleDescriptions := map[string]string{
 		"fee_collector":    "Validator and delegator staking rewards",
 		"inferencerewards": "AI inference provider rewards",
 		"distribution":     "Distribution module rewards",
 		"community_pool":   "Community pool funding",
 	}
 
-	if desc, exists := descriptions[moduleName]; exists {
+	if desc, exists := moduleDescriptions[destination]; exists {
 		return desc
 	}
-	return fmt.Sprintf("Rewards for %s module", moduleName)
+
+	// Handle contract addresses
+	if k.isContractAddress(destination) {
+		// Try to get contract registration details for a more descriptive name
+		if registeredModule, err := k.Keeper.GetRegisteredModule(goCtx, destination); err == nil {
+			return fmt.Sprintf("Contract: %s (%s)", registeredModule.Description, destination[:12]+"...")
+		}
+		return fmt.Sprintf("Contract rewards (%s...)", destination[:12])
+	}
+
+	// Default module description
+	return fmt.Sprintf("Rewards for %s module", destination)
 }
 
-// getMinWeightForModule returns minimum weight requirements for specific modules
-func (k msgServer) getMinWeightForModule(moduleName string, rules types.EmissionValidationRules) math.LegacyDec {
+// getMinWeightForDestination returns minimum weight requirements for specific destinations
+func (k msgServer) getMinWeightForDestination(destination string, rules types.EmissionValidationRules) math.LegacyDec {
 	// fee_collector (validators) have special minimum requirements
-	if moduleName == "fee_collector" {
+	if destination == "fee_collector" {
 		return rules.MinValidatorReward
 	}
-	// Other modules have no specific minimum (can be zero)
+	// Contracts and other modules have no specific minimum (can be zero)
 	return math.LegacyZeroDec()
 }
 
@@ -216,11 +271,17 @@ func (k msgServer) emitEmissionParamsUpdatedEvent(ctx sdk.Context, oldParams, ne
 		sdk.NewAttribute("governance_controlled", "true"),
 	}
 
-	// Add individual destination details
+	// Add individual destination details with type detection
 	for i, dest := range newParams.Destinations {
 		prefix := fmt.Sprintf("dest_%d", i)
+		destType := "MODULE"
+		if k.isContractAddress(dest.ModuleName) {
+			destType = "CONTRACT"
+		}
+
 		attributes = append(attributes,
-			sdk.NewAttribute(prefix+"_module", dest.ModuleName),
+			sdk.NewAttribute(prefix+"_destination", dest.ModuleName),
+			sdk.NewAttribute(prefix+"_type", destType),
 			sdk.NewAttribute(prefix+"_weight", dest.Weight.String()),
 			sdk.NewAttribute(prefix+"_enabled", fmt.Sprintf("%t", dest.Enabled)),
 			sdk.NewAttribute(prefix+"_description", dest.Description),
@@ -230,6 +291,26 @@ func (k msgServer) emitEmissionParamsUpdatedEvent(ctx sdk.Context, oldParams, ne
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(types.EventTypeEmissionParamsUpdated, attributes...),
 	)
+
+	// Log detailed governance update
+	ctx.Logger().Info("🏛️ GOVERNANCE EMISSION SPLIT UPDATED",
+		"num_destinations", len(newParams.Destinations),
+		"reason", reason,
+		"updated_by", newParams.UpdatedBy)
+
+	// Log each destination with type
+	for i, dest := range newParams.Destinations {
+		destType := "MODULE"
+		if k.isContractAddress(dest.ModuleName) {
+			destType = "CONTRACT"
+		}
+		ctx.Logger().Info("💰 Governance destination configured",
+			"index", i,
+			"type", destType,
+			"destination", dest.ModuleName,
+			"weight", dest.Weight.String(),
+			"description", dest.Description)
+	}
 }
 
 // paramsToString converts emission parameters to a compact string representation
