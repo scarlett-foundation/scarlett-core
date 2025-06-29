@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package scarlettcore.contracts.v1;
 
 import "amino/amino.proto";
@@ -15,6 +16,16 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/scarlett-core/contracts/v1/params";
   }
+
+  // ListContracts Queries a list of ListContracts items.
+  rpc ListContracts(QueryListContractsRequest) returns (QueryListContractsResponse) {
+    option (google.api.http).get = "/scarlett-core/contracts/v1/list_contracts";
+  }
+
+  // ContractInfo Queries a list of ContractInfo items.
+  rpc ContractInfo(QueryContractInfoRequest) returns (QueryContractInfoResponse) {
+    option (google.api.http).get = "/scarlett-core/contracts/v1/contract_info/{contract_address}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -27,4 +38,41 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryListContractsRequest defines the QueryListContractsRequest message.
+message QueryListContractsRequest {}
+
+// QueryListContractsResponse defines the QueryListContractsResponse message.
+message QueryListContractsResponse {
+  repeated ContractSummary contracts = 1;
+}
+
+// ContractSummary provides basic contract information
+message ContractSummary {
+  string address = 1;
+  string label = 2;
+  string creator = 3;
+  bool is_registered = 4;
+}
+
+// QueryContractInfoRequest defines the QueryContractInfoRequest message.
+message QueryContractInfoRequest {
+  string contract_address = 1;
+}
+
+// QueryContractInfoResponse defines the QueryContractInfoResponse message.
+message QueryContractInfoResponse {
+  ContractInfo contract_info = 1;
+}
+
+// ContractInfo provides detailed contract information
+message ContractInfo {
+  string address = 1;
+  string label = 2;
+  string creator = 3;
+  bool is_registered = 4;
+  string registration_name = 5;
+  string registration_description = 6;
+  string registration_creator = 7;
 }

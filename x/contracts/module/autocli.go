@@ -17,6 +17,20 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod:      "ListContracts",
+					Use:            "list-contracts ",
+					Short:          "Query list-contracts",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+				},
+
+				{
+					RpcMethod:      "ContractInfo",
+					Use:            "contract-info [contract-address]",
+					Short:          "Query contract-info",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "contract_address"}},
+				},
+
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
