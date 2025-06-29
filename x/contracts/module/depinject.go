@@ -33,10 +33,9 @@ type ModuleInputs struct {
 	Cdc          codec.Codec
 	AddressCodec address.Codec
 
-	AuthKeeper types.AuthKeeper
-	BankKeeper types.BankKeeper
-	// TODO: Add EmissionsKeeper back in Step 3 when we implement emissions integration
-	// EmissionsKeeper types.EmissionsKeeper
+	AuthKeeper      types.AuthKeeper
+	BankKeeper      types.BankKeeper
+	EmissionsKeeper types.EmissionsKeeper
 }
 
 type ModuleOutputs struct {
@@ -64,8 +63,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		authority,
 		wasmDir,
 		in.BankKeeper,
-		// TODO: Add EmissionsKeeper back in Step 3 when we implement emissions integration
-		// in.EmissionsKeeper,
+		in.EmissionsKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 

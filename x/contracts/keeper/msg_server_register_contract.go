@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"scarlett-core/x/contracts/types"
+	emissionstypes "scarlett-core/x/emissions/types"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -35,11 +36,15 @@ func (k msgServer) RegisterContract(ctx context.Context, msg *types.MsgRegisterC
 		return nil, errorsmod.Wrap(types.ErrInvalidInput, "contract description cannot be empty")
 	}
 
-	// TODO: In Step 3, we will validate that the contract actually exists
-	// by checking it was previously deployed via DeployContract
+	// Validate that the contract actually exists by checking it was previously deployed
 	err := k.validateContractExists(ctx, msg.ContractAddress)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "contract validation failed")
+	}
+
+	// Check if contract is already registered with emissions
+	if k.emissionsKeeper.IsModuleRegistered(ctx, msg.ContractAddress) {
+		return nil, errorsmod.Wrap(types.ErrInvalidInput, "contract is already registered for emissions")
 	}
 
 	// Store contract registration information
@@ -48,10 +53,20 @@ func (k msgServer) RegisterContract(ctx context.Context, msg *types.MsgRegisterC
 		return nil, errorsmod.Wrap(err, "failed to store contract registration")
 	}
 
-	// TODO: In Step 3, we will integrate with emissions keeper:
-	// k.emissionsKeeper.RegisterDestination(ctx, msg.ContractAddress, msg.Name, msg.Description)
+	// Register contract with emissions keeper as a valid destination
+	// Use the proper constructor from emissions types
+	registeredModule := emissionstypes.NewRegisteredModule(
+		msg.ContractAddress, // Use contract address as module name for emissions
+		msg.Creator,
+		msg.Description,
+	)
 
-	// Emit contract registration event
+	err = k.emissionsKeeper.SetRegisteredModule(ctx, registeredModule)
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "failed to register contract with emissions keeper")
+	}
+
+	// Emit comprehensive contract registration event
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
@@ -60,37 +75,52 @@ func (k msgServer) RegisterContract(ctx context.Context, msg *types.MsgRegisterC
 			sdk.NewAttribute("contract_address", msg.ContractAddress),
 			sdk.NewAttribute("name", msg.Name),
 			sdk.NewAttribute("description", msg.Description),
+			sdk.NewAttribute("status", "REGISTERED"),
+			sdk.NewAttribute("emissions_eligible", "true"),
 		),
 	)
+
+	// Log successful registration
+	sdkCtx.Logger().Info("✅ CONTRACT REGISTRATION SUCCESSFUL",
+		"contract_address", msg.ContractAddress,
+		"name", msg.Name,
+		"creator", msg.Creator,
+		"emissions_status", "REGISTERED")
 
 	return &types.MsgRegisterContractResponse{}, nil
 }
 
-// validateContractExists checks if the contract was previously deployed
+// validateContractExists checks if the contract was previously deployed via DeployContract
 func (k msgServer) validateContractExists(ctx context.Context, contractAddress string) error {
-	// TODO: In Phase 2, this will check actual contract storage
-	// For now, we'll do basic validation that it looks like a contract address
-
-	// Basic validation: contract addresses should be longer than regular addresses
-	if len(contractAddress) < 45 { // scarlett1 + 38 chars
-		return errorsmod.Wrap(types.ErrInvalidInput, "contract address format invalid")
+	// Check if contract exists in our ContractInfo collection
+	_, err := k.ContractInfo.Get(ctx, contractAddress)
+	if err != nil {
+		return errorsmod.Wrapf(types.ErrInvalidInput,
+			"contract not found: %s (contract must be deployed before registration)",
+			contractAddress)
 	}
-
-	// TODO: Check that contract was deployed via our DeployContract message
-	// This will be implemented when we add contract storage in Phase 2
 
 	return nil
 }
 
 // storeContractRegistration stores the contract registration information
 func (k msgServer) storeContractRegistration(ctx context.Context, contractAddress, name, description, creator string) error {
-	// TODO: Store contract registration in keeper state
-	// This will include:
-	// - Contract address -> registration info mapping
-	// - Registration status
-	// - Creator information
-	// - Metadata (name, description)
+	// Get existing contract info to update it with registration details
+	contractInfo, err := k.ContractInfo.Get(ctx, contractAddress)
+	if err != nil {
+		return errorsmod.Wrap(err, "failed to get contract info")
+	}
 
-	// For now, we'll just validate the inputs are properly formatted
+	// Update contract info with registration metadata
+	// Note: In a more complete implementation, we might have a separate
+	// ContractRegistration collection, but for V1 we'll store it in ContractInfo
+	contractInfo.Label = name + " (Registered for Emissions)"
+
+	// Store updated contract info
+	err = k.ContractInfo.Set(ctx, contractAddress, contractInfo)
+	if err != nil {
+		return errorsmod.Wrap(err, "failed to update contract info with registration")
+	}
+
 	return nil
 }

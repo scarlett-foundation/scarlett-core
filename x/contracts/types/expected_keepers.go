@@ -5,12 +5,19 @@ import (
 
 	"cosmossdk.io/core/address"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	emissionstypes "scarlett-core/x/emissions/types"
 )
 
-// TODO: Add EmissionsKeeper interface back in Step 3 when we implement emissions integration
-// type EmissionsKeeper interface {
-// 	// TODO Add methods imported from emissions should be defined here
-// }
+// EmissionsKeeper defines the expected interface for the Emissions module.
+type EmissionsKeeper interface {
+	// IsModuleRegistered checks if a module is registered in the emissions registry
+	IsModuleRegistered(ctx context.Context, moduleName string) bool
+	// GetRegisteredModule retrieves a registered module from the registry
+	GetRegisteredModule(ctx context.Context, moduleName string) (emissionstypes.RegisteredModule, error)
+	// SetRegisteredModule stores a registered module in the registry
+	SetRegisteredModule(ctx context.Context, module emissionstypes.RegisteredModule) error
+}
 
 // AuthKeeper defines the expected interface for the Auth module.
 type AuthKeeper interface {

@@ -33,9 +33,8 @@ type Keeper struct {
 	ContractInfo collections.Map[string, types.ContractInfo] // address -> contract info
 	ContractSeq  collections.Sequence                        // for generating contract IDs
 
-	bankKeeper types.BankKeeper
-	// TODO: Add EmissionsKeeper back in Step 3 when we implement emissions integration
-	// emissionsKeeper types.EmissionsKeeper
+	bankKeeper      types.BankKeeper
+	emissionsKeeper types.EmissionsKeeper
 }
 
 func NewKeeper(
@@ -46,8 +45,7 @@ func NewKeeper(
 	wasmDir string,
 
 	bankKeeper types.BankKeeper,
-	// TODO: Add EmissionsKeeper back in Step 3 when we implement emissions integration
-	// emissionsKeeper types.EmissionsKeeper,
+	emissionsKeeper types.EmissionsKeeper,
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
@@ -75,9 +73,8 @@ func NewKeeper(
 		authority:    authority,
 		wasmVM:       vm,
 
-		bankKeeper: bankKeeper,
-		// TODO: Add EmissionsKeeper back in Step 3 when we implement emissions integration
-		// emissionsKeeper: emissionsKeeper,
+		bankKeeper:      bankKeeper,
+		emissionsKeeper: emissionsKeeper,
 
 		Params:       collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		ContractCode: collections.NewMap(sb, types.ContractCodeKey, "contract_code", collections.BytesKey, collections.BytesValue),
