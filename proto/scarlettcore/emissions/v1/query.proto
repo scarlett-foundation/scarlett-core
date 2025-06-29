@@ -12,51 +12,47 @@ option go_package = "scarlett-core/x/emissions/types";
 
 // Query defines the gRPC querier service.
 service Query {
-  
   // Parameters queries the parameters of the module.
-  rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/scarlett-core/emissions/v1/params";
-  
   }
-  
+
   // EmissionParams Queries a list of EmissionParams items.
-  rpc EmissionParams (QueryEmissionParamsRequest) returns (QueryEmissionParamsResponse) {
+  rpc EmissionParams(QueryEmissionParamsRequest) returns (QueryEmissionParamsResponse) {
     option (google.api.http).get = "/scarlett-core/emissions/v1/emission_params";
-  
   }
-  
+
   // EmissionHistory Queries a list of EmissionHistory items.
-  rpc EmissionHistory (QueryEmissionHistoryRequest) returns (QueryEmissionHistoryResponse) {
+  rpc EmissionHistory(QueryEmissionHistoryRequest) returns (QueryEmissionHistoryResponse) {
     option (google.api.http).get = "/scarlett-core/emissions/v1/emission_history";
-  
   }
-  
+
   // DestinationStats Queries a list of DestinationStats items.
-  rpc DestinationStats (QueryDestinationStatsRequest) returns (QueryDestinationStatsResponse) {
+  rpc DestinationStats(QueryDestinationStatsRequest) returns (QueryDestinationStatsResponse) {
     option (google.api.http).get = "/scarlett-core/emissions/v1/destination_stats";
-  
   }
 
   // ListRegisteredModules Queries all registered modules in the emissions registry.
-  rpc ListRegisteredModules (QueryListRegisteredModulesRequest) returns (QueryListRegisteredModulesResponse) {
+  rpc ListRegisteredModules(QueryListRegisteredModulesRequest) returns (QueryListRegisteredModulesResponse) {
     option (google.api.http).get = "/scarlett-core/emissions/v1/registered_modules";
-  
   }
 
   // GetRegisteredModule Queries a specific registered module by name.
-  rpc GetRegisteredModule (QueryGetRegisteredModuleRequest) returns (QueryGetRegisteredModuleResponse) {
+  rpc GetRegisteredModule(QueryGetRegisteredModuleRequest) returns (QueryGetRegisteredModuleResponse) {
     option (google.api.http).get = "/scarlett-core/emissions/v1/registered_modules/{module_name}";
-  
   }
 }
+
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
-  
   // params holds all the parameters of this module.
-  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
 }
 
 // QueryEmissionParamsRequest defines the QueryEmissionParamsRequest message.
@@ -109,4 +105,3 @@ message QueryGetRegisteredModuleRequest {
 message QueryGetRegisteredModuleResponse {
   RegisteredModuleInfo module = 1;
 }
-

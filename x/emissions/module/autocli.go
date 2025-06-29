@@ -32,9 +32,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 
 				{
-					RpcMethod: "DestinationStats",
-					Use: "destination-stats ",
-					Short: "Query destination-stats",
+					RpcMethod:      "DestinationStats",
+					Use:            "destination-stats ",
+					Short:          "Query destination-stats",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
 				},
 

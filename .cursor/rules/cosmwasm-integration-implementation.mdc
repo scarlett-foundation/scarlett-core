@@ -1,0 +1,362 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# CosmWasm Integration & Smart Contract Emissions - Custom Module Implementation
+
+## Overview
+Create a **custom ignite-scaffolded contracts module** that integrates CosmWasm smart contracting with the existing `x/emissions` module. This approach provides clean CLI integration, full control over business logic, and seamless emissions registry integration while maintaining the permissionless platform for contract funding.
+
+## ⚠️ CRITICAL IMPLEMENTATION REQUIREMENTS
+- **BUILD ON existing registry** - leverage the Open Module Registration infrastructure
+- **PRESERVE all functionality** - existing emissions and module registration must continue working
+- **LEAN V1 approach** - focus on core contract support, add staking in future versions
+- **NO breaking changes** - chain must continue running identically during implementation
+- **SECURE execution** - contracts run in sandboxed Wasm VM
+- **CLEAN ARCHITECTURE** - custom module with standard ignite patterns
+
+## Implementation Strategy: Custom Contracts Module
+
+### Why Custom Module Over Direct x/wasmd Integration?
+- ✅ **Automatic CLI Registration** - All commands work out of the box
+- ✅ **Clean Module Structure** - Standard ignite patterns and conventions
+- ✅ **Custom Business Logic** - Easy integration with emissions registry
+- ✅ **Full Control** - Customize permissions, validation, and workflows
+- ✅ **Maintainable Code** - Follows existing codebase patterns
+- ✅ **Direct Integration** - Tight coupling with emissions module
+
+## Implementation Steps
+
+### Phase 1: Custom Contracts Module Foundation
+
+#### Step 1.1: Create Custom Contracts Module
+**Objective**: Scaffold a new contracts module with ignite
+**Files**: Creates `x/contracts/` module structure
+**Action**: 
+- Run `ignite scaffold module contracts --dep bank,emissions`
+- Generate complete module structure with CLI integration
+- Create keeper with bank and emissions dependencies
+- Auto-generate proto files and message types
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(contracts): scaffold custom contracts module with ignite`
+
+#### Step 1.2: Add Contract Deployment Message
+**Objective**: Create contract deployment functionality
+**Files**: Auto-generates message handlers and types
+**Action**:
+- Run `ignite scaffold message deploy-contract code:bytes instantiate-msg:string label:string --module contracts`
+- Add wasmvm dependencies to contracts module
+- Implement contract code storage and instantiation
+- Add contract address generation and validation
+**Verification**: User builds chain and confirms success
+**Commit**: `feat(contracts): add contract deployment message with wasm VM`
+
+#### Step 1.3: Add Contract Registration Message
+**Objective**: Enable contract registration for emissions
+**Files**: Auto-generates registration message handlers
+**Action**:
+- Run `ignite scaffold message register-contract contract-address:string name:string description:string --module contracts`
+- Integrate with emissions registry directly
+- Add contract address validation
+- Emit registration events
+**Verification**: User builds chain and can register contracts
+**Commit**: `feat(contracts): add contract registration with emissions integration`
+
+#### Step 1.4: Add Contract Queries
+**Objective**: Enable contract discovery and management
+**Files**: Auto-generates query handlers and types
+**Action**:
+- Run `ignite scaffold query list-contracts --module contracts`
+- Run `ignite scaffold query contract-info contract-address:string --module contracts`
+- Add deployed contracts listing
+- Add contract metadata and status queries
+**Verification**: User builds chain and can query contracts
+**Commit**: `feat(contracts): add contract discovery and metadata queries`
+
+### Phase 2: Wasm VM Integration
+
+#### Step 2.1: Add WasmVM Dependencies
+**Objective**: Integrate actual contract execution capabilities
+**Files**: Modify `x/contracts/keeper/keeper.go`, `go.mod`
+**Action**:
+- Add `github.com/CosmWasm/wasmvm` dependency
+- Initialize WasmVM instance in contracts keeper
+- Configure secure execution environment
+- Set up contract storage and state management
+**Verification**: User builds chain and VM initializes correctly
+**Commit**: `feat(contracts): integrate WasmVM for contract execution`
+
+#### Step 2.2: Implement Contract Deployment Handler
+**Objective**: Enable actual contract code storage and instantiation
+**Files**: Modify `x/contracts/keeper/msg_server_deploy_contract.go`
+**Action**:
+- Implement contract code validation and storage
+- Add contract instantiation with WasmVM
+- Generate contract addresses using standard algorithm
+- Store contract metadata and state
+- Add deployment events and logging
+**Verification**: User builds chain and can deploy contracts
+**Commit**: `feat(contracts): implement contract deployment with WasmVM`
+
+#### Step 2.3: Add Contract Execution Security
+**Objective**: Configure secure contract execution environment
+**Files**: Modify `x/contracts/keeper/wasm.go` (create new file)
+**Action**:
+- Configure gas limits and execution timeouts
+- Set up contract-to-contract call restrictions
+- Add contract permission validation
+- Implement contract state isolation
+- Configure WasmVM capabilities
+**Verification**: User builds chain and contracts execute securely
+**Commit**: `feat(contracts): configure secure contract execution environment`
+
+### Phase 3: Emissions Registry Integration
+
+#### Step 3.1: Integrate Contract Registration with Emissions
+**Objective**: Enable contract registration in emissions registry
+**Files**: Modify `x/contracts/keeper/msg_server_register_contract.go`
+**Action**:
+- Call emissions keeper to register contract as destination
+- Validate contract exists before registration
+- Add contract-specific registry entries
+- Support contract metadata in registry
+- Emit registration success events
+**Verification**: User builds chain and contracts register in emissions
+**Commit**: `feat(contracts): integrate contract registration with emissions registry`
+
+#### Step 3.2: Extend Emissions Distribution for Contracts
+**Objective**: Enable token distribution to registered contracts
+**Files**: Modify `x/emissions/keeper/distribution.go`
+**Action**:
+- Add contract address support to distribution logic
+- Validate contract registration before distribution
+- Use contracts keeper to verify contract exists
+- Add contract-specific distribution events
+- Preserve existing module distribution logic
+**Verification**: User builds chain and contracts receive emissions
+**Commit**: `feat(emissions): enable token distribution to registered contracts`
+
+#### Step 3.3: Update Governance Validation
+**Objective**: Allow governance to fund registered contracts
+**Files**: Modify `x/emissions/keeper/msg_server_update_emission_split.go`
+**Action**:
+- Add contract address validation in governance proposals
+- Check contract registration status
+- Support contract addresses in emission split updates
+- Add contract-specific governance validation
+- Maintain backward compatibility with module funding
+**Verification**: User builds chain and governance can fund contracts
+**Commit**: `feat(emissions): enable governance funding of registered contracts`
+
+### Phase 4: Query Enhancement and CLI Integration
+
+#### Step 4.1: Extend Contract Queries
+**Objective**: Provide comprehensive contract information
+**Files**: Modify `x/contracts/keeper/query_*.go` files
+**Action**:
+- Add contract deployment history queries
+- Add contract registration status queries
+- Add contract balance and funding queries
+- Add contract metadata and state queries
+- Include emissions integration status
+**Verification**: User builds chain and can query all contract information
+**Commit**: `feat(contracts): add comprehensive contract information queries`
+
+#### Step 4.2: Update Emissions Queries for Contracts
+**Objective**: Show contracts in emissions registry queries
+**Files**: Modify `x/emissions/keeper/query_registry.go`
+**Action**:
+- Include contract destinations in registry queries
+- Add contract-specific filtering options
+- Display contract metadata alongside modules
+- Add contract funding status and history
+- Maintain backward compatibility with existing queries
+**Verification**: User builds chain and can see contracts in emissions queries
+**Commit**: `feat(emissions): display registered contracts in registry queries`
+
+#### Step 4.3: Add CLI Documentation and Examples
+**Objective**: Provide user-friendly contract workflows
+**Files**: Create documentation and example files
+**Action**:
+- Create contract deployment examples
+- Add registration workflow documentation
+- Document governance funding process
+- Add CLI command reference
+- Create end-to-end testing scenarios
+**Verification**: User can follow docs to deploy, register, and fund contracts
+**Commit**: `feat(contracts): add comprehensive CLI documentation and examples`
+
+## Build Verification Protocol
+
+### After Each Step:
+1. **Agent completes code changes**
+2. **Agent asks user**: "Please run `ignite chain build` in your terminal and let me know if it succeeds"
+3. **User confirms**: Build status (success/failure)
+4. **If failure**: Agent analyzes and fixes issues before proceeding
+5. **If success**: Agent creates commit with specified message and proceeds
+
+### User Commands to Run:
+```bash
+ignite chain build
+echo "Build exit code: $?"
+```
+
+### Agent Must Never:
+- ❌ Run build or ignite commands themselves
+- ❌ Assume build success
+- ❌ Proceed without user confirmation
+- ❌ Skip verification steps
+
+## Lean V1 Scope (Exclude for Future Versions)
+
+### Phase 1 Exclusions:
+- ❌ **Staking requirements** - implement permissionless deployment first
+- ❌ **Complex governance permissions** - use existing validation patterns
+- ❌ **Contract slashing mechanisms** - focus on core functionality
+- ❌ **Reputation systems** - add after core features work
+- ❌ **Contract upgrade mechanisms** - focus on deployment and funding
+
+### Future V2 Enhancements:
+- Stake-to-deploy requirements
+- Contract reputation tracking
+- Automated slashing for malicious contracts
+- Contract upgrade governance
+- Dynamic deployment thresholds
+
+## Safety Requirements
+
+### Contract Validation (EXACT Implementation)
+```go
+// Contract validation in registration handler
+func (k msgServer) RegisterContract(ctx context.Context, req *types.MsgRegisterContract) (*types.MsgRegisterContractResponse, error) {
+    // Validate contract exists in our contracts module
+    contractInfo, found := k.GetContractInfo(ctx, req.ContractAddress)
+    if !found {
+        return nil, types.ErrContractNotFound.Wrapf("contract address '%s' not found", req.ContractAddress)
+    }
+    
+    // Register with emissions module
+    return k.emissionsKeeper.RegisterDestination(ctx, req.ContractAddress, req.Name, req.Description)
+}
+```
+
+### Distribution Safety (EXACT Implementation)  
+```go
+// Safe token distribution to contracts in emissions module
+if destination.DestinationType == types.DESTINATION_TYPE_CONTRACT {
+    // Validate contract still exists via contracts keeper
+    if !k.contractsKeeper.HasContract(ctx, destination.Address) {
+        return fmt.Errorf("contract %s no longer exists", destination.Address)
+    }
+    
+    err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, 
+        sdk.MustAccAddressFromBech32(destination.Address), coins)
+    if err != nil {
+        return fmt.Errorf("failed to send coins to contract %s: %w", destination.Address, err)
+    }
+}
+```
+
+## Success Criteria
+
+### ✅ Custom Contracts Module
+- ✅ Complete ignite-scaffolded contracts module with CLI integration
+- ✅ Developers can deploy contracts via `tx contracts deploy-contract`
+- ✅ Contract registration via `tx contracts register-contract`
+- ✅ Contract queries via `query contracts` commands
+- ✅ All CLI commands automatically available
+
+### ✅ WasmVM Integration
+- ✅ WasmVM integrated within custom contracts module
+- ✅ Contracts run in sandboxed Wasm environment
+- ✅ Secure execution with proper gas limits
+- ✅ Contract deployment and instantiation working
+- ✅ Contract state management and storage
+
+### ✅ Emissions Registry Integration  
+- ✅ Contracts can register as emission destinations
+- ✅ Contract validation before registration
+- ✅ Backward compatibility with existing module registration
+- ✅ Contract-specific events and logging
+
+### ✅ Emission Distribution
+- ✅ Governance can fund registered contracts
+- ✅ Tokens distributed to contract addresses correctly
+- ✅ Registry validation prevents funding unregistered contracts
+- ✅ Distribution logging shows contract vs module destinations
+
+### ✅ Query & Management
+- ✅ Comprehensive contract queries in contracts module
+- ✅ Contracts visible in emissions registry queries
+- ✅ CLI documentation and examples
+- ✅ End-to-end contract funding workflow
+
+## Test Workflow
+
+### Complete V1 Test Scenario:
+```bash
+# 1. Deploy a contract via custom module
+scarlett-cored tx contracts deploy-contract contract.wasm '{}' "Test Contract" --from dev --gas auto --yes
+
+# 2. Register the contract for emissions  
+scarlett-cored tx contracts register-contract scarlett1... "Test App" "Demo contract" --from dev --yes
+
+# 3. Query deployed contracts
+scarlett-cored query contracts list-contracts
+
+# 4. Query registered contracts in emissions
+scarlett-cored query emissions list-registered-modules
+
+# 5. Governance funds the contract
+scarlett-cored tx gov submit-proposal fund-contract-proposal.json --from gov --yes
+
+# 6. Verify contract receives emissions
+scarlett-cored query bank balances scarlett1...
+
+# 7. Query contract info
+scarlett-cored query contracts contract-info scarlett1...
+```
+
+## Rollback Plan
+If any step fails:
+1. **Git revert** the last commit
+2. **Analyze** the specific build failure
+3. **Fix** the issue causing the failure
+4. **Re-attempt** the step
+5. **Never proceed** without successful build
+
+## Expected Outcomes
+
+### Developer Experience:
+- Deploy contracts via intuitive `tx contracts deploy-contract` command
+- Register contracts for funding via `tx contracts register-contract`
+- Query contract information via comprehensive `query contracts` commands
+- Receive ongoing token incentives through governance approval
+
+### Community Control:
+- Full visibility into deployed and registered contracts
+- Governance retains ultimate control over which contracts get funded
+- Same two-phase process: deploy → register → govern → fund
+
+### Technical Achievement:
+- Custom contracts module with full ignite integration
+- Clean separation of concerns between contracts and emissions
+- All CLI commands automatically available and documented
+- Maintainable codebase following ignite conventions
+- Foundation for future contract management features
+
+### Architecture Benefits:
+- **Modularity**: Clean separation between contract management and emissions
+- **Extensibility**: Easy to add new contract features and governance
+- **Maintainability**: Standard ignite patterns and conventions
+- **Integration**: Tight coupling with emissions while maintaining separation
+- **CLI Excellence**: All commands work automatically with help text
+
+## Auto-Attachment Configuration
+This rule should be automatically attached for:
+- Custom CosmWasm module implementation
+- Ignite-scaffolded contract management
+- Smart contract emission funding
+- Contract registry development  
+- Permissionless contract platforms

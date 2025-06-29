@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Emissions Module Consolidation Refactor - Step-by-Step Implementation
 
