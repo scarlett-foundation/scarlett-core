@@ -238,11 +238,119 @@ func (m *MsgDeployContractResponse) GetContractAddress() string {
 	return ""
 }
 
+// MsgRegisterContract defines the MsgRegisterContract message.
+type MsgRegisterContract struct {
+	Creator         string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	ContractAddress string `protobuf:"bytes,2,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
+	Name            string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description     string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+}
+
+func (m *MsgRegisterContract) Reset()         { *m = MsgRegisterContract{} }
+func (m *MsgRegisterContract) String() string { return proto.CompactTextString(m) }
+func (*MsgRegisterContract) ProtoMessage()    {}
+func (*MsgRegisterContract) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ad2009009c962b41, []int{4}
+}
+func (m *MsgRegisterContract) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgRegisterContract) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgRegisterContract.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgRegisterContract) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRegisterContract.Merge(m, src)
+}
+func (m *MsgRegisterContract) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgRegisterContract) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRegisterContract.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgRegisterContract proto.InternalMessageInfo
+
+func (m *MsgRegisterContract) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgRegisterContract) GetContractAddress() string {
+	if m != nil {
+		return m.ContractAddress
+	}
+	return ""
+}
+
+func (m *MsgRegisterContract) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *MsgRegisterContract) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+// MsgRegisterContractResponse defines the MsgRegisterContractResponse message.
+type MsgRegisterContractResponse struct {
+}
+
+func (m *MsgRegisterContractResponse) Reset()         { *m = MsgRegisterContractResponse{} }
+func (m *MsgRegisterContractResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgRegisterContractResponse) ProtoMessage()    {}
+func (*MsgRegisterContractResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_ad2009009c962b41, []int{5}
+}
+func (m *MsgRegisterContractResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgRegisterContractResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgRegisterContractResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgRegisterContractResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRegisterContractResponse.Merge(m, src)
+}
+func (m *MsgRegisterContractResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgRegisterContractResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRegisterContractResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgRegisterContractResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "scarlettcore.contracts.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "scarlettcore.contracts.v1.MsgUpdateParamsResponse")
 	proto.RegisterType((*MsgDeployContract)(nil), "scarlettcore.contracts.v1.MsgDeployContract")
 	proto.RegisterType((*MsgDeployContractResponse)(nil), "scarlettcore.contracts.v1.MsgDeployContractResponse")
+	proto.RegisterType((*MsgRegisterContract)(nil), "scarlettcore.contracts.v1.MsgRegisterContract")
+	proto.RegisterType((*MsgRegisterContractResponse)(nil), "scarlettcore.contracts.v1.MsgRegisterContractResponse")
 }
 
 func init() {
@@ -250,37 +358,42 @@ func init() {
 }
 
 var fileDescriptor_ad2009009c962b41 = []byte{
-	// 478 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0xbf, 0x6f, 0xd3, 0x40,
-	0x14, 0xce, 0xd1, 0x1f, 0x28, 0x47, 0xd4, 0xd0, 0x53, 0xa4, 0x3a, 0x1e, 0xdc, 0xe2, 0x01, 0xa2,
-	0x88, 0xda, 0x6a, 0x40, 0x48, 0x94, 0x89, 0xb4, 0x6b, 0x24, 0x64, 0xc4, 0xc2, 0x12, 0xae, 0xce,
-	0xe9, 0xb0, 0x14, 0xfb, 0xac, 0x7b, 0x8f, 0xaa, 0xd9, 0x10, 0x23, 0x13, 0x7f, 0x46, 0xc7, 0x0c,
-	0xfc, 0x11, 0x1d, 0x18, 0x2a, 0x26, 0x26, 0x84, 0x92, 0x21, 0x3b, 0x7f, 0x01, 0xb2, 0x7d, 0x6e,
-	0x93, 0x54, 0x6d, 0xe9, 0x62, 0xdd, 0x7b, 0xef, 0x7b, 0xdf, 0xfb, 0x3e, 0xbf, 0x3b, 0xea, 0x42,
-	0xc8, 0xf5, 0x50, 0x20, 0x86, 0x4a, 0x0b, 0x3f, 0x54, 0x09, 0x6a, 0x1e, 0x22, 0xf8, 0xc7, 0x7b,
-	0x3e, 0x9e, 0x78, 0xa9, 0x56, 0xa8, 0x58, 0x73, 0x1e, 0xe3, 0x5d, 0x60, 0xbc, 0xe3, 0x3d, 0x7b,
-	0x93, 0xc7, 0x51, 0xa2, 0xfc, 0xfc, 0x5b, 0xa0, 0xed, 0xad, 0x50, 0x41, 0xac, 0xc0, 0x8f, 0x41,
-	0x66, 0x2c, 0x31, 0x48, 0x53, 0x68, 0x16, 0x85, 0x7e, 0x1e, 0xf9, 0x45, 0x60, 0x4a, 0x0d, 0xa9,
-	0xa4, 0x2a, 0xf2, 0xd9, 0xc9, 0x64, 0x1f, 0x5f, 0xaf, 0x2d, 0xe5, 0x9a, 0xc7, 0xa6, 0xdb, 0xfd,
-	0x41, 0x68, 0xbd, 0x07, 0xf2, 0x5d, 0x3a, 0xe0, 0x28, 0xde, 0xe4, 0x15, 0xf6, 0x82, 0x56, 0xf9,
-	0x27, 0xfc, 0xa8, 0x74, 0x84, 0x23, 0x8b, 0xec, 0x90, 0x56, 0xb5, 0x6b, 0xfd, 0xfc, 0xbe, 0xdb,
-	0x30, 0x63, 0x5f, 0x0f, 0x06, 0x5a, 0x00, 0xbc, 0x45, 0x1d, 0x25, 0x32, 0xb8, 0x84, 0xb2, 0x43,
-	0xba, 0x5e, 0x70, 0x5b, 0xf7, 0x76, 0x48, 0xeb, 0x41, 0xe7, 0x91, 0x77, 0xad, 0x79, 0xaf, 0x18,
-	0xd5, 0xad, 0x9e, 0xfd, 0xde, 0xae, 0x9c, 0xce, 0xc6, 0x6d, 0x12, 0x98, 0xde, 0xfd, 0x57, 0x5f,
-	0x66, 0xe3, 0xf6, 0x25, 0xeb, 0xd7, 0xd9, 0xb8, 0xdd, 0x5a, 0x30, 0x73, 0x32, 0x67, 0x67, 0x49,
-	0xba, 0xdb, 0xa4, 0x5b, 0x4b, 0xa9, 0x40, 0x40, 0xaa, 0x12, 0x10, 0xee, 0x29, 0xa1, 0x9b, 0x3d,
-	0x90, 0x87, 0x22, 0x1d, 0xaa, 0xd1, 0x81, 0x61, 0x60, 0x1d, 0x7a, 0x3f, 0xd4, 0x82, 0xa3, 0xd2,
-	0xb7, 0x3a, 0x2d, 0x81, 0x8c, 0xd1, 0xd5, 0x50, 0x0d, 0x44, 0xee, 0xb2, 0x16, 0xe4, 0x67, 0xf6,
-	0x84, 0xd6, 0xa3, 0x04, 0x90, 0x27, 0x18, 0x71, 0x14, 0xfd, 0x18, 0xa4, 0xb5, 0x92, 0xf1, 0x05,
-	0x1b, 0x73, 0xe9, 0x1e, 0x48, 0xd6, 0xa0, 0x6b, 0x43, 0x7e, 0x24, 0x86, 0xd6, 0x6a, 0x5e, 0x2e,
-	0x82, 0xfd, 0x5a, 0x66, 0xba, 0x1c, 0xe0, 0x7e, 0xa0, 0xcd, 0x2b, 0x4a, 0x4b, 0x1f, 0xec, 0x80,
-	0x3e, 0x2c, 0xfd, 0xf7, 0x79, 0x21, 0xf0, 0x56, 0xe9, 0xf5, 0xb2, 0xc3, 0xa4, 0x3b, 0x7f, 0x09,
-	0x5d, 0xc9, 0xd4, 0x24, 0xb4, 0xb6, 0xb0, 0xfa, 0xf6, 0x0d, 0x2b, 0x5b, 0xfa, 0xb1, 0x76, 0xe7,
-	0xff, 0xb1, 0x17, 0xe2, 0x91, 0x6e, 0x2c, 0x2d, 0xe0, 0xe9, 0xcd, 0x2c, 0x8b, 0x68, 0xfb, 0xf9,
-	0x5d, 0xd0, 0xe5, 0x54, 0x7b, 0xed, 0x73, 0x76, 0xc3, 0xba, 0x2f, 0xcf, 0x26, 0x0e, 0x39, 0x9f,
-	0x38, 0xe4, 0xcf, 0xc4, 0x21, 0xdf, 0xa6, 0x4e, 0xe5, 0x7c, 0xea, 0x54, 0x7e, 0x4d, 0x9d, 0xca,
-	0xfb, 0xed, 0x92, 0x75, 0xf7, 0xca, 0x0d, 0xc3, 0x51, 0x2a, 0xe0, 0x68, 0x3d, 0x7f, 0x2d, 0xcf,
-	0xfe, 0x05, 0x00, 0x00, 0xff, 0xff, 0xc5, 0xe9, 0x72, 0x35, 0xf3, 0x03, 0x00, 0x00,
+	// 555 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x54, 0xbf, 0x6f, 0xd3, 0x40,
+	0x14, 0xce, 0xa5, 0x3f, 0x50, 0xae, 0x51, 0xd3, 0x1e, 0x91, 0xea, 0x18, 0xe1, 0x06, 0x0f, 0x10,
+	0x22, 0x6a, 0xab, 0x01, 0x55, 0xa2, 0x4c, 0xa4, 0x5d, 0x23, 0x21, 0x23, 0x16, 0x96, 0x70, 0xb5,
+	0x4f, 0x87, 0xa5, 0xd8, 0x67, 0xdd, 0x1d, 0x55, 0xc3, 0x84, 0x18, 0x99, 0xf8, 0x33, 0x3a, 0x66,
+	0x60, 0xe0, 0x4f, 0xe8, 0xc0, 0x50, 0x31, 0x31, 0x21, 0x94, 0x0c, 0xd9, 0xf8, 0x1b, 0x90, 0xed,
+	0x73, 0x9a, 0x38, 0x6d, 0x4a, 0xd5, 0xc5, 0xba, 0x7b, 0xef, 0xbb, 0xef, 0xbd, 0xef, 0xbb, 0x77,
+	0x86, 0xa6, 0x70, 0x31, 0xef, 0x11, 0x29, 0x5d, 0xc6, 0x89, 0xed, 0xb2, 0x50, 0x72, 0xec, 0x4a,
+	0x61, 0x1f, 0xef, 0xda, 0xf2, 0xc4, 0x8a, 0x38, 0x93, 0x0c, 0xd5, 0xa6, 0x31, 0xd6, 0x04, 0x63,
+	0x1d, 0xef, 0xea, 0x9b, 0x38, 0xf0, 0x43, 0x66, 0x27, 0xdf, 0x14, 0xad, 0x6f, 0xb9, 0x4c, 0x04,
+	0x4c, 0xd8, 0x81, 0xa0, 0x31, 0x4b, 0x20, 0xa8, 0x4a, 0xd4, 0xd2, 0x44, 0x37, 0xd9, 0xd9, 0xe9,
+	0x46, 0xa5, 0xaa, 0x94, 0x51, 0x96, 0xc6, 0xe3, 0x95, 0x8a, 0x3e, 0xbc, 0xba, 0xb7, 0x08, 0x73,
+	0x1c, 0xa8, 0xd3, 0xe6, 0x0f, 0x00, 0x2b, 0x1d, 0x41, 0xdf, 0x44, 0x1e, 0x96, 0xe4, 0x55, 0x92,
+	0x41, 0x7b, 0xb0, 0x84, 0x3f, 0xc8, 0xf7, 0x8c, 0xfb, 0xb2, 0xaf, 0x81, 0x3a, 0x68, 0x94, 0xda,
+	0xda, 0xcf, 0x6f, 0x3b, 0x55, 0x55, 0xf6, 0xa5, 0xe7, 0x71, 0x22, 0xc4, 0x6b, 0xc9, 0xfd, 0x90,
+	0x3a, 0x17, 0x50, 0x74, 0x08, 0x57, 0x53, 0x6e, 0xad, 0x58, 0x07, 0x8d, 0xb5, 0xd6, 0x03, 0xeb,
+	0x4a, 0xf1, 0x56, 0x5a, 0xaa, 0x5d, 0x3a, 0xfb, 0xbd, 0x5d, 0x38, 0x1d, 0x0f, 0x9a, 0xc0, 0x51,
+	0x67, 0xf7, 0x5f, 0x7c, 0x1e, 0x0f, 0x9a, 0x17, 0xac, 0x5f, 0xc6, 0x83, 0x66, 0x63, 0x46, 0xcc,
+	0xc9, 0x94, 0x9c, 0x5c, 0xeb, 0x66, 0x0d, 0x6e, 0xe5, 0x42, 0x0e, 0x11, 0x11, 0x0b, 0x05, 0x31,
+	0x4f, 0x01, 0xdc, 0xec, 0x08, 0x7a, 0x48, 0xa2, 0x1e, 0xeb, 0x1f, 0x28, 0x06, 0xd4, 0x82, 0x77,
+	0x5c, 0x4e, 0xb0, 0x64, 0xfc, 0x5a, 0xa5, 0x19, 0x10, 0x21, 0xb8, 0xec, 0x32, 0x8f, 0x24, 0x2a,
+	0xcb, 0x4e, 0xb2, 0x46, 0x8f, 0x60, 0xc5, 0x0f, 0x85, 0xc4, 0xa1, 0xf4, 0xb1, 0x24, 0xdd, 0x40,
+	0x50, 0x6d, 0x29, 0xe6, 0x73, 0xd6, 0xa7, 0xc2, 0x1d, 0x41, 0x51, 0x15, 0xae, 0xf4, 0xf0, 0x11,
+	0xe9, 0x69, 0xcb, 0x49, 0x3a, 0xdd, 0xec, 0x97, 0x63, 0xd1, 0x59, 0x01, 0xf3, 0x1d, 0xac, 0xcd,
+	0x75, 0x9a, 0xe9, 0x40, 0x07, 0x70, 0x23, 0xd3, 0xdf, 0xc5, 0x69, 0x83, 0xd7, 0xb6, 0x5e, 0xc9,
+	0x4e, 0xa8, 0xb0, 0xf9, 0x1d, 0xc0, 0xbb, 0x1d, 0x41, 0x1d, 0x42, 0x7d, 0x21, 0x09, 0xbf, 0x95,
+	0x1d, 0x8f, 0x2f, 0x69, 0xa8, 0x98, 0x88, 0xcb, 0x97, 0x8d, 0x9d, 0x0b, 0x71, 0x40, 0x94, 0x35,
+	0xc9, 0x1a, 0xd5, 0xe1, 0x9a, 0x47, 0x84, 0xcb, 0xfd, 0x48, 0xfa, 0x2c, 0x54, 0xb6, 0x4c, 0x87,
+	0x72, 0xe6, 0xdc, 0x87, 0xf7, 0x2e, 0xe9, 0x3c, 0xb3, 0xa7, 0xf5, 0xb7, 0x08, 0x97, 0x62, 0x9f,
+	0x43, 0x58, 0x9e, 0x19, 0xea, 0xe6, 0x82, 0x61, 0xcc, 0x8d, 0x8c, 0xde, 0xfa, 0x7f, 0xec, 0xe4,
+	0x5a, 0x24, 0x5c, 0xcf, 0x8d, 0xd6, 0x93, 0xc5, 0x2c, 0xb3, 0x68, 0xfd, 0xd9, 0x4d, 0xd0, 0x93,
+	0xaa, 0x1f, 0xe1, 0xc6, 0xdc, 0x1d, 0x5a, 0x8b, 0x99, 0xf2, 0x78, 0x7d, 0xef, 0x66, 0xf8, 0xac,
+	0xb6, 0xbe, 0xf2, 0x29, 0x7e, 0xb7, 0xed, 0xe7, 0x67, 0x43, 0x03, 0x9c, 0x0f, 0x0d, 0xf0, 0x67,
+	0x68, 0x80, 0xaf, 0x23, 0xa3, 0x70, 0x3e, 0x32, 0x0a, 0xbf, 0x46, 0x46, 0xe1, 0xed, 0x76, 0xc6,
+	0xbb, 0x33, 0xf7, 0x6e, 0x65, 0x3f, 0x22, 0xe2, 0x68, 0x35, 0xf9, 0x07, 0x3d, 0xfd, 0x17, 0x00,
+	0x00, 0xff, 0xff, 0x42, 0x25, 0x37, 0xc6, 0x49, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -300,6 +413,8 @@ type MsgClient interface {
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 	// DeployContract defines the DeployContract RPC.
 	DeployContract(ctx context.Context, in *MsgDeployContract, opts ...grpc.CallOption) (*MsgDeployContractResponse, error)
+	// RegisterContract defines the RegisterContract RPC.
+	RegisterContract(ctx context.Context, in *MsgRegisterContract, opts ...grpc.CallOption) (*MsgRegisterContractResponse, error)
 }
 
 type msgClient struct {
@@ -328,6 +443,15 @@ func (c *msgClient) DeployContract(ctx context.Context, in *MsgDeployContract, o
 	return out, nil
 }
 
+func (c *msgClient) RegisterContract(ctx context.Context, in *MsgRegisterContract, opts ...grpc.CallOption) (*MsgRegisterContractResponse, error) {
+	out := new(MsgRegisterContractResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.contracts.v1.Msg/RegisterContract", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
@@ -335,6 +459,8 @@ type MsgServer interface {
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 	// DeployContract defines the DeployContract RPC.
 	DeployContract(context.Context, *MsgDeployContract) (*MsgDeployContractResponse, error)
+	// RegisterContract defines the RegisterContract RPC.
+	RegisterContract(context.Context, *MsgRegisterContract) (*MsgRegisterContractResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -346,6 +472,9 @@ func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateP
 }
 func (*UnimplementedMsgServer) DeployContract(ctx context.Context, req *MsgDeployContract) (*MsgDeployContractResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeployContract not implemented")
+}
+func (*UnimplementedMsgServer) RegisterContract(ctx context.Context, req *MsgRegisterContract) (*MsgRegisterContractResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterContract not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -388,6 +517,24 @@ func _Msg_DeployContract_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_RegisterContract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRegisterContract)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RegisterContract(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.contracts.v1.Msg/RegisterContract",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RegisterContract(ctx, req.(*MsgRegisterContract))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scarlettcore.contracts.v1.Msg",
@@ -400,6 +547,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeployContract",
 			Handler:    _Msg_DeployContract_Handler,
+		},
+		{
+			MethodName: "RegisterContract",
+			Handler:    _Msg_RegisterContract_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -550,6 +701,80 @@ func (m *MsgDeployContractResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgRegisterContract) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgRegisterContract) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgRegisterContract) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ContractAddress) > 0 {
+		i -= len(m.ContractAddress)
+		copy(dAtA[i:], m.ContractAddress)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.ContractAddress)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgRegisterContractResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgRegisterContractResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgRegisterContractResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -620,6 +845,40 @@ func (m *MsgDeployContractResponse) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
+	return n
+}
+
+func (m *MsgRegisterContract) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.ContractAddress)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgRegisterContractResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	return n
 }
 
@@ -1035,6 +1294,234 @@ func (m *MsgDeployContractResponse) Unmarshal(dAtA []byte) error {
 			}
 			m.ContractAddress = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgRegisterContract) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgRegisterContract: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgRegisterContract: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ContractAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ContractAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgRegisterContractResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgRegisterContractResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgRegisterContractResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

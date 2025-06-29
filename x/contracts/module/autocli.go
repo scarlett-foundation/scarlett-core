@@ -34,6 +34,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Send a deploy-contract tx",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "code"}, {ProtoField: "instantiate_msg"}, {ProtoField: "label"}},
 				},
+				{
+					RpcMethod:      "RegisterContract",
+					Use:            "register-contract [contract-address] [name] [description]",
+					Short:          "Send a register-contract tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "contract_address"}, {ProtoField: "name"}, {ProtoField: "description"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},

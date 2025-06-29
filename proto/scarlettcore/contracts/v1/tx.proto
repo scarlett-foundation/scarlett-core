@@ -20,6 +20,9 @@ service Msg {
 
   // DeployContract defines the DeployContract RPC.
   rpc DeployContract(MsgDeployContract) returns (MsgDeployContractResponse);
+
+  // RegisterContract defines the RegisterContract RPC.
+  rpc RegisterContract(MsgRegisterContract) returns (MsgRegisterContractResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -56,3 +59,15 @@ message MsgDeployContract {
 message MsgDeployContractResponse {
   string contract_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
+
+// MsgRegisterContract defines the MsgRegisterContract message.
+message MsgRegisterContract {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string contract_address = 2;
+  string name = 3;
+  string description = 4;
+}
+
+// MsgRegisterContractResponse defines the MsgRegisterContractResponse message.
+message MsgRegisterContractResponse {}
