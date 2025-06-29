@@ -15,5 +15,17 @@ const (
 	GovModuleName = "gov"
 )
 
-// ParamsKey is the prefix to retrieve all Params
-var ParamsKey = collections.NewPrefix("p_contracts")
+// Collection keys
+var (
+	// ParamsKey is the prefix to retrieve all Params
+	ParamsKey = collections.NewPrefix("p_contracts")
+
+	// ContractCodeKey is the prefix for storing contract bytecode
+	ContractCodeKey = collections.NewPrefix("contract_code")
+
+	// ContractInfoKey is the prefix for storing contract metadata
+	ContractInfoKey = collections.NewPrefix("contract_info")
+
+	// ContractSeqKey is the prefix for contract ID sequence
+	ContractSeqKey = collections.NewPrefix("contract_seq")
+)

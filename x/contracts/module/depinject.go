@@ -52,11 +52,17 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 	if in.Config.Authority != "" {
 		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
 	}
+
+	// TODO: Make wasmDir configurable via app config in the future
+	// For now, use a default path relative to the app home directory
+	wasmDir := "./"
+
 	k := keeper.NewKeeper(
 		in.StoreService,
 		in.Cdc,
 		in.AddressCodec,
 		authority,
+		wasmDir,
 		in.BankKeeper,
 		// TODO: Add EmissionsKeeper back in Step 3 when we implement emissions integration
 		// in.EmissionsKeeper,
