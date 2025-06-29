@@ -14,24 +14,28 @@ func (q queryServer) ListContracts(ctx context.Context, req *types.QueryListCont
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	// TODO: In Phase 2, this will query actual contract storage
-	// For V1, we'll return mock data to show the structure works
-	contracts := []*types.ContractSummary{
-		// This will be replaced with actual contract storage queries in Phase 2
-		// Example structure:
-		// {
-		//     Address: "scarlett1abcd1234...",
-		//     Label: "Demo Contract",
-		//     Creator: "scarlett1creator...",
-		//     IsRegistered: true,
-		// },
-	}
+	var contracts []*types.ContractSummary
 
-	// TODO: Phase 2 implementation will:
-	// 1. Iterate through stored contracts
-	// 2. Check registration status for each
-	// 3. Populate ContractSummary for each deployed contract
-	// 4. Return paginated results
+	// Iterate through all deployed contracts
+	err := q.k.ContractInfo.Walk(ctx, nil, func(contractAddr string, contractInfo types.ContractInfo) (bool, error) {
+		// Check if contract is registered for emissions
+		isRegistered := q.k.emissionsKeeper.IsModuleRegistered(ctx, contractAddr)
+
+		// Create contract summary
+		summary := &types.ContractSummary{
+			Address:      contractAddr,
+			Label:        contractInfo.Label,
+			Creator:      contractInfo.Creator,
+			IsRegistered: isRegistered,
+		}
+
+		contracts = append(contracts, summary)
+		return false, nil // Continue iteration
+	})
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to iterate contracts: "+err.Error())
+	}
 
 	return &types.QueryListContractsResponse{
 		Contracts: contracts,

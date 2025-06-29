@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"cosmossdk.io/collections"
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -32,8 +33,8 @@ func (q queryServer) ListRegisteredModules(ctx context.Context, req *types.Query
 				return nil, fmt.Errorf("failed to parse registered module '%s': %w", key, err)
 			}
 
-			// Convert to proto message format
-			moduleInfo := q.registeredModuleToInfo(registeredModule)
+			// Convert to proto message format with enhanced contract detection
+			moduleInfo := q.registeredModuleToInfoEnhanced(ctx, registeredModule)
 			return &moduleInfo, nil
 		},
 	)
@@ -69,8 +70,8 @@ func (q queryServer) GetRegisteredModule(ctx context.Context, req *types.QueryGe
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// Convert to proto message format
-	moduleInfo := q.registeredModuleToInfo(registeredModule)
+	// Convert to proto message format with enhanced contract information
+	moduleInfo := q.registeredModuleToInfoEnhanced(ctx, registeredModule)
 
 	return &types.QueryGetRegisteredModuleResponse{
 		Module: &moduleInfo,
@@ -96,4 +97,88 @@ func (q queryServer) registeredModuleToInfo(module types.RegisteredModule) types
 		CreatedAt:   module.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:   module.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+}
+
+// Helper function to determine if a module name is actually a contract address
+func (q queryServer) isContractAddress(moduleName string) bool {
+	// Contract addresses start with "scarlett1" and are longer than typical module names
+	return strings.HasPrefix(moduleName, "scarlett1") && len(moduleName) >= 45
+}
+
+// Enhanced helper function to convert RegisteredModule to RegisteredModuleInfo with contract detection
+func (q queryServer) registeredModuleToInfoEnhanced(ctx context.Context, module types.RegisteredModule) types.RegisteredModuleInfo {
+	info := types.RegisteredModuleInfo{
+		ModuleName:  module.ModuleName,
+		Creator:     module.Creator,
+		Description: module.Description,
+		Status:      string(module.Status),
+		CreatedAt:   module.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:   module.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+
+	// Add contract-specific information if this is a contract
+	if q.isContractAddress(module.ModuleName) {
+		info.IsContract = true
+		info.ContractAddress = module.ModuleName
+
+		// Enhance description to indicate this is a contract
+		if !strings.Contains(info.Description, "(Contract)") {
+			info.Description = fmt.Sprintf("%s (Contract)", info.Description)
+		}
+	} else {
+		info.IsContract = false
+		info.ContractAddress = ""
+
+		// Enhance description to indicate this is a module
+		if !strings.Contains(info.Description, "(Module)") {
+			info.Description = fmt.Sprintf("%s (Module)", info.Description)
+		}
+	}
+
+	return info
+}
+
+// GetContractFundingStatus returns detailed funding information for a contract
+func (q queryServer) GetContractFundingStatus(ctx context.Context, contractAddress string) (*types.ContractFundingInfo, error) {
+	// Check if contract is registered
+	registeredModule, err := q.k.GetRegisteredModule(ctx, contractAddress)
+	if err != nil {
+		return &types.ContractFundingInfo{
+			ContractAddress: contractAddress,
+			IsRegistered:    false,
+			IsEligible:      false,
+			Status:          "not_registered",
+		}, nil
+	}
+
+	// Get current emission configuration
+	emissionParams, err := q.k.GetEmissionParams(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get emission parameters: %w", err)
+	}
+
+	// Calculate funding information
+	isEligible := registeredModule.Status == types.ModuleStatusRegistered
+	fundingWeight := float64(0)
+
+	// Find the contract in current emission destinations
+	for _, destination := range emissionParams.Destinations {
+		if destination.ModuleName == contractAddress {
+			fundingWeight, _ = destination.Weight.Float64()
+			break
+		}
+	}
+
+	return &types.ContractFundingInfo{
+		ContractAddress:  contractAddress,
+		IsRegistered:     true,
+		IsEligible:       isEligible,
+		Status:           string(registeredModule.Status),
+		CurrentWeight:    fundingWeight,
+		RegistrationName: registeredModule.ModuleName,
+		Description:      registeredModule.Description,
+		Creator:          registeredModule.Creator,
+		RegisteredAt:     registeredModule.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		LastUpdated:      registeredModule.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}, nil
 }
