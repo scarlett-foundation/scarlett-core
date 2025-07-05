@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"cosmossdk.io/core/address"
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -29,17 +28,33 @@ type ParamSubspace interface {
 	Set(context.Context, []byte, interface{})
 }
 
-// AccountKeeper defines the expected account keeper used for simulations (noalias)
+// AccountKeeper defines the expected interface for the Account module.
 type AccountKeeper interface {
-	GetAccount(context.Context, sdk.AccAddress) types.AccountI
-	// Methods imported from account should be defined here
+	GetAccount(context.Context, sdk.AccAddress) types.AccountI // only used for simulation
 }
 
-// WasmKeeper defines the expected interface for wasm operations
+// WasmKeeper defines the expected interface for the Wasm module.
+// This interface delegates to wasmd's actual keeper methods.
 type WasmKeeper interface {
-	// Add wasmd keeper reference to ensure import is used
-	GetKeeper() *wasmkeeper.Keeper
-	// Use wasmd types to ensure compatibility
-	GetContractInfo(ctx context.Context, contractAddress sdk.AccAddress) *wasmtypes.ContractInfo
+	// Contract information queries
+	GetContractInfo(ctx context.Context, contractAddr sdk.AccAddress) *wasmtypes.ContractInfo
 	GetCodeInfo(ctx context.Context, codeID uint64) *wasmtypes.CodeInfo
+
+	// Basic wasm operations that we can delegate to
+	HasContractInfo(ctx context.Context, contractAddr sdk.AccAddress) bool
 }
+
+// Note: We reference wasmd's keeper interfaces directly since they're already defined
+// This ensures 100% compatibility with wasmd v0.61.0
+
+// StakingKeeper is an alias for wasmd's staking keeper interface
+type StakingKeeper = wasmtypes.StakingKeeper
+
+// DistributionKeeper is an alias for wasmd's distribution keeper interface
+type DistributionKeeper = wasmtypes.DistributionKeeper
+
+// ChannelKeeper is an alias for wasmd's IBC channel keeper interface
+type ChannelKeeper = wasmtypes.ChannelKeeper
+
+// Note: PortKeeper, CapabilityKeeper, and ScopedKeeper are not available in wasmd v0.61.0
+// They were removed or are not exposed in the public API
