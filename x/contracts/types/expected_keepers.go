@@ -38,7 +38,7 @@ type AccountKeeper interface {
 // WasmKeeper defines the expected interface for wasm operations
 type WasmKeeper interface {
 	// Add wasmd keeper reference to ensure import is used
-	GetWasmConfig() wasmkeeper.WasmConfig
+	GetKeeper() *wasmkeeper.Keeper
 	// Placeholder to ensure wasmvm import is used
-	GetWasmEngine() wasmvm.VM
+	GetVM() wasmvm.VM
 }
