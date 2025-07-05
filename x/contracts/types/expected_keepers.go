@@ -4,7 +4,10 @@ import (
 	"context"
 
 	"cosmossdk.io/core/address"
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+	wasmvm "github.com/CosmWasm/wasmvm/v3"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 // AuthKeeper defines the expected interface for the Auth module.
@@ -24,4 +27,18 @@ type BankKeeper interface {
 type ParamSubspace interface {
 	Get(context.Context, []byte, interface{})
 	Set(context.Context, []byte, interface{})
+}
+
+// AccountKeeper defines the expected account keeper used for simulations (noalias)
+type AccountKeeper interface {
+	GetAccount(context.Context, sdk.AccAddress) types.AccountI
+	// Methods imported from account should be defined here
+}
+
+// WasmKeeper defines the expected interface for wasm operations
+type WasmKeeper interface {
+	// Add wasmd keeper reference to ensure import is used
+	GetWasmConfig() wasmkeeper.WasmConfig
+	// Placeholder to ensure wasmvm import is used
+	GetWasmEngine() wasmvm.VM
 }
