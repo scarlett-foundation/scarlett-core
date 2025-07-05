@@ -1,6 +1,8 @@
 package app
 
 import (
+	_ "scarlett-core/x/contracts/module"
+	contractsmoduletypes "scarlett-core/x/contracts/types"
 	_ "scarlett-core/x/emissions/module"
 	emissionsmoduletypes "scarlett-core/x/emissions/types"
 	_ "scarlett-core/x/scarlettcore/module"
@@ -87,6 +89,7 @@ var (
 		{Account: icatypes.ModuleName},
 		{Account: "inferencerewards"}, // Module account for LLM inference miner rewards
 		{Account: scarlettcoremoduletypes.ModuleName, Permissions: []string{authtypes.Burner}}, // Required for token burning
+		{Account: contractsmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
@@ -132,6 +135,7 @@ var (
 						// chain modules
 						scarlettcoremoduletypes.ModuleName,
 						emissionsmoduletypes.ModuleName,
+						contractsmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -142,6 +146,7 @@ var (
 						// chain modules
 						scarlettcoremoduletypes.ModuleName,
 						emissionsmoduletypes.ModuleName,
+						contractsmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -180,6 +185,7 @@ var (
 						// chain modules
 						scarlettcoremoduletypes.ModuleName,
 						emissionsmoduletypes.ModuleName,
+						contractsmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -285,6 +291,10 @@ var (
 			{
 				Name:   emissionsmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&emissionsmoduletypes.Module{}),
+			},
+			{
+				Name:   contractsmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&contractsmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
