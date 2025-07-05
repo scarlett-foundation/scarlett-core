@@ -14,23 +14,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Security Configuration Constants
-const (
-	// Gas limits for contract execution
-	DefaultGasLimit = uint64(1_000_000)  // 1M gas default limit
-	MaxGasLimit     = uint64(10_000_000) // 10M gas maximum limit
-	MinGasLimit     = uint64(100_000)    // 100K gas minimum limit
-
-	// Execution timeouts
-	DefaultExecutionTimeout = 30 * time.Second // 30 seconds max execution
-	MaxExecutionTimeout     = 60 * time.Second // 60 seconds absolute max
-
-	// Memory and storage limits
-	MaxContractSize       = 1024 * 1024 // 1MB max contract size
-	MaxInstantiateMsgSize = 64 * 1024   // 64KB max instantiate message
-	MaxExecuteMsgSize     = 32 * 1024   // 32KB max execute message
-	MaxQueryMsgSize       = 16 * 1024   // 16KB max query message
-)
+// Note: Security configuration is now managed via types.GasConfig
+// This provides centralized configuration with embedded defaults for consensus safety
 
 // ContractExecutionParams holds parameters for secure contract execution
 type ContractExecutionParams struct {
@@ -81,24 +66,12 @@ func (k Keeper) ValidateContractExecution(ctx context.Context, contractAddr stri
 
 // validateGasLimits ensures gas limits are within acceptable bounds
 func (k Keeper) validateGasLimits(gasLimit uint64) error {
-	if gasLimit < MinGasLimit {
-		return errorsmod.Wrapf(types.ErrInvalidInput, "gas limit too low: %d, minimum: %d", gasLimit, MinGasLimit)
-	}
-	if gasLimit > MaxGasLimit {
-		return errorsmod.Wrapf(types.ErrInvalidInput, "gas limit too high: %d, maximum: %d", gasLimit, MaxGasLimit)
-	}
-	return nil
+	return k.gasConfig.ValidateGasLimit(gasLimit)
 }
 
 // validateTimeout ensures execution timeout is within acceptable bounds
 func (k Keeper) validateTimeout(timeout time.Duration) error {
-	if timeout <= 0 {
-		return errorsmod.Wrapf(types.ErrInvalidInput, "timeout must be positive")
-	}
-	if timeout > MaxExecutionTimeout {
-		return errorsmod.Wrapf(types.ErrInvalidInput, "timeout too long: %v, maximum: %v", timeout, MaxExecutionTimeout)
-	}
-	return nil
+	return k.gasConfig.ValidateTimeout(timeout)
 }
 
 // validateCallerPermissions checks if caller has permission to execute contract
@@ -208,36 +181,12 @@ func (k Keeper) IsolatedContractStore(ctx context.Context, contractAddr string) 
 
 // ValidateContractCodeSize ensures contract code is within size limits
 func (k Keeper) ValidateContractCodeSize(code []byte) error {
-	if len(code) > MaxContractSize {
-		return errorsmod.Wrapf(types.ErrInvalidInput,
-			"contract code too large: %d bytes, maximum: %d bytes",
-			len(code), MaxContractSize)
-	}
-	return nil
+	return k.gasConfig.ValidateContractSize(code)
 }
 
 // ValidateMessageSize ensures messages are within size limits
 func (k Keeper) ValidateMessageSize(msg []byte, msgType string) error {
-	var maxSize int
-
-	switch msgType {
-	case "instantiate":
-		maxSize = MaxInstantiateMsgSize
-	case "execute":
-		maxSize = MaxExecuteMsgSize
-	case "query":
-		maxSize = MaxQueryMsgSize
-	default:
-		maxSize = MaxExecuteMsgSize // Default to execute message size
-	}
-
-	if len(msg) > maxSize {
-		return errorsmod.Wrapf(types.ErrInvalidInput,
-			"%s message too large: %d bytes, maximum: %d bytes",
-			msgType, len(msg), maxSize)
-	}
-
-	return nil
+	return k.gasConfig.ValidateMessageSize(msg, msgType)
 }
 
 // GetWasmVMCapabilities returns the security-configured capabilities for WasmVM

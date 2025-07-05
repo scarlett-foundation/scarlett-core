@@ -15,6 +15,10 @@ import (
 )
 
 func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContract) (*types.MsgDeployContractResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	logger := sdkCtx.Logger()
+	logger.Info("🚀 DeployContract handler initiated")
+
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errorsmod.Wrap(err, "invalid creator address")
 	}
@@ -24,8 +28,19 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 		return nil, errorsmod.Wrap(types.ErrInvalidInput, "contract code cannot be empty")
 	}
 
+	// Get gas configuration
+	gasConfig := k.GetGasConfig()
+	logger.Info("✅ Gas configuration loaded", "config", fmt.Sprintf("%+v", gasConfig))
+
+	// Validate contract code size
+	if err := gasConfig.ValidateContractSize(msg.Code); err != nil {
+		logger.Error("❌ Contract size validation failed", "error", err)
+		return nil, errorsmod.Wrap(types.ErrInvalidInput, err.Error())
+	}
+
 	// Validate contract code is valid WASM
 	if !isValidWasmBytecode(msg.Code) {
+		logger.Error("❌ Invalid WASM bytecode format")
 		return nil, errorsmod.Wrap(types.ErrInvalidInput, "invalid WASM bytecode format")
 	}
 
@@ -36,15 +51,19 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 
 	// Store contract code in WasmVM and get checksum
 	wasmCode := wasmvm.WasmCode(msg.Code)
-	gasLimit := uint64(1_000_000) // 1M gas limit for code storage
+	deploymentGasLimit := gasConfig.DeploymentGasLimit // Use configurable gas limit (50M gas)
+	logger.Info("⛽️ Storing contract code in WasmVM", "gas_limit", deploymentGasLimit)
 	vm, err := k.GetWasmVM()
 	if err != nil {
+		logger.Error("❌ Failed to get WasmVM", "error", err)
 		return nil, errorsmod.Wrapf(types.ErrInvalidInput, "failed to get WasmVM: %s", err)
 	}
-	checksum, gasUsed, err := vm.StoreCode(wasmCode, gasLimit)
+	checksum, gasUsed, err := vm.StoreCode(wasmCode, deploymentGasLimit)
 	if err != nil {
+		logger.Error("❌ Failed to store contract code", "error", err, "gas_used", gasUsed)
 		return nil, errorsmod.Wrapf(types.ErrInvalidInput, "failed to store contract code: %s", err)
 	}
+	logger.Info("✅ Contract code stored successfully", "gas_used", gasUsed, "checksum", hex.EncodeToString(checksum))
 	_ = gasUsed // We'll use this for gas accounting in future versions
 
 	// Generate next contract ID
@@ -79,7 +98,6 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 	}
 
 	// Emit deployment event
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			"contract_deployed",

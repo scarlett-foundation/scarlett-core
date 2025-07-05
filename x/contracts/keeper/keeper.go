@@ -30,6 +30,9 @@ type Keeper struct {
 	wasmDir    string
 	wasmVMInit bool
 
+	// Gas configuration for contract operations
+	gasConfig types.GasConfig
+
 	// Contract storage
 	ContractCode collections.Map[[]byte, []byte]             // codeID -> wasm bytecode
 	ContractInfo collections.Map[string, types.ContractInfo] // address -> contract info
@@ -61,7 +64,8 @@ func NewKeeper(
 		addressCodec: addressCodec,
 		authority:    authority,
 		wasmDir:      wasmDir,
-		wasmVMInit:   false, // Lazy initialization
+		wasmVMInit:   false,                // Lazy initialization
+		gasConfig:    types.GetGasConfig(), // Load embedded gas configuration
 
 		bankKeeper:      bankKeeper,
 		emissionsKeeper: emissionsKeeper,
@@ -86,6 +90,11 @@ func (k Keeper) GetAuthority() []byte {
 	return k.authority
 }
 
+// GetGasConfig returns the current gas configuration
+func (k Keeper) GetGasConfig() types.GasConfig {
+	return k.gasConfig
+}
+
 // initWasmVM initializes WasmVM lazily when first needed
 func (k *Keeper) initWasmVM() error {
 	if k.wasmVMInit {
@@ -95,10 +104,10 @@ func (k *Keeper) initWasmVM() error {
 	// Initialize WasmVM with secure configuration
 	// NewVM(dataDir string, supportedCapabilities []string, memoryLimit uint32, printDebug bool, cacheSize uint32) (*VM, error)
 	wasmCacheDir := filepath.Join(k.wasmDir, "wasm", "cache")
-	supportedCapabilities := []string{"iterator", "staking", "stargate", "cosmwasm_1_1", "cosmwasm_1_2", "cosmwasm_2_0", "bulk-memory"} // Standard capabilities with bulk-memory (supported in wasmvm v3)
-	memoryLimit := uint32(32)                                                                                                           // 32 MiB memory limit per contract
-	printDebug := false                                                                                                                 // Don't print debug in production
-	cacheSize := uint32(256)                                                                                                            // 256 MiB cache
+	supportedCapabilities := []string{"iterator", "staking", "stargate", "cosmwasm_1_1", "cosmwasm_1_2"} // Conservative capabilities to avoid v3.0.0 bugs
+	memoryLimit := uint32(16)                                                                            // 16 MiB memory limit - conservative for v3.0.0
+	printDebug := true                                                                                   // Enable debug to see WasmVM internals
+	cacheSize := uint32(100)                                                                             // 100 MiB cache - conservative for v3.0.0
 
 	vm, err := wasmvm.NewVM(wasmCacheDir, supportedCapabilities, memoryLimit, printDebug, cacheSize)
 	if err != nil {
