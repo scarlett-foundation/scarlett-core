@@ -130,40 +130,52 @@ func (k Keeper) CreateSecureExecutionEnvironment(ctx context.Context, contractAd
 
 // CreateGasMeter creates a gas meter for contract execution
 func (k Keeper) CreateGasMeter(gasLimit uint64) wasmvmtypes.GasMeter {
-	// This is a simplified gas meter
-	// In production, this would integrate with SDK gas meter
-	return &SimpleGasMeter{
+	return &WasmGasMeter{
 		limit:    gasLimit,
 		consumed: 0,
 	}
 }
 
-// SimpleGasMeter is a basic implementation of gas metering for contract execution
-type SimpleGasMeter struct {
+// WasmGasMeter implements proper gas conversion between WasmVM and Cosmos SDK
+type WasmGasMeter struct {
 	limit    uint64
 	consumed uint64
 }
 
-func (gm *SimpleGasMeter) GasConsumed() uint64 {
-	return gm.consumed
+// GasConversionFactor is how many SDK gas units equal one WasmVM gas unit
+// WasmVM uses much larger gas units than Cosmos SDK
+const GasConversionFactor = 100_000
+
+func (gm *WasmGasMeter) GasConsumed() uint64 {
+	return gm.consumed / GasConversionFactor
 }
 
-func (gm *SimpleGasMeter) GasConsumedToLimit() uint64 {
+func (gm *WasmGasMeter) GasConsumedToLimit() uint64 {
 	if gm.consumed > gm.limit {
-		return gm.limit
+		return gm.limit / GasConversionFactor
 	}
-	return gm.consumed
+	return gm.consumed / GasConversionFactor
 }
 
-func (gm *SimpleGasMeter) Limit() uint64 {
-	return gm.limit
+func (gm *WasmGasMeter) Limit() uint64 {
+	return gm.limit / GasConversionFactor
 }
 
-func (gm *SimpleGasMeter) ConsumeGas(amount uint64, descriptor string) error {
-	if gm.consumed+amount > gm.limit {
-		return fmt.Errorf("out of gas: consumed %d, limit %d, requested %d", gm.consumed, gm.limit, amount)
+func (gm *WasmGasMeter) ConsumeGas(amount uint64, descriptor string) error {
+	// Convert WasmVM gas units to SDK gas units
+	sdkGas := amount / GasConversionFactor
+	if sdkGas == 0 {
+		sdkGas = 1 // Minimum 1 gas per operation
 	}
-	gm.consumed += amount
+
+	if gm.consumed+sdkGas > gm.limit {
+		return fmt.Errorf("out of gas: consumed %d, limit %d, requested %d (wasmvm units: %d)",
+			gm.consumed/GasConversionFactor,
+			gm.limit/GasConversionFactor,
+			sdkGas,
+			amount)
+	}
+	gm.consumed += sdkGas
 	return nil
 }
 
