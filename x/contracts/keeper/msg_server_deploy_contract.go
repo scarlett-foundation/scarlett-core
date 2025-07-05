@@ -77,15 +77,20 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 	// Add 20% buffer for safety
 	deploymentGasLimit := gasNeeded + (gasNeeded / 5)
 
+	// Convert to WasmVM gas units
+	wasmGasLimit := deploymentGasLimit * GasConversionFactor
+
 	// Ensure we don't exceed max gas limit
 	if deploymentGasLimit > gasConfig.MaxGasLimit {
 		deploymentGasLimit = gasConfig.MaxGasLimit
+		wasmGasLimit = deploymentGasLimit * GasConversionFactor
 	}
 
 	logger.Info("⛽️ Preparing to store contract code in WasmVM",
 		"contract_size", len(msg.Code),
 		"gas_needed", gasNeeded,
-		"gas_limit", deploymentGasLimit)
+		"sdk_gas_limit", deploymentGasLimit,
+		"wasm_gas_limit", wasmGasLimit)
 
 	vm, err := k.GetWasmVM(logger)
 	if err != nil {
