@@ -72,25 +72,56 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 
 	// Calculate gas needed based on contract size
 	// Use 1 gas per byte as base cost, plus 50M base cost for compilation
-	gasNeeded := uint64(len(msg.Code)) + 50_000_000
+	baseGas := uint64(50_000_000)
+	perByteGas := uint64(1)
+	byteCost := uint64(len(msg.Code)) * perByteGas
+	gasNeeded := baseGas + byteCost
+
+	logger.Info("⚙️ Calculating contract deployment gas",
+		"contract_size_bytes", len(msg.Code),
+		"base_gas", baseGas,
+		"per_byte_gas", perByteGas,
+		"byte_cost_gas", byteCost,
+		"total_gas_needed", gasNeeded)
 
 	// Add 20% buffer for safety
-	deploymentGasLimit := gasNeeded + (gasNeeded / 5)
+	gasBuffer := gasNeeded / 5
+	deploymentGasLimit := gasNeeded + gasBuffer
+
+	logger.Info("⚙️ Adding safety buffer to gas limit",
+		"gas_needed", gasNeeded,
+		"buffer_percentage", "20%",
+		"buffer_amount", gasBuffer,
+		"total_with_buffer", deploymentGasLimit)
 
 	// Convert to WasmVM gas units
 	wasmGasLimit := deploymentGasLimit * GasConversionFactor
 
+	logger.Info("⚙️ Converting to WasmVM gas units",
+		"sdk_gas_limit", deploymentGasLimit,
+		"conversion_factor", GasConversionFactor,
+		"wasm_gas_limit", wasmGasLimit)
+
 	// Ensure we don't exceed max gas limit
 	if deploymentGasLimit > gasConfig.MaxGasLimit {
+		logger.Info("⚠️ Gas limit exceeds maximum, capping at max limit",
+			"requested_sdk_gas", deploymentGasLimit,
+			"max_sdk_gas", gasConfig.MaxGasLimit)
 		deploymentGasLimit = gasConfig.MaxGasLimit
 		wasmGasLimit = deploymentGasLimit * GasConversionFactor
 	}
 
-	logger.Info("⛽️ Preparing to store contract code in WasmVM",
+	logger.Info("⛽️ Final gas configuration for contract deployment",
 		"contract_size", len(msg.Code),
-		"gas_needed", gasNeeded,
-		"sdk_gas_limit", deploymentGasLimit,
-		"wasm_gas_limit", wasmGasLimit)
+		"base_gas", baseGas,
+		"byte_cost_gas", byteCost,
+		"buffer_gas", gasBuffer,
+		"final_sdk_gas", deploymentGasLimit,
+		"final_wasm_gas", wasmGasLimit)
+
+	logger.Info("✅ WasmVM instance obtained, calling StoreCode",
+		"vm_initialized", true,
+		"gas_limit", deploymentGasLimit)
 
 	vm, err := k.GetWasmVM(logger)
 	if err != nil {

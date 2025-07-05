@@ -11,6 +11,7 @@ import (
 
 	corestore "cosmossdk.io/core/store"
 	errorsmod "cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -137,9 +138,17 @@ func (k Keeper) CreateGasMeter(gasLimit uint64) wasmvmtypes.GasMeter {
 	// Convert SDK gas limit to WasmVM gas units
 	wasmGasLimit := gasLimit * GasConversionFactor
 
+	sdkCtx := sdk.UnwrapSDKContext(k.ctx)
+	logger := sdkCtx.Logger()
+	logger.Info("⛽️ Creating WasmVM gas meter",
+		"sdk_gas_limit", gasLimit,
+		"conversion_factor", GasConversionFactor,
+		"wasm_gas_limit", wasmGasLimit)
+
 	return &WasmGasMeter{
 		limit:    wasmGasLimit,
 		consumed: 0,
+		logger:   logger,
 	}
 }
 
@@ -147,25 +156,58 @@ func (k Keeper) CreateGasMeter(gasLimit uint64) wasmvmtypes.GasMeter {
 type WasmGasMeter struct {
 	limit    uint64 // In WasmVM gas units
 	consumed uint64 // In WasmVM gas units
+	logger   log.Logger
 }
 
 func (gm *WasmGasMeter) GasConsumed() uint64 {
+	sdkGas := gm.consumed / GasConversionFactor
+	gm.logger.Info("📊 Gas consumption check",
+		"wasm_gas_consumed", gm.consumed,
+		"sdk_gas_consumed", sdkGas)
 	return gm.consumed
 }
 
 func (gm *WasmGasMeter) GasConsumedToLimit() uint64 {
 	if gm.consumed > gm.limit {
+		gm.logger.Info("📊 Gas consumption exceeds limit",
+			"wasm_gas_consumed", gm.consumed,
+			"wasm_gas_limit", gm.limit,
+			"sdk_gas_consumed", gm.consumed/GasConversionFactor,
+			"sdk_gas_limit", gm.limit/GasConversionFactor)
 		return gm.limit
 	}
+	gm.logger.Info("📊 Gas consumption within limit",
+		"wasm_gas_consumed", gm.consumed,
+		"wasm_gas_limit", gm.limit,
+		"sdk_gas_consumed", gm.consumed/GasConversionFactor,
+		"sdk_gas_limit", gm.limit/GasConversionFactor)
 	return gm.consumed
 }
 
 func (gm *WasmGasMeter) Limit() uint64 {
+	gm.logger.Info("📊 Gas limit check",
+		"wasm_gas_limit", gm.limit,
+		"sdk_gas_limit", gm.limit/GasConversionFactor)
 	return gm.limit
 }
 
 func (gm *WasmGasMeter) ConsumeGas(amount uint64, descriptor string) error {
+	gm.logger.Info("⚡️ Gas consumption request",
+		"operation", descriptor,
+		"wasm_gas_requested", amount,
+		"sdk_gas_requested", amount/GasConversionFactor,
+		"wasm_gas_remaining", gm.limit-gm.consumed,
+		"sdk_gas_remaining", (gm.limit-gm.consumed)/GasConversionFactor)
+
 	if gm.consumed+amount > gm.limit {
+		gm.logger.Error("❌ Out of gas",
+			"operation", descriptor,
+			"wasm_gas_consumed", gm.consumed,
+			"wasm_gas_limit", gm.limit,
+			"wasm_gas_requested", amount,
+			"sdk_gas_consumed", gm.consumed/GasConversionFactor,
+			"sdk_gas_limit", gm.limit/GasConversionFactor,
+			"sdk_gas_requested", amount/GasConversionFactor)
 		return fmt.Errorf("out of gas: consumed %d, limit %d, requested %d (sdk units: %d/%d)",
 			gm.consumed,
 			gm.limit,
@@ -173,7 +215,16 @@ func (gm *WasmGasMeter) ConsumeGas(amount uint64, descriptor string) error {
 			gm.consumed/GasConversionFactor,
 			gm.limit/GasConversionFactor)
 	}
+
 	gm.consumed += amount
+	gm.logger.Info("✅ Gas consumed successfully",
+		"operation", descriptor,
+		"wasm_gas_consumed", amount,
+		"wasm_gas_total", gm.consumed,
+		"wasm_gas_remaining", gm.limit-gm.consumed,
+		"sdk_gas_consumed", amount/GasConversionFactor,
+		"sdk_gas_total", gm.consumed/GasConversionFactor,
+		"sdk_gas_remaining", (gm.limit-gm.consumed)/GasConversionFactor)
 	return nil
 }
 
