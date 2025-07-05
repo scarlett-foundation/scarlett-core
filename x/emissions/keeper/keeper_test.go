@@ -16,6 +16,10 @@ import (
 	"scarlett-core/x/emissions/keeper"
 	module "scarlett-core/x/emissions/module"
 	"scarlett-core/x/emissions/types"
+
+	"github.com/stretchr/testify/require"
+
+	keepertest "scarlett-core/testutil/keeper"
 )
 
 type fixture struct {
@@ -53,4 +57,29 @@ func initFixture(t *testing.T) *fixture {
 		keeper:       k,
 		addressCodec: addressCodec,
 	}
+}
+
+func TestGetParams(t *testing.T) {
+	k, ctx := keepertest.EmissionsKeeper(t)
+	params := types.DefaultParams()
+
+	k.SetParams(ctx, params)
+
+	require.EqualValues(t, params, k.GetParams(ctx))
+}
+
+func TestRegisterModule(t *testing.T) {
+	k, ctx := keepertest.EmissionsKeeper(t)
+	params := types.DefaultParams()
+
+	k.SetParams(ctx, params)
+
+	// Test module registration
+	err := k.RegisterModule(ctx, "test_module", "Test Module", "test_address")
+	require.NoError(t, err)
+
+	// Verify registration
+	modules := k.GetRegisteredModules(ctx)
+	require.Equal(t, 1, len(modules))
+	require.Equal(t, "test_module", modules[0].Name)
 }

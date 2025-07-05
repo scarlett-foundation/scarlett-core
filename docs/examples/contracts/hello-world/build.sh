@@ -28,9 +28,17 @@ fi
 echo -e "${YELLOW}🧹 Cleaning previous builds...${NC}"
 cargo clean
 
-# Build the contract
-echo -e "${YELLOW}⚙️  Building contract...${NC}"
-cargo build --release --target wasm32-unknown-unknown
+# Build optimized binary
+RUSTFLAGS='-C link-arg=-s' cargo build --release --target wasm32-unknown-unknown --locked
+
+# Create release directory if it doesn't exist
+mkdir -p artifacts
+
+# Optimize the Wasm binary
+wasm-opt -Os ./target/wasm32-unknown-unknown/release/hello_world.wasm -o ./artifacts/hello_world.wasm
+
+# Verify the output
+ls -l ./artifacts/hello_world.wasm
 
 # Check if the build was successful
 if [ -f "target/wasm32-unknown-unknown/release/hello_world.wasm" ]; then

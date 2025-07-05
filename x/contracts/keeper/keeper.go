@@ -114,8 +114,12 @@ func (k *Keeper) initWasmVM(logger log.Logger) error {
 		"cosmwasm_1_2",
 		"cosmwasm_1_3",
 		"cosmwasm_1_4",
-		"bulkmem", // Enable bulk memory operations
-		"threads", // Enable threads (often needed with bulk memory)
+		"bulkmem",         // Enable bulk memory operations
+		"threads",         // Enable threads (often needed with bulk memory)
+		"sign-ext",        // Enable sign extension operations
+		"mutable-globals", // Enable mutable globals
+		"reference-types", // Enable reference types
+		"multivalue",      // Enable multivalue returns
 	}
 	memoryLimit := uint32(256) // 256 MiB memory limit - sufficient for large contracts
 	printDebug := true         // Enable debug to see WasmVM internals

@@ -16,6 +16,9 @@ import (
 	"scarlett-core/x/scarlettcore/keeper"
 	module "scarlett-core/x/scarlettcore/module"
 	"scarlett-core/x/scarlettcore/types"
+
+	"cosmossdk.io/math"
+	"github.com/stretchr/testify/require"
 )
 
 // Mock BankKeeper for testing
@@ -76,4 +79,24 @@ func initFixture(t *testing.T) *fixture {
 		keeper:       k,
 		addressCodec: addressCodec,
 	}
+}
+
+func TestGetParams(t *testing.T) {
+	k, ctx := keepertest.ScarlettcoreKeeper(t)
+	params := types.DefaultParams()
+
+	k.SetParams(ctx, params)
+
+	require.EqualValues(t, params, k.GetParams(ctx))
+}
+
+func TestBurnTokens(t *testing.T) {
+	k, ctx := keepertest.ScarlettcoreKeeper(t)
+	params := types.DefaultParams()
+
+	k.SetParams(ctx, params)
+
+	amount := math.NewInt(1000000)
+	err := k.BurnTokens(ctx, amount)
+	require.NoError(t, err)
 }

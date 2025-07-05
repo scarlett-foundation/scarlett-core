@@ -2,20 +2,22 @@
 name = "hello_world"
 version = "0.1.0"
 edition = "2021"
+description = "A simple hello world smart contract"
+license = "Apache-2.0"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-cosmwasm-std = "3.0.1"
-cosmwasm-schema = "3.0.1"
-cw-storage-plus = "3.0.0"
-cw2 = "3.0.0"
+cosmwasm-std = { version = "1.5.0", features = ["iterator", "staking", "stargate"] }
+cosmwasm-schema = "1.5.0"
+cw-storage-plus = "1.1.0"
+cw2 = "1.1.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
 thiserror = "1.0.31"
 
 [dev-dependencies]
-cw-multi-test = "3.0.1"
+cw-multi-test = "0.17.0"
 
 [profile.release]
 opt-level = 3
@@ -26,4 +28,12 @@ debug-assertions = false
 codegen-units = 1
 panic = 'abort'
 incremental = false
-overflow-checks = true 
+overflow-checks = true
+
+[workspace]
+members = []
+
+[features]
+default = []
+# backtraces feature has been removed as it's not supported in cosmwasm-std 2.0
+library = [] 
