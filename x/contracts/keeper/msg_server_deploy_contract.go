@@ -111,18 +111,6 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 		wasmGasLimit = deploymentGasLimit * GasConversionFactor
 	}
 
-	logger.Info("⛽️ Final gas configuration for contract deployment",
-		"contract_size", len(msg.Code),
-		"base_gas", baseGas,
-		"byte_cost_gas", byteCost,
-		"buffer_gas", gasBuffer,
-		"final_sdk_gas", deploymentGasLimit,
-		"final_wasm_gas", wasmGasLimit)
-
-	logger.Info("✅ WasmVM instance obtained, calling StoreCode",
-		"vm_initialized", true,
-		"gas_limit", deploymentGasLimit)
-
 	vm, err := k.GetWasmVM(logger)
 	if err != nil {
 		logger.Error("❌ Failed to get WasmVM instance",
@@ -135,21 +123,19 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 		"vm_initialized", true,
 		"gas_limit", deploymentGasLimit)
 
-	checksum, gasUsed, err := vm.StoreCode(wasmCode, deploymentGasLimit)
+	// Store contract code with gas metering
+	checksum, gasUsed, err := vm.StoreCode(wasmCode, wasmGasLimit)
 	if err != nil {
 		logger.Error("❌ Failed to store contract code in WasmVM",
 			"error", err,
-			"gas_used", gasUsed,
-			"gas_limit", deploymentGasLimit,
 			"contract_size", len(msg.Code),
-			"gas_efficiency", fmt.Sprintf("%.2f bytes/gas", float64(len(msg.Code))/float64(gasUsed)))
+			"gas_used", gasUsed)
 		return nil, errorsmod.Wrapf(types.ErrInvalidInput, "failed to store contract code: %s", err)
 	}
 
 	logger.Info("✅ Contract code stored successfully in WasmVM",
 		"gas_used", gasUsed,
-		"gas_limit", deploymentGasLimit,
-		"gas_remaining", deploymentGasLimit-gasUsed,
+		"gas_remaining", wasmGasLimit-gasUsed,
 		"gas_efficiency", fmt.Sprintf("%.2f bytes/gas", float64(len(msg.Code))/float64(gasUsed)),
 		"checksum", hex.EncodeToString(checksum))
 

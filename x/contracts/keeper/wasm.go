@@ -11,7 +11,7 @@ import (
 
 	corestore "cosmossdk.io/core/store"
 	errorsmod "cosmossdk.io/errors"
-	"github.com/cosmos/cosmos-sdk/log"
+	"cosmossdk.io/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -134,11 +134,11 @@ func (k Keeper) CreateSecureExecutionEnvironment(ctx context.Context, contractAd
 const GasConversionFactor = 100_000
 
 // CreateGasMeter creates a gas meter for contract execution
-func (k Keeper) CreateGasMeter(gasLimit uint64) wasmvmtypes.GasMeter {
+func (k Keeper) CreateGasMeter(ctx context.Context, gasLimit uint64) wasmvmtypes.GasMeter {
 	// Convert SDK gas limit to WasmVM gas units
 	wasmGasLimit := gasLimit * GasConversionFactor
 
-	sdkCtx := sdk.UnwrapSDKContext(k.ctx)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	logger := sdkCtx.Logger()
 	logger.Info("⛽️ Creating WasmVM gas meter",
 		"sdk_gas_limit", gasLimit,
