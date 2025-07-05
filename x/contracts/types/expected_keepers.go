@@ -5,6 +5,7 @@ import (
 
 	"cosmossdk.io/core/address"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	wasmvm "github.com/CosmWasm/wasmvm/v3"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -41,4 +42,7 @@ type WasmKeeper interface {
 	GetKeeper() *wasmkeeper.Keeper
 	// Placeholder to ensure wasmvm import is used
 	GetVM() wasmvm.VM
+	// Use wasmd types to ensure compatibility
+	GetContractInfo(ctx context.Context, contractAddress sdk.AccAddress) *wasmtypes.ContractInfo
+	GetCodeInfo(ctx context.Context, codeID uint64) *wasmtypes.CodeInfo
 }
