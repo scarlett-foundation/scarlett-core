@@ -31,22 +31,22 @@ type GasConfig struct {
 // All nodes building from the same source will have identical limits
 var DefaultGasConfig = GasConfig{
 	// Deployment limits - significantly increased for real-world contracts
-	DeploymentGasLimit: 100_000_000, // 100M gas - handles large contracts like 275KB+ WASM
-	MaxContractSize:    5_242_880,   // 5MB - allows complex DeFi contracts
+	DeploymentGasLimit: 200_000_000, // 200M gas - handles large contracts
+	MaxContractSize:    10_485_760,  // 10MB - allows very complex contracts
 
 	// Execution limits - reasonable for production use
-	DefaultGasLimit: 2_000_000,   // 2M gas - good default for most operations
-	MaxGasLimit:     200_000_000, // 200M gas - handles complex contract interactions
-	MinGasLimit:     200_000,     // 200K gas - prevents tiny gas limit abuse
+	DefaultGasLimit: 5_000_000,   // 5M gas - good default for most operations
+	MaxGasLimit:     500_000_000, // 500M gas - handles complex contract interactions
+	MinGasLimit:     500_000,     // 500K gas - prevents tiny gas limit abuse
 
 	// Timeout limits - secure but usable
 	DefaultTimeout: 30 * time.Second,  // 30 seconds - reasonable for most operations
 	MaxTimeout:     120 * time.Second, // 2 minutes - absolute maximum
 
 	// Message size limits - increased for real-world usage
-	MaxInstantiateSize: 524_288, // 512KB - handles complex instantiation
-	MaxExecuteSize:     262_144, // 256KB - handles complex execution messages
-	MaxQuerySize:       131_072, // 128KB - handles complex queries
+	MaxInstantiateSize: 1_048_576, // 1MB - handles complex instantiation
+	MaxExecuteSize:     524_288,   // 512KB - handles complex execution messages
+	MaxQuerySize:       262_144,   // 256KB - handles complex queries
 }
 
 // ValidateGasConfig ensures all gas limits are reasonable and secure

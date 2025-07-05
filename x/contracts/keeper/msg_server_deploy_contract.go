@@ -69,11 +69,23 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 
 	// Store contract code in WasmVM and get checksum
 	wasmCode := wasmvm.WasmCode(msg.Code)
-	deploymentGasLimit := gasConfig.DeploymentGasLimit // Use configurable gas limit (50M gas)
+
+	// Calculate gas needed based on contract size
+	// Use 1 gas per byte as base cost, plus 50M base cost for compilation
+	gasNeeded := uint64(len(msg.Code)) + 50_000_000
+
+	// Add 20% buffer for safety
+	deploymentGasLimit := gasNeeded + (gasNeeded / 5)
+
+	// Ensure we don't exceed max gas limit
+	if deploymentGasLimit > gasConfig.MaxGasLimit {
+		deploymentGasLimit = gasConfig.MaxGasLimit
+	}
 
 	logger.Info("⛽️ Preparing to store contract code in WasmVM",
-		"gas_limit", deploymentGasLimit,
-		"contract_size", len(msg.Code))
+		"contract_size", len(msg.Code),
+		"gas_needed", gasNeeded,
+		"gas_limit", deploymentGasLimit)
 
 	vm, err := k.GetWasmVM(logger)
 	if err != nil {
