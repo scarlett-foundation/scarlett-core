@@ -106,10 +106,20 @@ func (k *Keeper) initWasmVM(logger log.Logger) error {
 	// Initialize WasmVM with production-ready configuration
 	// NewVM(dataDir string, supportedCapabilities []string, memoryLimit uint32, printDebug bool, cacheSize uint32) (*VM, error)
 	wasmCacheDir := filepath.Join(k.wasmDir, "wasm", "cache")
-	supportedCapabilities := []string{"iterator", "staking", "stargate", "cosmwasm_1_1", "cosmwasm_1_2"} // Conservative capabilities to avoid v3.0.0 bugs
-	memoryLimit := uint32(256)                                                                           // 256 MiB memory limit - sufficient for large contracts
-	printDebug := true                                                                                   // Enable debug to see WasmVM internals
-	cacheSize := uint32(200)                                                                             // 200 MiB cache - increased for better performance
+	supportedCapabilities := []string{
+		"iterator",
+		"staking",
+		"stargate",
+		"cosmwasm_1_1",
+		"cosmwasm_1_2",
+		"cosmwasm_1_3",
+		"cosmwasm_1_4",
+		"bulkmem", // Enable bulk memory operations
+		"threads", // Enable threads (often needed with bulk memory)
+	}
+	memoryLimit := uint32(256) // 256 MiB memory limit - sufficient for large contracts
+	printDebug := true         // Enable debug to see WasmVM internals
+	cacheSize := uint32(200)   // 200 MiB cache - increased for better performance
 
 	// Log WasmVM initialization parameters using proper SDK logging
 	logger.Info("🔧 Initializing WasmVM with configuration",
