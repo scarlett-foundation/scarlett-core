@@ -8,7 +8,7 @@ import (
 
 	"scarlett-core/x/contracts/types"
 
-	wasmvm "github.com/CosmWasm/wasmvm"
+	wasmvm "github.com/CosmWasm/wasmvm/v3"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -36,10 +36,16 @@ func (k msgServer) DeployContract(ctx context.Context, msg *types.MsgDeployContr
 
 	// Store contract code in WasmVM and get checksum
 	wasmCode := wasmvm.WasmCode(msg.Code)
-	checksum, err := k.wasmVM.StoreCode(wasmCode)
+	gasLimit := uint64(1_000_000) // 1M gas limit for code storage
+	vm, err := k.GetWasmVM()
+	if err != nil {
+		return nil, errorsmod.Wrapf(types.ErrInvalidInput, "failed to get WasmVM: %s", err)
+	}
+	checksum, gasUsed, err := vm.StoreCode(wasmCode, gasLimit)
 	if err != nil {
 		return nil, errorsmod.Wrapf(types.ErrInvalidInput, "failed to store contract code: %s", err)
 	}
+	_ = gasUsed // We'll use this for gas accounting in future versions
 
 	// Generate next contract ID
 	contractSeq, err := k.ContractSeq.Next(ctx)

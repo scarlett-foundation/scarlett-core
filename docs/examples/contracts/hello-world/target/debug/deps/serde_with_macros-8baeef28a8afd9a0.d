@@ -1,0 +1,8 @@
+/Users/brendanplayford/scarlett/scarlett-core/docs/examples/contracts/hello-world/target/debug/deps/serde_with_macros-8baeef28a8afd9a0.d: /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/lib.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/apply.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/lazy_bool.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/utils.rs
+
+/Users/brendanplayford/scarlett/scarlett-core/docs/examples/contracts/hello-world/target/debug/deps/libserde_with_macros-8baeef28a8afd9a0.dylib: /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/lib.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/apply.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/lazy_bool.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/utils.rs
+
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/lib.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/apply.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/lazy_bool.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.14.0/src/utils.rs:

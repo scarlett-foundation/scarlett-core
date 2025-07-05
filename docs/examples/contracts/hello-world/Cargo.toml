@@ -1,0 +1,29 @@
+[package]
+name = "hello_world"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+cosmwasm-std = "3.0.1"
+cosmwasm-schema = "3.0.1"
+cw-storage-plus = "3.0.0"
+cw2 = "3.0.0"
+serde = { version = "1.0.210", default-features = false, features = ["derive"] }
+thiserror = "1.0.31"
+
+[dev-dependencies]
+cw-multi-test = "3.0.1"
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = 'abort'
+incremental = false
+overflow-checks = true 

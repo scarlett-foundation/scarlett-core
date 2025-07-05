@@ -7,7 +7,7 @@ import (
 
 	"scarlett-core/x/contracts/types"
 
-	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
+	wasmvmtypes "github.com/CosmWasm/wasmvm/v3/types"
 
 	corestore "cosmossdk.io/core/store"
 	errorsmod "cosmossdk.io/errors"
@@ -137,7 +137,7 @@ func (k Keeper) CreateSecureExecutionEnvironment(ctx context.Context, contractAd
 	// Create block info with current chain state
 	blockInfo := wasmvmtypes.BlockInfo{
 		Height:  uint64(sdkCtx.BlockHeight()),
-		Time:    uint64(sdkCtx.BlockTime().Unix()),
+		Time:    wasmvmtypes.Uint64(sdkCtx.BlockTime().Unix()),
 		ChainID: sdkCtx.ChainID(),
 	}
 

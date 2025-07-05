@@ -9,7 +9,7 @@ import (
 	corestore "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	wasmvm "github.com/CosmWasm/wasmvm"
+	wasmvm "github.com/CosmWasm/wasmvm/v3"
 
 	"scarlett-core/x/contracts/types"
 )
@@ -25,8 +25,10 @@ type Keeper struct {
 	Schema collections.Schema
 	Params collections.Item[types.Params]
 
-	// WasmVM instance for contract execution
-	wasmVM *wasmvm.VM
+	// WasmVM instance for contract execution (lazy initialization)
+	wasmVM     *wasmvm.VM
+	wasmDir    string
+	wasmVMInit bool
 
 	// Contract storage
 	ContractCode collections.Map[[]byte, []byte]             // codeID -> wasm bytecode
@@ -51,19 +53,6 @@ func NewKeeper(
 		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
 	}
 
-	// Initialize WasmVM with secure configuration
-	// NewVM(dataDir string, supportedCapabilities string, memoryLimit uint32, printDebug bool, cacheSize uint32) (*VM, error)
-	wasmCacheDir := filepath.Join(wasmDir, "wasm", "cache")
-	supportedCapabilities := "iterator,staking,stargate,cosmwasm_1_1,cosmwasm_1_2" // Standard capabilities
-	memoryLimit := uint32(32)                                                      // 32 MiB memory limit per contract
-	printDebug := false                                                            // Don't print debug in production
-	cacheSize := uint32(256)                                                       // 256 MiB cache
-
-	vm, err := wasmvm.NewVM(wasmCacheDir, supportedCapabilities, memoryLimit, printDebug, cacheSize)
-	if err != nil {
-		panic(fmt.Sprintf("failed to initialize WasmVM: %s", err))
-	}
-
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
@@ -71,7 +60,8 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
-		wasmVM:       vm,
+		wasmDir:      wasmDir,
+		wasmVMInit:   false, // Lazy initialization
 
 		bankKeeper:      bankKeeper,
 		emissionsKeeper: emissionsKeeper,
@@ -96,7 +86,34 @@ func (k Keeper) GetAuthority() []byte {
 	return k.authority
 }
 
-// GetWasmVM returns the WasmVM instance
-func (k Keeper) GetWasmVM() *wasmvm.VM {
-	return k.wasmVM
+// initWasmVM initializes WasmVM lazily when first needed
+func (k *Keeper) initWasmVM() error {
+	if k.wasmVMInit {
+		return nil
+	}
+
+	// Initialize WasmVM with secure configuration
+	// NewVM(dataDir string, supportedCapabilities []string, memoryLimit uint32, printDebug bool, cacheSize uint32) (*VM, error)
+	wasmCacheDir := filepath.Join(k.wasmDir, "wasm", "cache")
+	supportedCapabilities := []string{"iterator", "staking", "stargate", "cosmwasm_1_1", "cosmwasm_1_2", "cosmwasm_2_0", "bulk-memory"} // Standard capabilities with bulk-memory (supported in wasmvm v3)
+	memoryLimit := uint32(32)                                                                                                           // 32 MiB memory limit per contract
+	printDebug := false                                                                                                                 // Don't print debug in production
+	cacheSize := uint32(256)                                                                                                            // 256 MiB cache
+
+	vm, err := wasmvm.NewVM(wasmCacheDir, supportedCapabilities, memoryLimit, printDebug, cacheSize)
+	if err != nil {
+		return fmt.Errorf("failed to initialize WasmVM: %w", err)
+	}
+
+	k.wasmVM = vm
+	k.wasmVMInit = true
+	return nil
+}
+
+// GetWasmVM returns the WasmVM instance, initializing it if needed
+func (k *Keeper) GetWasmVM() (*wasmvm.VM, error) {
+	if err := k.initWasmVM(); err != nil {
+		return nil, err
+	}
+	return k.wasmVM, nil
 }
