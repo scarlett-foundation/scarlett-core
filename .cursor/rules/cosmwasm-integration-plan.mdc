@@ -1,4 +1,176 @@
+---
+alwaysApply: true
+---
+
 # Vanilla CosmWasm (`x/wasm`) Integration Plan
+
+## Overview
+This document outlines the step-by-step process for integrating vanilla CosmWasm functionality into the chain. The chosen architecture avoids direct integration of the legacy `wasmd` module, which is incompatible with the project's modern `depinject` framework. Instead, we will scaffold a new `x/contracts` module to serve as a clean, `depinject`-compatible wrapper around the `x/wasm` keeper. This approach preserves architectural integrity and prevents technical debt.
+
+## Architecture & Context
+
+### Current State Analysis
+- **Cosmos SDK Version**: v0.53.x based with `depinject`
+- **Current System**: The chain does not have any CosmWasm or smart contract capabilities.
+- **Dependency Injection**: The application uses the `depinject` framework for clean, automated dependency management, which is a core architectural pattern to preserve.
+
+### Scope for Initial Integration
+- **Vanilla CosmWasm**: The primary goal is to establish core smart contract functionality (`StoreCode`, `InstantiateContract`, `ExecuteContract`, `QueryContract`).
+- **IBCv2 Deferred**: The `wasmd v0.61.0` release includes significant new features for IBCv2. These features are explicitly **out of scope** for this initial integration to minimize complexity. They can be integrated in a future phase.
+
+### Architectural Problem & Strategy
+- **The Challenge**: The standard `x/wasm` module from `wasmd` (v0.61.0) predates `depinject` and requires manual instantiation and wiring of its keeper and dependencies. Forcing this into our app would lead to a complex, hybrid `app.go` that is difficult to maintain and upgrade.
+- **Implementation Strategy**: We will use the **Wrapper Module Pattern**.
+    1.  **Scaffold `x/contracts`**: Use Ignite to create a new, `depinject`-compatible module named `contracts`.
+    2.  **Encapsulate `x/wasm`**: The `x/contracts` keeper will embed the `wasm.Keeper` and handle its manual instantiation internally.
+    3.  **Clean Integration**: This isolates the legacy pattern, allowing the rest of the application to remain clean and leverage `depinject` seamlessly.
+
+## Implementation Structure: New `x/contracts` Module
+
+### Core Components
+- **`x/contracts/keeper.Keeper`**: This struct will embed the `wasm.Keeper` to inherit all its core logic.
+  ```go
+  import (
+      "github.com/CosmWasm/wasmd/x/wasm"
+      // ... other imports
+  )
+
+  type Keeper struct {
+      wasm.Keeper
+      // ... other dependencies if needed by the wrapper itself
+  }
+  ```
+- **`x/contracts/keeper.NewKeeper()`**: A constructor function that will perform the manual instantiation of `wasm.Keeper`, taking in all its required dependencies (bank keeper, account keeper, etc.) and the wasm configuration.
+- **Wasm Configuration**: A dedicated configuration object to specify wasm engine parameters, such as supported capabilities, memory cache size, and contract debug mode.
+
+## Dependencies & Module Integration
+
+### Required Go Dependencies
+```bash
+# In go.mod
+require (
+    github.com/CosmWasm/wasmd v0.61.0
+    github.com/CosmWasm/wasmvm v3.0.0
+)
+```
+
+### Required Keeper Dependencies (for `wasm.Keeper`)
+The `NewKeeper` function for `x/contracts` will require a set of keepers to be injected so they can be passed to the internal `wasm.NewKeeper` constructor. The final list must be verified against the `v0.61.0` `NewKeeper` signature, as the changelog notes some keepers and features (like IBC fee handling) have been removed. The expected dependencies include:
+- `AccountKeeper`
+- `BankKeeper`
+- `StakingKeeper`
+- `DistributionKeeper` querier
+- `IBC ChannelKeeper`
+- `GovKeeper` (for proposal router)
+
+### App Integration
+- **`app/app_config.go`**: The new `x/contracts` module will be added to the module list here. The `depinject` container will be configured to provide all necessary dependencies to the `x/contracts` module's `NewKeeper` function.
+- **`app/app.go`**: The `x/contracts` keeper will be added to the `App` struct and initialized via `depinject`. The wasm-related governance proposal types will be wired into the `x/gov` module's router.
+
+## Implementation Steps
+
+### Phase 1: Module Scaffolding & Dependencies (15 minutes)
+1.  **Scaffold new module**: `ignite scaffold module contracts --dep bank,auth`
+2.  **Add Go dependencies**: Manually add `wasmd` and `wasmvm` to `go.mod` and run `go mod tidy`.
+3.  **COMMIT**: `git add . && git commit -m "feat(contracts): scaffold x/contracts module and add wasm dependencies"`
+
+### Phase 2: Keeper Implementation (45 minutes)
+1.  **Enhance `x/contracts` keeper**: Modify `x/contracts/keeper/keeper.go` to embed `wasm.Keeper`.
+2.  **Define expected keepers**: Create `x/contracts/types/expected_keepers.go` with interfaces for all keepers `wasm.Keeper` depends on.
+3.  **Implement `NewKeeper`**: Write the constructor to manually instantiate `wasm.Keeper` and assign it to the embedded field.
+4.  **Define Wasm config**: Create wasm configuration types and default values, likely in `app/config.go`.
+5.  **COMMIT**: `git add . && git commit -m "feat(contracts): implement keeper with embedded wasm.Keeper"`
+
+### Phase 3: Application Integration (40 minutes)
+1.  **Register module**: Update `app/app_config.go` to include the `contracts` module and provide its dependencies via `depinject`.
+2.  **Wire governance router**: In `app/app.go`, add the wasm proposal handlers (e.g., `wasm.NewWasmProposalHandler`) to the `x/gov` router, granting governance the power to manage contracts.
+3.  **Expose CLI commands**: Update `x/contracts/module/autocli.go` to expose the standard `x/wasm` CLI commands for transactions and queries.
+4.  **COMMIT**: `git add . && git commit -m "feat(contracts): integrate x/contracts module into the application"`
+
+### Phase 4: Genesis & Finalization (20 minutes)
+1.  **Implement Genesis**: Implement `InitGenesis` and `ExportGenesis` in `x/contracts`, which will simply delegate the call to the embedded `wasm.Keeper`.
+2.  **Set Permissionless Parameters**: During `InitGenesis`, explicitly set the `x/wasm` parameters for `CodeUploadAccess` and `InstantiateDefaultPermission` to `AllowEverybody`. This will make the chain permissionless for smart contract deployment from genesis.
+3.  **Final Build Check**: Ensure the entire application compiles and starts successfully.
+4.  **COMMIT**: `git add . && git commit -m "feat(contracts): implement genesis handling and set permissionless config"`
+
+## Security Considerations
+
+- **Permissionless by Default**: Per our configuration, all contract management actions (`StoreCode`, `InstantiateContract`, etc.) will be permissionless. Anyone can deploy contracts by paying the required transaction fees. The governance-gated model will not be active at launch.
+- **Gas Limiting**: The wasm engine's gas metering is critical. We will use the default, robust gas settings to prevent abuse.
+- **Capabilities**: The set of capabilities passed to contracts will be minimal by default to adhere to the principle of least privilege.
+
+## Acceptance Criteria
+
+### ✅ **Core Integration**
+- [ ] The chain builds and starts successfully with the new `x/contracts` module.
+- [ ] The `x/contracts` module correctly encapsulates the `x/wasm` keeper.
+- [ ] The integration strictly follows the `depinject` pattern at the application level.
+
+### ✅ **Governance & CLI**
+- [ ] A user can submit a `StoreCodeProposal` via a governance transaction.
+- [ ] After a proposal passes, the new contract code is visible via CLI queries.
+- [ ] A user can submit an `InstantiateContractProposal` for stored code.
+- [ ] After a proposal passes, the new contract address is visible.
+
+### ✅ **Contract Interaction**
+- [ ] A user can query a contract's state using the standard `x/wasm` query commands.
+- [ ] A user can execute a message on an instantiated contract.
+
+## CLI & Governance Proposal Examples
+
+### Query Commands
+```bash
+# Query all stored contract code info
+scarlett-cored query wasm list-code
+
+# Query all instantiated contracts for a given code ID
+scarlett-cored query wasm list-contract-by-code [code-id]
+
+# Query a contract's smart state
+scarlett-cored query wasm contract-state smart [contract-address] '{"get_count":{}}'
+```
+
+### Governance Proposal Example
+```json
+// store_code_proposal.json
+{
+  "title": "Store CW20 Base Contract Code",
+  "description": "Upload the standard CW20 base contract to the chain for future token instantiations.",
+  "messages": [
+    {
+      "@type": "/cosmwasm.wasm.v1.MsgStoreCode",
+      "authority": "scarlett10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47",
+      "wasm_byte_code": "base64-encoded-contract-bytes-here"
+    }
+  ],
+  "deposit": "10000000sclt"
+}
+```
+```bash
+# Command to submit the proposal
+scarlett-cored tx gov submit-proposal store_code_proposal.json --from my-wallet
+```
+
+## Key Files to Create/Modify
+
+### New Files
+1. `x/contracts/keeper/keeper.go`
+2. `x/contracts/keeper/genesis.go`
+3. `x/contracts/types/expected_keepers.go`
+4. All other files scaffolded by `ignite scaffold module contracts`
+
+### Modified Files
+1. `go.mod` & `go.sum`
+2. `app/app.go`
+3. `app/app_config.go`
+
+## Git Commit Strategy
+Each phase will be committed separately with a descriptive message following the `feat(contracts): [description]` pattern. This ensures a clean, revertible history. No phase will be started until the previous one is committed. 
+2. `app/app.go`
+3. `app/app_config.go`
+
+## Git Commit Strategy
+Each phase will be committed separately with a descriptive message following the `feat(contracts): [description]` pattern. This ensures a clean, revertible history. No phase will be started until the previous one is committed. # Vanilla CosmWasm (`x/wasm`) Integration Plan
 
 ## Overview
 This document outlines the step-by-step process for integrating vanilla CosmWasm functionality into the chain. The chosen architecture avoids direct integration of the legacy `wasmd` module, which is incompatible with the project's modern `depinject` framework. Instead, we will scaffold a new `x/contracts` module to serve as a clean, `depinject`-compatible wrapper around the `x/wasm` keeper. This approach preserves architectural integrity and prevents technical debt.

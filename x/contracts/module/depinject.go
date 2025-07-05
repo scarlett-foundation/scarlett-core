@@ -1,13 +1,13 @@
 package contracts
 
 import (
-	"cosmossdk.io/core/address"
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/depinject/appconfig"
+	"cosmossdk.io/log"
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	"github.com/cosmos/cosmos-sdk/codec"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"scarlett-core/x/contracts/keeper"
 	"scarlett-core/x/contracts/types"
@@ -31,10 +31,14 @@ type ModuleInputs struct {
 	Config       *types.Module
 	StoreService store.KVStoreService
 	Cdc          codec.Codec
-	AddressCodec address.Codec
+	Logger       log.Logger
 
-	AuthKeeper types.AuthKeeper
-	BankKeeper types.BankKeeper
+	// We need the wasmd keeper to wrap it
+	WasmKeeper *wasmkeeper.Keeper
+
+	AuthKeeper    types.AuthKeeper
+	BankKeeper    types.BankKeeper
+	AccountKeeper types.AccountKeeper
 }
 
 type ModuleOutputs struct {
@@ -45,18 +49,14 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
-	// default to governance authority if not provided
-	authority := authtypes.NewModuleAddress(types.GovModuleName)
-	if in.Config.Authority != "" {
-		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
-	}
 	k := keeper.NewKeeper(
-		in.StoreService,
 		in.Cdc,
-		in.AddressCodec,
-		authority,
-		in.BankKeeper,
+		in.StoreService,
+		in.Logger,
+		in.WasmKeeper,
 		in.AuthKeeper,
+		in.BankKeeper,
+		in.AccountKeeper,
 	)
 	m := NewAppModule(in.Cdc, k, in.AuthKeeper, in.BankKeeper)
 

@@ -1,67 +1,85 @@
 package keeper
 
 import (
-	"fmt"
+	"context"
 
-	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
-	corestore "cosmossdk.io/core/store"
+	"cosmossdk.io/core/store"
+	"cosmossdk.io/log"
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"scarlett-core/x/contracts/types"
 )
 
+// Keeper wraps wasmd's keeper to provide contracts module functionality
 type Keeper struct {
-	storeService corestore.KVStoreService
-	cdc          codec.Codec
-	addressCodec address.Codec
-	// Address capable of executing a MsgUpdateParams message.
-	// Typically, this should be the x/gov module account.
-	authority []byte
+	cdc      codec.BinaryCodec
+	storeKey store.KVStoreService
+	logger   log.Logger
 
-	Schema collections.Schema
-	Params collections.Item[types.Params]
+	// Embed wasmd's keeper to delegate all wasm operations
+	*wasmkeeper.Keeper
 
-	bankKeeper types.BankKeeper
-	authKeeper types.AuthKeeper
+	// Expected keepers for additional functionality
+	authKeeper    types.AuthKeeper
+	bankKeeper    types.BankKeeper
+	accountKeeper types.AccountKeeper
 }
 
+// NewKeeper creates a new contracts keeper that wraps wasmd's functionality
 func NewKeeper(
-	storeService corestore.KVStoreService,
-	cdc codec.Codec,
-	addressCodec address.Codec,
-	authority []byte,
-
-	bankKeeper types.BankKeeper,
+	cdc codec.BinaryCodec,
+	storeKey store.KVStoreService,
+	logger log.Logger,
+	wasmKeeper *wasmkeeper.Keeper,
 	authKeeper types.AuthKeeper,
+	bankKeeper types.BankKeeper,
+	accountKeeper types.AccountKeeper,
 ) Keeper {
-	if _, err := addressCodec.BytesToString(authority); err != nil {
-		panic(fmt.Sprintf("invalid authority address %s: %s", authority, err))
+	return Keeper{
+		cdc:           cdc,
+		storeKey:      storeKey,
+		logger:        logger,
+		Keeper:        wasmKeeper, // Embed wasmd's keeper
+		authKeeper:    authKeeper,
+		bankKeeper:    bankKeeper,
+		accountKeeper: accountKeeper,
 	}
-
-	sb := collections.NewSchemaBuilder(storeService)
-
-	k := Keeper{
-		storeService: storeService,
-		cdc:          cdc,
-		addressCodec: addressCodec,
-		authority:    authority,
-
-		bankKeeper: bankKeeper,
-		authKeeper: authKeeper,
-		Params:     collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
-	}
-
-	schema, err := sb.Build()
-	if err != nil {
-		panic(err)
-	}
-	k.Schema = schema
-
-	return k
 }
 
-// GetAuthority returns the module's authority.
-func (k Keeper) GetAuthority() []byte {
-	return k.authority
+// Logger returns the module logger
+func (k Keeper) Logger() log.Logger {
+	return k.logger.With("module", "x/"+types.ModuleName)
+}
+
+// GetContractInfo delegates to wasmd's keeper
+func (k Keeper) GetContractInfo(ctx context.Context, contractAddress sdk.AccAddress) *wasmtypes.ContractInfo {
+	return k.Keeper.GetContractInfo(ctx, contractAddress)
+}
+
+// GetCodeInfo delegates to wasmd's keeper
+func (k Keeper) GetCodeInfo(ctx context.Context, codeID uint64) *wasmtypes.CodeInfo {
+	return k.Keeper.GetCodeInfo(ctx, codeID)
+}
+
+// GetKeeper returns the embedded wasmd keeper for compatibility
+func (k Keeper) GetKeeper() *wasmkeeper.Keeper {
+	return k.Keeper
+}
+
+// AddressCodec returns the address codec from auth keeper
+func (k Keeper) AddressCodec() address.Codec {
+	return k.authKeeper.AddressCodec()
+}
+
+// ValidateContractAddress validates that an address is a valid contract address
+func (k Keeper) ValidateContractAddress(ctx context.Context, addr sdk.AccAddress) error {
+	contractInfo := k.GetContractInfo(ctx, addr)
+	if contractInfo == nil {
+		return types.ErrInvalidSigner.Wrapf("address %s is not a contract", addr.String())
+	}
+	return nil
 }

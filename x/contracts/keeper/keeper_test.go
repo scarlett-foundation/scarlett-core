@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"cosmossdk.io/core/address"
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"scarlett-core/x/contracts/keeper"
 	module "scarlett-core/x/contracts/module"
@@ -24,6 +24,17 @@ type fixture struct {
 	addressCodec address.Codec
 }
 
+// mockWasmKeeper is a minimal mock for testing
+type mockWasmKeeper struct{}
+
+func (m *mockWasmKeeper) GetContractInfo(ctx context.Context, contractAddress sdk.AccAddress) interface{} {
+	return nil
+}
+
+func (m *mockWasmKeeper) GetCodeInfo(ctx context.Context, codeID uint64) interface{} {
+	return nil
+}
+
 func initFixture(t *testing.T) *fixture {
 	t.Helper()
 
@@ -34,21 +45,16 @@ func initFixture(t *testing.T) *fixture {
 	storeService := runtime.NewKVStoreService(storeKey)
 	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
 
-	authority := authtypes.NewModuleAddress(types.GovModuleName)
-
+	// For testing, we'll use nil for the wasmd keeper since we're not testing wasm functionality
 	k := keeper.NewKeeper(
-		storeService,
 		encCfg.Codec,
-		addressCodec,
-		authority,
-		nil,
-		nil,
+		storeService,
+		log.NewNopLogger(),
+		nil, // wasmKeeper - nil for testing
+		nil, // authKeeper - nil for testing
+		nil, // bankKeeper - nil for testing
+		nil, // accountKeeper - nil for testing
 	)
-
-	// Initialize params
-	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
-		t.Fatalf("failed to set params: %v", err)
-	}
 
 	return &fixture{
 		ctx:          ctx,

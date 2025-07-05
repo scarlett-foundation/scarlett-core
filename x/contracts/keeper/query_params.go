@@ -2,9 +2,6 @@ package keeper
 
 import (
 	"context"
-	"errors"
-
-	"cosmossdk.io/collections"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,10 +14,9 @@ func (q queryServer) Params(ctx context.Context, req *types.QueryParamsRequest) 
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	params, err := q.k.Params.Get(ctx)
-	if err != nil && !errors.Is(err, collections.ErrNotFound) {
-		return nil, status.Error(codes.Internal, "internal error")
-	}
+	// Since we're wrapping wasmd's keeper, we return default params
+	// In a real implementation, you might want to store module-specific params
+	params := types.DefaultParams()
 
 	return &types.QueryParamsResponse{Params: params}, nil
 }
