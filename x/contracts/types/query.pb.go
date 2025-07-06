@@ -161,6 +161,20 @@ func (m *QueryContractInfoRequest) GetContract() string {
 
 // QueryContractInfoResponse defines the QueryContractInfoResponse message.
 type QueryContractInfoResponse struct {
+	// contract_address is the bech32 address of the contract
+	ContractAddress string `protobuf:"bytes,1,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
+	// creator is the bech32 address of the contract creator
+	Creator string `protobuf:"bytes,2,opt,name=creator,proto3" json:"creator,omitempty"`
+	// admin is the bech32 address of the contract admin (if any)
+	Admin string `protobuf:"bytes,3,opt,name=admin,proto3" json:"admin,omitempty"`
+	// code_id is the reference to the stored WASM code
+	CodeId uint64 `protobuf:"varint,4,opt,name=code_id,json=codeId,proto3" json:"code_id,omitempty"`
+	// label is a human-readable name for this contract
+	Label string `protobuf:"bytes,5,opt,name=label,proto3" json:"label,omitempty"`
+	// created contains information about when the contract was created
+	Created *AbsoluteTxPosition `protobuf:"bytes,6,opt,name=created,proto3" json:"created,omitempty"`
+	// ibc_port_id is the unique identifier for the IBC port (if IBC enabled)
+	IbcPortId string `protobuf:"bytes,7,opt,name=ibc_port_id,json=ibcPortId,proto3" json:"ibc_port_id,omitempty"`
 }
 
 func (m *QueryContractInfoResponse) Reset()         { *m = QueryContractInfoResponse{} }
@@ -195,6 +209,55 @@ func (m *QueryContractInfoResponse) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_QueryContractInfoResponse proto.InternalMessageInfo
+
+func (m *QueryContractInfoResponse) GetContractAddress() string {
+	if m != nil {
+		return m.ContractAddress
+	}
+	return ""
+}
+
+func (m *QueryContractInfoResponse) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *QueryContractInfoResponse) GetAdmin() string {
+	if m != nil {
+		return m.Admin
+	}
+	return ""
+}
+
+func (m *QueryContractInfoResponse) GetCodeId() uint64 {
+	if m != nil {
+		return m.CodeId
+	}
+	return 0
+}
+
+func (m *QueryContractInfoResponse) GetLabel() string {
+	if m != nil {
+		return m.Label
+	}
+	return ""
+}
+
+func (m *QueryContractInfoResponse) GetCreated() *AbsoluteTxPosition {
+	if m != nil {
+		return m.Created
+	}
+	return nil
+}
+
+func (m *QueryContractInfoResponse) GetIbcPortId() string {
+	if m != nil {
+		return m.IbcPortId
+	}
+	return ""
+}
 
 // QuerySmartContractStateRequest defines the QuerySmartContractStateRequest message.
 type QuerySmartContractStateRequest struct {
@@ -251,6 +314,8 @@ func (m *QuerySmartContractStateRequest) GetQueryData() []byte {
 
 // QuerySmartContractStateResponse defines the QuerySmartContractStateResponse message.
 type QuerySmartContractStateResponse struct {
+	// data is the raw bytes returned by the smart contract query
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (m *QuerySmartContractStateResponse) Reset()         { *m = QuerySmartContractStateResponse{} }
@@ -286,6 +351,68 @@ func (m *QuerySmartContractStateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QuerySmartContractStateResponse proto.InternalMessageInfo
 
+func (m *QuerySmartContractStateResponse) GetData() []byte {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+// AbsoluteTxPosition contains the block height and transaction index
+type AbsoluteTxPosition struct {
+	// block_height is the block the contract was created at
+	BlockHeight uint64 `protobuf:"varint,1,opt,name=block_height,json=blockHeight,proto3" json:"block_height,omitempty"`
+	// tx_index is the transaction index within the block
+	TxIndex uint64 `protobuf:"varint,2,opt,name=tx_index,json=txIndex,proto3" json:"tx_index,omitempty"`
+}
+
+func (m *AbsoluteTxPosition) Reset()         { *m = AbsoluteTxPosition{} }
+func (m *AbsoluteTxPosition) String() string { return proto.CompactTextString(m) }
+func (*AbsoluteTxPosition) ProtoMessage()    {}
+func (*AbsoluteTxPosition) Descriptor() ([]byte, []int) {
+	return fileDescriptor_344bcf1f425eb3ff, []int{6}
+}
+func (m *AbsoluteTxPosition) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AbsoluteTxPosition) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AbsoluteTxPosition.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AbsoluteTxPosition) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AbsoluteTxPosition.Merge(m, src)
+}
+func (m *AbsoluteTxPosition) XXX_Size() int {
+	return m.Size()
+}
+func (m *AbsoluteTxPosition) XXX_DiscardUnknown() {
+	xxx_messageInfo_AbsoluteTxPosition.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AbsoluteTxPosition proto.InternalMessageInfo
+
+func (m *AbsoluteTxPosition) GetBlockHeight() uint64 {
+	if m != nil {
+		return m.BlockHeight
+	}
+	return 0
+}
+
+func (m *AbsoluteTxPosition) GetTxIndex() uint64 {
+	if m != nil {
+		return m.TxIndex
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "scarlettcore.contracts.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "scarlettcore.contracts.v1.QueryParamsResponse")
@@ -293,6 +420,7 @@ func init() {
 	proto.RegisterType((*QueryContractInfoResponse)(nil), "scarlettcore.contracts.v1.QueryContractInfoResponse")
 	proto.RegisterType((*QuerySmartContractStateRequest)(nil), "scarlettcore.contracts.v1.QuerySmartContractStateRequest")
 	proto.RegisterType((*QuerySmartContractStateResponse)(nil), "scarlettcore.contracts.v1.QuerySmartContractStateResponse")
+	proto.RegisterType((*AbsoluteTxPosition)(nil), "scarlettcore.contracts.v1.AbsoluteTxPosition")
 }
 
 func init() {
@@ -300,38 +428,49 @@ func init() {
 }
 
 var fileDescriptor_344bcf1f425eb3ff = []byte{
-	// 490 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x53, 0x41, 0x4f, 0xd4, 0x40,
-	0x14, 0xde, 0x21, 0xba, 0x71, 0x47, 0x2e, 0x8e, 0x1c, 0x96, 0xaa, 0x5d, 0x68, 0xd4, 0x90, 0x4d,
-	0xe8, 0x64, 0x81, 0x90, 0x60, 0x3c, 0x21, 0x07, 0xf5, 0x84, 0xcb, 0x4d, 0x0e, 0x9b, 0xb7, 0x75,
-	0x68, 0x9a, 0xd0, 0x79, 0xa5, 0x33, 0x6c, 0x24, 0x84, 0x8b, 0xbf, 0xc0, 0x84, 0x3f, 0xe1, 0xd1,
-	0x1b, 0x7f, 0x81, 0x23, 0x89, 0x17, 0x2f, 0x1a, 0xb3, 0x6b, 0xe2, 0xdf, 0x30, 0x9d, 0x4e, 0xd7,
-	0x12, 0xe8, 0xb2, 0x72, 0x69, 0x66, 0xde, 0x7c, 0xdf, 0xfb, 0xbe, 0xef, 0xcd, 0x94, 0x3e, 0x53,
-	0x01, 0xa4, 0xfb, 0x42, 0xeb, 0x00, 0x53, 0xc1, 0x03, 0x94, 0x3a, 0x85, 0x40, 0x2b, 0x3e, 0xe8,
-	0xf0, 0x83, 0x43, 0x91, 0x1e, 0xf9, 0x49, 0x8a, 0x1a, 0xd9, 0x7c, 0x19, 0xe6, 0x8f, 0x61, 0xfe,
-	0xa0, 0xe3, 0x3c, 0x80, 0x38, 0x92, 0xc8, 0xcd, 0x37, 0x47, 0x3b, 0xed, 0x00, 0x55, 0x8c, 0x8a,
-	0xf7, 0x41, 0x89, 0xbc, 0x0d, 0x1f, 0x74, 0xfa, 0x42, 0x43, 0x87, 0x27, 0x10, 0x46, 0x12, 0x74,
-	0x84, 0xd2, 0x62, 0xe7, 0x42, 0x0c, 0xd1, 0x2c, 0x79, 0xb6, 0xb2, 0xd5, 0xc7, 0x21, 0x62, 0xb8,
-	0x2f, 0x38, 0x24, 0x11, 0x07, 0x29, 0x51, 0x1b, 0x8a, 0xb2, 0xa7, 0xcf, 0xab, 0x4d, 0x27, 0x90,
-	0x42, 0x6c, 0x71, 0xde, 0x1c, 0x65, 0xef, 0x32, 0xf5, 0x6d, 0x53, 0xec, 0x8a, 0x83, 0x43, 0xa1,
-	0xb4, 0xb7, 0x4b, 0x1f, 0x5e, 0xaa, 0xaa, 0x04, 0xa5, 0x12, 0x6c, 0x8b, 0xd6, 0x73, 0x72, 0x93,
-	0x2c, 0x90, 0xa5, 0xfb, 0x2b, 0x8b, 0x7e, 0x65, 0x66, 0x3f, 0xa7, 0x6e, 0x36, 0xce, 0x7f, 0xb6,
-	0x6a, 0x5f, 0xfe, 0x7c, 0x6d, 0x93, 0xae, 0xe5, 0x7a, 0xeb, 0xb4, 0x69, 0x9a, 0xbf, 0xb2, 0xf0,
-	0x37, 0x72, 0x0f, 0xad, 0x30, 0x73, 0xe8, 0xbd, 0xa2, 0x8b, 0xd1, 0x68, 0x74, 0xc7, 0x7b, 0xef,
-	0x11, 0x9d, 0xbf, 0x86, 0x97, 0x5b, 0xf3, 0x76, 0xa9, 0x6b, 0x0e, 0x77, 0x62, 0x48, 0x75, 0x81,
-	0xd8, 0xd1, 0xa0, 0xc5, 0x14, 0xad, 0xd9, 0x13, 0x4a, 0xcd, 0x1d, 0xf4, 0x3e, 0x80, 0x86, 0xe6,
-	0xcc, 0x02, 0x59, 0x9a, 0xed, 0x36, 0x4c, 0x65, 0x0b, 0x34, 0x78, 0x8b, 0xb4, 0x55, 0xd9, 0x3c,
-	0xd7, 0x5f, 0x39, 0xbb, 0x43, 0xef, 0x1a, 0x0c, 0x3b, 0x25, 0xb4, 0x9e, 0x87, 0x67, 0xcb, 0x13,
-	0xe6, 0x73, 0x75, 0xea, 0x8e, 0x3f, 0x2d, 0xdc, 0x66, 0x6e, 0x7f, 0xfa, 0xf6, 0xfb, 0x74, 0xe6,
-	0x29, 0xf3, 0x78, 0xc1, 0x5b, 0xae, 0xba, 0x6d, 0x76, 0x46, 0xe8, 0x6c, 0x79, 0x70, 0x6c, 0xf5,
-	0x26, 0xb1, 0x6b, 0xae, 0xc7, 0x59, 0xfb, 0x3f, 0x92, 0xf5, 0xf9, 0xd2, 0xf8, 0x5c, 0x67, 0x6b,
-	0x93, 0x7c, 0x16, 0x9b, 0x5e, 0x24, 0xf7, 0x90, 0x1f, 0x17, 0xdb, 0x13, 0xf6, 0x83, 0x50, 0x76,
-	0x75, 0xf0, 0x6c, 0xe3, 0x26, 0x2b, 0x95, 0x2f, 0xc1, 0x79, 0x71, 0x1b, 0xaa, 0xcd, 0xb2, 0x6d,
-	0xb2, 0xbc, 0x65, 0xaf, 0x27, 0x65, 0x51, 0x19, 0xbf, 0x37, 0x4e, 0xa4, 0xb2, 0x0e, 0xa5, 0x48,
-	0xfc, 0xf8, 0xdf, 0x63, 0x3b, 0xd9, 0xdc, 0x38, 0x1f, 0xba, 0xe4, 0x62, 0xe8, 0x92, 0x5f, 0x43,
-	0x97, 0x7c, 0x1e, 0xb9, 0xb5, 0x8b, 0x91, 0x5b, 0xfb, 0x3e, 0x72, 0x6b, 0xef, 0x5b, 0x97, 0x25,
-	0x3e, 0x96, 0x44, 0xf4, 0x51, 0x22, 0x54, 0xbf, 0x6e, 0xfe, 0xe1, 0xd5, 0xbf, 0x01, 0x00, 0x00,
-	0xff, 0xff, 0x04, 0xd1, 0xbd, 0x58, 0xa2, 0x04, 0x00, 0x00,
+	// 665 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0x41, 0x4f, 0x13, 0x41,
+	0x14, 0xee, 0x62, 0x69, 0xe9, 0x40, 0xa2, 0x8e, 0x24, 0x2e, 0x8d, 0x2e, 0xb0, 0x51, 0x83, 0x24,
+	0x74, 0x52, 0x40, 0x12, 0x8c, 0x17, 0x90, 0x44, 0xea, 0xa9, 0x2e, 0x9e, 0xe4, 0xb0, 0x99, 0xdd,
+	0x1d, 0xca, 0xc6, 0xed, 0xce, 0x32, 0x33, 0x90, 0x12, 0xc2, 0xc5, 0x1f, 0x60, 0x4c, 0xf8, 0x13,
+	0x1e, 0xbd, 0xf1, 0x17, 0x38, 0x92, 0x78, 0xf1, 0xa2, 0x31, 0x60, 0xe2, 0xdf, 0x30, 0xfb, 0x76,
+	0xb6, 0x96, 0x40, 0x0b, 0x7a, 0x69, 0xe6, 0x7d, 0xfd, 0xbe, 0xf7, 0xbe, 0xf7, 0xe6, 0xcd, 0xa2,
+	0xc7, 0xd2, 0xa7, 0x22, 0x62, 0x4a, 0xf9, 0x5c, 0x30, 0xe2, 0xf3, 0x58, 0x09, 0xea, 0x2b, 0x49,
+	0xf6, 0xea, 0x64, 0x67, 0x97, 0x89, 0xfd, 0x5a, 0x22, 0xb8, 0xe2, 0x78, 0xa2, 0x97, 0x56, 0xeb,
+	0xd2, 0x6a, 0x7b, 0xf5, 0xea, 0x5d, 0xda, 0x0e, 0x63, 0x4e, 0xe0, 0x37, 0x63, 0x57, 0x67, 0x7d,
+	0x2e, 0xdb, 0x5c, 0x12, 0x8f, 0x4a, 0x96, 0xa5, 0x21, 0x7b, 0x75, 0x8f, 0x29, 0x5a, 0x27, 0x09,
+	0x6d, 0x85, 0x31, 0x55, 0x21, 0x8f, 0x35, 0x77, 0xbc, 0xc5, 0x5b, 0x1c, 0x8e, 0x24, 0x3d, 0x69,
+	0xf4, 0x41, 0x8b, 0xf3, 0x56, 0xc4, 0x08, 0x4d, 0x42, 0x42, 0xe3, 0x98, 0x2b, 0x90, 0x48, 0xfd,
+	0xef, 0x93, 0xfe, 0xa6, 0x13, 0x2a, 0x68, 0x5b, 0xf3, 0xec, 0x71, 0x84, 0xdf, 0xa4, 0xd5, 0x9b,
+	0x00, 0x3a, 0x6c, 0x67, 0x97, 0x49, 0x65, 0x6f, 0xa2, 0x7b, 0x17, 0x50, 0x99, 0xf0, 0x58, 0x32,
+	0xbc, 0x86, 0x4a, 0x99, 0xd8, 0x34, 0xa6, 0x8c, 0x99, 0xd1, 0xf9, 0xe9, 0x5a, 0xdf, 0x9e, 0x6b,
+	0x99, 0x74, 0xb5, 0x72, 0xf2, 0x63, 0xb2, 0xf0, 0xf9, 0xf7, 0x97, 0x59, 0xc3, 0xd1, 0x5a, 0x7b,
+	0x09, 0x99, 0x90, 0xfc, 0xa5, 0xa6, 0x37, 0xe2, 0x2d, 0xae, 0x0b, 0xe3, 0x2a, 0x1a, 0xc9, 0xb3,
+	0x40, 0x8d, 0x8a, 0xd3, 0x8d, 0xed, 0x8f, 0x43, 0x68, 0xe2, 0x0a, 0xa1, 0xf6, 0xf6, 0x14, 0xdd,
+	0xc9, 0x99, 0x2e, 0x0d, 0x02, 0xc1, 0xa4, 0xd4, 0x19, 0x6e, 0xe7, 0xf8, 0x4a, 0x06, 0x63, 0x13,
+	0x95, 0x7d, 0xc1, 0xa8, 0xe2, 0xc2, 0x1c, 0x02, 0x46, 0x1e, 0xe2, 0x71, 0x34, 0x4c, 0x83, 0x76,
+	0x18, 0x9b, 0xb7, 0x00, 0xcf, 0x02, 0x7c, 0x1f, 0x95, 0x7d, 0x1e, 0x30, 0x37, 0x0c, 0xcc, 0xe2,
+	0x94, 0x31, 0x53, 0x74, 0x4a, 0x69, 0xd8, 0x08, 0x52, 0x7a, 0x44, 0x3d, 0x16, 0x99, 0xc3, 0x19,
+	0x1d, 0x02, 0xfc, 0x4a, 0xa7, 0x67, 0x81, 0x59, 0x82, 0x31, 0xcd, 0x0d, 0x18, 0xd3, 0x8a, 0x27,
+	0x79, 0xb4, 0xab, 0xd8, 0xdb, 0x4e, 0x93, 0xcb, 0x30, 0xbd, 0x41, 0x27, 0x57, 0x63, 0x0b, 0x8d,
+	0x86, 0x9e, 0xef, 0x26, 0x5c, 0xa8, 0xb4, 0x76, 0x19, 0x8a, 0x54, 0x42, 0xcf, 0x6f, 0x72, 0xa1,
+	0x1a, 0x81, 0xbd, 0x89, 0x2c, 0x98, 0xc7, 0x46, 0x9b, 0x0a, 0x95, 0x0f, 0x65, 0x43, 0x51, 0xc5,
+	0x6e, 0x30, 0x4e, 0xfc, 0x10, 0x21, 0xd8, 0x3b, 0x37, 0xa0, 0x8a, 0xc2, 0x20, 0xc6, 0x9c, 0x0a,
+	0x20, 0x6b, 0x54, 0x51, 0xfb, 0x19, 0x9a, 0xec, 0x9b, 0x5c, 0x8f, 0x1c, 0xa3, 0x22, 0x68, 0x0d,
+	0xd0, 0xc2, 0xd9, 0x76, 0x10, 0xbe, 0xdc, 0x12, 0x9e, 0x46, 0x63, 0x5e, 0xc4, 0xfd, 0xf7, 0xee,
+	0x36, 0x0b, 0x5b, 0xdb, 0x99, 0x97, 0xa2, 0x33, 0x0a, 0xd8, 0x3a, 0x40, 0x78, 0x02, 0x8d, 0xa8,
+	0x8e, 0x1b, 0xc6, 0x01, 0xeb, 0x80, 0x99, 0xa2, 0x53, 0x56, 0x9d, 0x46, 0x1a, 0xce, 0x1f, 0x17,
+	0xd1, 0x30, 0x78, 0xc1, 0x47, 0x06, 0x2a, 0x65, 0x8b, 0x85, 0x07, 0x0d, 0xf5, 0xf2, 0x46, 0x57,
+	0x6b, 0x37, 0xa5, 0x67, 0xbd, 0xd9, 0xb3, 0x1f, 0xbe, 0xfe, 0x3a, 0x1a, 0x7a, 0x84, 0x6d, 0x92,
+	0xeb, 0xe6, 0xfa, 0xbd, 0x24, 0x7c, 0x6c, 0xa0, 0xb1, 0xde, 0x9d, 0xc4, 0x0b, 0xd7, 0x15, 0xbb,
+	0x62, 0xf5, 0xab, 0x8b, 0xff, 0x26, 0xd2, 0x3e, 0x5f, 0x80, 0xcf, 0x25, 0xbc, 0x38, 0xc8, 0x67,
+	0xf7, 0x61, 0x84, 0xf1, 0x16, 0x27, 0x07, 0x79, 0x78, 0x88, 0xbf, 0x1b, 0x08, 0x5f, 0xbe, 0x60,
+	0xbc, 0x7c, 0x9d, 0x95, 0xbe, 0x1b, 0x57, 0x7d, 0xfe, 0x3f, 0x52, 0xdd, 0x4b, 0x13, 0x7a, 0x79,
+	0x8d, 0xd7, 0x07, 0xf5, 0x22, 0x53, 0xbd, 0xdb, 0xed, 0x48, 0xa6, 0x19, 0x7a, 0x5a, 0x22, 0x07,
+	0x7f, 0x97, 0xfa, 0x70, 0x75, 0xf9, 0xe4, 0xcc, 0x32, 0x4e, 0xcf, 0x2c, 0xe3, 0xe7, 0x99, 0x65,
+	0x7c, 0x3a, 0xb7, 0x0a, 0xa7, 0xe7, 0x56, 0xe1, 0xdb, 0xb9, 0x55, 0x78, 0x37, 0x79, 0xb1, 0x44,
+	0xa7, 0xa7, 0x88, 0xda, 0x4f, 0x98, 0xf4, 0x4a, 0xf0, 0x7d, 0x5c, 0xf8, 0x13, 0x00, 0x00, 0xff,
+	0xff, 0x2c, 0xe6, 0x54, 0xd3, 0xfe, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -599,6 +738,58 @@ func (m *QueryContractInfoResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	_ = i
 	var l int
 	_ = l
+	if len(m.IbcPortId) > 0 {
+		i -= len(m.IbcPortId)
+		copy(dAtA[i:], m.IbcPortId)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.IbcPortId)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.Created != nil {
+		{
+			size, err := m.Created.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Label) > 0 {
+		i -= len(m.Label)
+		copy(dAtA[i:], m.Label)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Label)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.CodeId != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.CodeId))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Admin) > 0 {
+		i -= len(m.Admin)
+		copy(dAtA[i:], m.Admin)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Admin)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ContractAddress) > 0 {
+		i -= len(m.ContractAddress)
+		copy(dAtA[i:], m.ContractAddress)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.ContractAddress)))
+		i--
+		dAtA[i] = 0xa
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -659,6 +850,46 @@ func (m *QuerySmartContractStateResponse) MarshalToSizedBuffer(dAtA []byte) (int
 	_ = i
 	var l int
 	_ = l
+	if len(m.Data) > 0 {
+		i -= len(m.Data)
+		copy(dAtA[i:], m.Data)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Data)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AbsoluteTxPosition) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AbsoluteTxPosition) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AbsoluteTxPosition) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.TxIndex != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.TxIndex))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.BlockHeight != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.BlockHeight))
+		i--
+		dAtA[i] = 0x8
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -712,6 +943,33 @@ func (m *QueryContractInfoResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = len(m.ContractAddress)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Admin)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.CodeId != 0 {
+		n += 1 + sovQuery(uint64(m.CodeId))
+	}
+	l = len(m.Label)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.Created != nil {
+		l = m.Created.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.IbcPortId)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
 	return n
 }
 
@@ -738,6 +996,25 @@ func (m *QuerySmartContractStateResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = len(m.Data)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *AbsoluteTxPosition) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.BlockHeight != 0 {
+		n += 1 + sovQuery(uint64(m.BlockHeight))
+	}
+	if m.TxIndex != 0 {
+		n += 1 + sovQuery(uint64(m.TxIndex))
+	}
 	return n
 }
 
@@ -991,6 +1268,221 @@ func (m *QueryContractInfoResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: QueryContractInfoResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ContractAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ContractAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Admin", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Admin = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CodeId", wireType)
+			}
+			m.CodeId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CodeId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Label", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Label = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Created", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Created == nil {
+				m.Created = &AbsoluteTxPosition{}
+			}
+			if err := m.Created.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IbcPortId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IbcPortId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
@@ -1157,6 +1649,128 @@ func (m *QuerySmartContractStateResponse) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: QuerySmartContractStateResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Data", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Data = append(m.Data[:0], dAtA[iNdEx:postIndex]...)
+			if m.Data == nil {
+				m.Data = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AbsoluteTxPosition) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AbsoluteTxPosition: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AbsoluteTxPosition: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BlockHeight", wireType)
+			}
+			m.BlockHeight = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.BlockHeight |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TxIndex", wireType)
+			}
+			m.TxIndex = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TxIndex |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])

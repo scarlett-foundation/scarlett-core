@@ -29,11 +29,32 @@ func (q queryServer) ContractInfo(ctx context.Context, req *types.QueryContractI
 
 	// Get the wasm keeper
 	wasmKeeper := q.k.getWasmKeeper()
+	if wasmKeeper == nil {
+		return nil, status.Error(codes.Internal, "wasm keeper not initialized")
+	}
 
-	// Query contract info from wasmd keeper
+	// Query contract info from wasmd
 	contractInfo := wasmKeeper.GetContractInfo(ctx, contractAddr)
 	if contractInfo == nil {
 		return nil, status.Error(codes.NotFound, "contract not found")
+	}
+
+	// Map wasmd ContractInfo to our proto response
+	response := &types.QueryContractInfoResponse{
+		ContractAddress: req.Contract,
+		Creator:         contractInfo.Creator,
+		Admin:           contractInfo.Admin,
+		CodeId:          contractInfo.CodeID,
+		Label:           contractInfo.Label,
+		IbcPortId:       contractInfo.IBCPortID,
+	}
+
+	// Map created position if available
+	if contractInfo.Created != nil {
+		response.Created = &types.AbsoluteTxPosition{
+			BlockHeight: contractInfo.Created.BlockHeight,
+			TxIndex:     contractInfo.Created.TxIndex,
+		}
 	}
 
 	// Log the successful query
@@ -43,7 +64,5 @@ func (q queryServer) ContractInfo(ctx context.Context, req *types.QueryContractI
 		"creator", contractInfo.Creator,
 		"admin", contractInfo.Admin)
 
-	// For now, return empty response since proto doesn't have fields defined
-	// TODO: Update proto to include contract info fields and populate response
-	return &types.QueryContractInfoResponse{}, nil
+	return response, nil
 }

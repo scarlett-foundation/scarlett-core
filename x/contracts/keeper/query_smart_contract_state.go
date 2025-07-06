@@ -34,11 +34,19 @@ func (q queryServer) SmartContractState(ctx context.Context, req *types.QuerySma
 
 	// Get the wasm keeper
 	wasmKeeper := q.k.getWasmKeeper()
+	if wasmKeeper == nil {
+		return nil, status.Error(codes.Internal, "wasm keeper not initialized")
+	}
 
-	// Execute smart contract query
+	// Execute smart contract query via wasmd
 	queryResult, err := wasmKeeper.QuerySmart(ctx, contractAddr, req.QueryData)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "failed to execute smart contract query")
+	}
+
+	// Create response with query result data
+	response := &types.QuerySmartContractStateResponse{
+		Data: queryResult,
 	}
 
 	// Log the successful query
@@ -47,8 +55,5 @@ func (q queryServer) SmartContractState(ctx context.Context, req *types.QuerySma
 		"query_data_length", len(req.QueryData),
 		"result_length", len(queryResult))
 
-	// For now, return empty response since proto doesn't have fields defined
-	// TODO: Update proto to include query result fields and populate response
-	// The queryResult contains the actual JSON response from the contract
-	return &types.QuerySmartContractStateResponse{}, nil
+	return response, nil
 }
