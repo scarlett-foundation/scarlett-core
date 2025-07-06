@@ -3,21 +3,47 @@ package keeper
 import (
 	"context"
 
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"scarlett-core/x/contracts/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.
-// Since this is a wrapper around wasmd, we don't need to handle genesis state
+// This sets up permissionless parameters for the wasm module.
 func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
-	// The underlying wasmd keeper handles its own genesis
-	// We just need to validate our wrapper is properly initialized
-	k.Logger().Info("Initializing contracts module genesis")
+	// Convert context to SDK context for compatibility
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	k.Keeper.Logger(sdkCtx).Info("🚀 Initializing contracts module genesis")
+
+	// Set permissionless parameters for the wasm module
+	// This makes contract deployment permissionless from genesis
+	wasmParams := wasmtypes.Params{
+		CodeUploadAccess: wasmtypes.AccessConfig{
+			Permission: wasmtypes.AccessTypeEverybody,
+		},
+		InstantiateDefaultPermission: wasmtypes.AccessTypeEverybody,
+	}
+
+	// Set the permissionless parameters using the embedded keeper
+	if err := k.Keeper.SetParams(ctx, wasmParams); err != nil {
+		return err
+	}
+
+	k.Keeper.Logger(sdkCtx).Info("✅ Contracts module genesis initialized with permissionless parameters")
+
 	return nil
 }
 
-// ExportGenesis returns the module's exported genesis.
-// Since this is a wrapper around wasmd, we return default genesis
-func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) {
-	k.Logger().Info("Exporting contracts module genesis")
-	return types.DefaultGenesis(), nil
+// ExportGenesis returns the module's exported genesis state.
+func (k Keeper) ExportGenesis(ctx context.Context) types.GenesisState {
+	// Convert context to SDK context for compatibility
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	k.Keeper.Logger(sdkCtx).Info("📤 Exporting contracts module genesis")
+
+	// For our wrapper module, we just export the default genesis state
+	// The actual wasm state is handled by the embedded keeper internally
+	return *types.DefaultGenesis()
 }
