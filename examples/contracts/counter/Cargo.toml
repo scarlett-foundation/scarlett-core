@@ -1,0 +1,22 @@
+[package]
+name = "counter"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+default = []
+library = []
+
+[dependencies]
+cosmwasm-std = { version = "2.1.4", features = ["staking"] }
+cosmwasm-schema = "2.1.4"
+cw-storage-plus = "2.0.0"
+cw2 = "2.0.0"
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+thiserror = "1.0"
+
+[dev-dependencies]
+cosmwasm-vm = { version = "2.1.4", default-features = false } 

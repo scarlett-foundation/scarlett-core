@@ -1,0 +1,10 @@
+/Users/brendanplayford/scarlett/scarlett-core/examples/contracts/counter/target/debug/deps/rmp_serde-74ce5514ebb16bf9.d: /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/lib.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/bytes.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/config.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/decode.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/encode.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/../README.md
+
+/Users/brendanplayford/scarlett/scarlett-core/examples/contracts/counter/target/debug/deps/librmp_serde-74ce5514ebb16bf9.rmeta: /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/lib.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/bytes.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/config.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/decode.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/encode.rs /Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/../README.md
+
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/lib.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/bytes.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/config.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/decode.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/encode.rs:
+/Users/brendanplayford/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rmp-serde-1.3.0/src/../README.md:
