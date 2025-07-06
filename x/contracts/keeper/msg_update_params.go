@@ -17,7 +17,7 @@ func (k msgServer) UpdateParams(ctx context.Context, req *types.MsgUpdateParams)
 		return nil, errorsmod.Wrap(err, "invalid parameters")
 	}
 
-	k.Logger().Info("UpdateParams called", "authority", req.Authority)
+	k.Logger(ctx).Info("UpdateParams called", "authority", req.Authority)
 
 	// In a real implementation, you might want to store module-specific params
 	// or delegate to wasmd's parameter management
