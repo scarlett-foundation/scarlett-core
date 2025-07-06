@@ -57,7 +57,9 @@ message MsgStoreCode {
 }
 
 // MsgStoreCodeResponse defines the MsgStoreCodeResponse message.
-message MsgStoreCodeResponse {}
+message MsgStoreCodeResponse {
+  uint64 code_id = 1;
+}
 
 // MsgInstantiateContract defines the MsgInstantiateContract message.
 message MsgInstantiateContract {
@@ -71,7 +73,9 @@ message MsgInstantiateContract {
 }
 
 // MsgInstantiateContractResponse defines the MsgInstantiateContractResponse message.
-message MsgInstantiateContractResponse {}
+message MsgInstantiateContractResponse {
+  string contract_address = 1;
+}
 
 // MsgExecuteContract defines the MsgExecuteContract message.
 message MsgExecuteContract {
@@ -83,4 +87,6 @@ message MsgExecuteContract {
 }
 
 // MsgExecuteContractResponse defines the MsgExecuteContractResponse message.
-message MsgExecuteContractResponse {}
+message MsgExecuteContractResponse {
+  bytes data = 1;
+}
