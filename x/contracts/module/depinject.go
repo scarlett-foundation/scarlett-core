@@ -34,11 +34,11 @@ type ModuleInputs struct {
 	StoreService store.KVStoreService
 	Logger       log.Logger
 
-	// Use actual Cosmos SDK keeper types that depinject can resolve
-	// Only include the keepers we're actually using for now
-	AccountKeeper authkeeper.AccountKeeper
-	BankKeeper    bankkeeper.Keeper
-	StakingKeeper stakingkeeper.Keeper
+	// Use the exact same pattern as the emissions module
+	// Some keepers are value types, some are pointer types
+	AccountKeeper authkeeper.AccountKeeper // Value type like emissions
+	BankKeeper    bankkeeper.Keeper        // Value type like emissions
+	StakingKeeper *stakingkeeper.Keeper    // Pointer type like emissions
 	// DistributionKeeper and ChannelKeeper are set to nil in NewKeeper for now
 	// since they don't match the exact interfaces wasmd expects
 }
@@ -52,16 +52,16 @@ type ModuleOutputs struct {
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
 	// Create the contracts keeper which will handle the manual wasm.Keeper instantiation
-	k := keeper.NewKeeper(
+	keeper := keeper.NewKeeper(
 		in.Cdc,
 		in.StoreService,
 		in.Logger,
 		in.AccountKeeper,
 		in.BankKeeper,
-		in.StakingKeeper,
+		*in.StakingKeeper,
 	)
 
-	m := NewAppModule(in.Cdc, k)
+	m := NewAppModule(in.Cdc, keeper)
 
-	return ModuleOutputs{ContractsKeeper: k, Module: m}
+	return ModuleOutputs{ContractsKeeper: keeper, Module: m}
 }
