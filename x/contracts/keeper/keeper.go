@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/log"
@@ -73,9 +72,9 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 		// Authority for governance (should be governance module address)
 		authority := "cosmos10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47" // placeholder
 
-		// Home directory for wasm - use a unique path to avoid conflicts
-		// Generate unique directory with timestamp to prevent multiple VM instances from conflicting
-		homeDir := fmt.Sprintf("/tmp/wasm-contracts-%d-%d", os.Getpid(), time.Now().UnixNano())
+		// Home directory for wasm - use a consistent path for this keeper instance
+		// Use PID to make it unique per process but consistent within the process
+		homeDir := fmt.Sprintf("/tmp/wasm-contracts-%d", os.Getpid())
 
 		// For the parameters that wasmd v0.61.0 expects but we don't have compatible implementations,
 		// we'll use nil for now. This is compatible with the wasmd v0.61.0 NewKeeper signature.
