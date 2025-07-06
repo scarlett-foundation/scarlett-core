@@ -1,0 +1,611 @@
+# Contracts Module Distribution Integration Enhancement
+
+## Overview
+This document outlines the plan to enhance the contracts module with full distribution module integration, enabling smart contracts to interact directly with staking rewards, validator commissions, and community pool operations.
+
+## Current Status
+
+### What's Working ✅
+- Contracts can query distribution state via stargate queries
+- Basic staking rewards functionality works through bank module
+- Governance can manage distribution parameters
+- Contracts can receive tokens from distribution events
+
+### What's Missing ⚠️
+```go
+// Current nil implementation in keeper.go:
+var distributionKeeperCompat wasmtypes.DistributionKeeper = nil
+```
+
+### Limited Functionality
+- ❌ Direct reward withdrawals from contracts
+- ❌ Contract-initiated commission withdrawals
+- ❌ Community pool interactions from contracts
+- ❌ Custom reward distribution logic
+- ❌ Validator delegation rewards queries
+
+## Enhancement Goals
+
+### Phase 1: Basic Distribution Integration
+1. **Reward Withdrawal Operations**
+   - Enable contracts to withdraw delegation rewards
+   - Allow validator commission withdrawals
+   - Support partial reward withdrawals
+
+2. **Distribution Queries**
+   - Query delegation rewards for specific validators
+   - Get validator commission amounts
+   - Check community pool balance
+   - Historical reward data access
+
+3. **Community Pool Integration**
+   - Propose community pool spending from contracts
+   - Query community pool proposals
+   - Enable community pool funding from contracts
+
+### Phase 2: Advanced Distribution Features
+1. **Custom Reward Logic**
+   - Contract-controlled reward distribution
+   - Custom staking reward calculations
+   - Automated reward compounding
+
+2. **Validator Operations**
+   - Contract-managed validator commissions
+   - Automated validator reward distribution
+   - Validator performance tracking
+
+## Implementation Plan
+
+### Step 1: Create Distribution Adapter Layer
+
+```go
+// File: x/contracts/keeper/distribution_adapter.go
+package keeper
+
+import (
+    wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+    distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+    distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+    sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
+// DistributionKeeperAdapter adapts Scarlett's distribution keeper to wasmd's interface
+type DistributionKeeperAdapter struct {
+    distributionKeeper distrkeeper.Keeper
+    stakingKeeper      stakingkeeper.Keeper
+}
+
+func NewDistributionKeeperAdapter(
+    distributionKeeper distrkeeper.Keeper,
+    stakingKeeper stakingkeeper.Keeper,
+) *DistributionKeeperAdapter {
+    return &DistributionKeeperAdapter{
+        distributionKeeper: distributionKeeper,
+        stakingKeeper:      stakingKeeper,
+    }
+}
+
+// Implement wasmtypes.DistributionKeeper interface
+func (d *DistributionKeeperAdapter) DelegationRewards(
+    ctx sdk.Context,
+    delAddr sdk.AccAddress,
+    valAddr sdk.ValAddress,
+) (sdk.DecCoins, error) {
+    return d.distributionKeeper.CalculateDelegationRewards(ctx, 
+        d.stakingKeeper.Validator(ctx, valAddr), 
+        d.stakingKeeper.Delegation(ctx, delAddr, valAddr), 
+        d.distributionKeeper.GetValidatorCurrentRewards(ctx, valAddr).Rewards)
+}
+
+func (d *DistributionKeeperAdapter) WithdrawDelegationRewards(
+    ctx sdk.Context,
+    delAddr sdk.AccAddress,
+    valAddr sdk.ValAddress,
+) (sdk.Coins, error) {
+    return d.distributionKeeper.WithdrawDelegationRewards(ctx, delAddr, valAddr)
+}
+
+func (d *DistributionKeeperAdapter) GetValidatorOutstandingRewards(
+    ctx sdk.Context,
+    valAddr sdk.ValAddress,
+) (distrtypes.ValidatorOutstandingRewards, error) {
+    rewards, err := d.distributionKeeper.GetValidatorOutstandingRewardsCoins(ctx, valAddr)
+    if err != nil {
+        return distrtypes.ValidatorOutstandingRewards{}, err
+    }
+    return distrtypes.ValidatorOutstandingRewards{Rewards: sdk.DecCoinsFromCoins(rewards...)}, nil
+}
+
+func (d *DistributionKeeperAdapter) GetValidatorCommission(
+    ctx sdk.Context,
+    valAddr sdk.ValAddress,
+) (distrtypes.ValidatorAccumulatedCommission, error) {
+    commission, err := d.distributionKeeper.GetValidatorAccumulatedCommission(ctx, valAddr)
+    return commission, err
+}
+
+func (d *DistributionKeeperAdapter) GetCommunityTax(ctx sdk.Context) (sdk.Dec, error) {
+    params, err := d.distributionKeeper.Params.Get(ctx)
+    if err != nil {
+        return sdk.ZeroDec(), err
+    }
+    return params.CommunityTax, nil
+}
+
+func (d *DistributionKeeperAdapter) GetFeePoolCommunityCoins(ctx sdk.Context) (sdk.DecCoins, error) {
+    feePool, err := d.distributionKeeper.FeePool.Get(ctx)
+    if err != nil {
+        return sdk.DecCoins{}, err
+    }
+    return feePool.CommunityPool, nil
+}
+```
+
+### Step 2: Update Keeper Constructor
+
+```go
+// File: x/contracts/keeper/keeper.go
+func NewKeeper(
+    cdc codec.Codec,
+    storeService store.KVStoreService,
+    logger log.Logger,
+    accountKeeper authkeeper.AccountKeeper,
+    bankKeeper bankkeeper.Keeper,
+    stakingKeeper stakingkeeper.Keeper,
+    // Add distribution keeper
+    distributionKeeper distrkeeper.Keeper,
+    homeDir string,
+) Keeper {
+    // Create distribution adapter
+    distributionKeeperCompat := NewDistributionKeeperAdapter(distributionKeeper, stakingKeeper)
+    
+    // Update wasmd keeper initialization
+    wasmKeeperValue := wasmkeeper.NewKeeper(
+        k.cdc,
+        k.storeService,
+        k.accountKeeper,
+        k.bankKeeper,
+        k.stakingKeeper,
+        distributionKeeperCompat, // Now implemented
+        ics4Wrapper,
+        channelKeeperCompat,
+        channelKeeperV2,
+        portSource,
+        messageRouter,
+        grpcQueryRouter,
+        wasmDir,
+        nodeConfig,
+        vmConfig,
+        supportedFeatures,
+        authority,
+    )
+}
+```
+
+### Step 3: Update Module Dependencies
+
+```go
+// File: x/contracts/module/depinject.go
+type ModuleInputs struct {
+    depinject.In
+
+    Cdc                codec.Codec
+    StoreService       store.KVStoreService
+    Logger             log.Logger
+    AccountKeeper      authkeeper.AccountKeeper
+    BankKeeper         bankkeeper.Keeper
+    StakingKeeper      *stakingkeeper.Keeper
+    
+    // Add distribution dependency
+    DistributionKeeper distrkeeper.Keeper `optional:"true"`
+
+    Config *contractstypes.Module
+}
+
+func ProvideModule(in ModuleInputs) ModuleOutputs {
+    k := keeper.NewKeeper(
+        in.Cdc,
+        in.StoreService,
+        in.Logger,
+        in.AccountKeeper,
+        in.BankKeeper,
+        *in.StakingKeeper,
+        in.DistributionKeeper,
+        defaultHomeDir,
+    )
+    
+    // ... rest of implementation
+}
+```
+
+### Step 4: Add Distribution Message Types
+
+```go
+// File: x/contracts/types/distribution_msgs.go
+package types
+
+// Distribution-specific message types for contracts
+type ContractDistributionMsg struct {
+    // Withdraw delegation rewards
+    WithdrawDelegationRewards *WithdrawDelegationRewardsMsg `json:"withdraw_delegation_rewards,omitempty"`
+    // Withdraw validator commission
+    WithdrawValidatorCommission *WithdrawValidatorCommissionMsg `json:"withdraw_validator_commission,omitempty"`
+    // Fund community pool
+    FundCommunityPool *FundCommunityPoolMsg `json:"fund_community_pool,omitempty"`
+}
+
+type WithdrawDelegationRewardsMsg struct {
+    ValidatorAddress string `json:"validator_address"`
+}
+
+type WithdrawValidatorCommissionMsg struct {
+    ValidatorAddress string `json:"validator_address"`
+}
+
+type FundCommunityPoolMsg struct {
+    Amount sdk.Coins `json:"amount"`
+}
+
+// Distribution query types
+type ContractDistributionQuery struct {
+    // Query delegation rewards
+    DelegationRewards *DelegationRewardsQuery `json:"delegation_rewards,omitempty"`
+    // Query validator commission
+    ValidatorCommission *ValidatorCommissionQuery `json:"validator_commission,omitempty"`
+    // Query community pool
+    CommunityPool *CommunityPoolQuery `json:"community_pool,omitempty"`
+}
+
+type DelegationRewardsQuery struct {
+    DelegatorAddress string `json:"delegator_address"`
+    ValidatorAddress string `json:"validator_address"`
+}
+
+type ValidatorCommissionQuery struct {
+    ValidatorAddress string `json:"validator_address"`
+}
+
+type CommunityPoolQuery struct{}
+```
+
+### Step 5: Implement Distribution Handlers
+
+```go
+// File: x/contracts/keeper/distribution_handlers.go
+package keeper
+
+// Handle distribution messages from contracts
+func (k Keeper) HandleDistributionMsg(
+    ctx sdk.Context,
+    contractAddr sdk.AccAddress,
+    msg ContractDistributionMsg,
+) error {
+    switch {
+    case msg.WithdrawDelegationRewards != nil:
+        return k.handleWithdrawDelegationRewards(ctx, contractAddr, msg.WithdrawDelegationRewards)
+    case msg.WithdrawValidatorCommission != nil:
+        return k.handleWithdrawValidatorCommission(ctx, contractAddr, msg.WithdrawValidatorCommission)
+    case msg.FundCommunityPool != nil:
+        return k.handleFundCommunityPool(ctx, contractAddr, msg.FundCommunityPool)
+    default:
+        return errors.New("unknown distribution message")
+    }
+}
+
+func (k Keeper) handleWithdrawDelegationRewards(
+    ctx sdk.Context,
+    contractAddr sdk.AccAddress,
+    msg *WithdrawDelegationRewardsMsg,
+) error {
+    valAddr, err := sdk.ValAddressFromBech32(msg.ValidatorAddress)
+    if err != nil {
+        return err
+    }
+    
+    if k.wasmKeeper == nil {
+        return ErrWasmNotInitialized
+    }
+    
+    // Use the distribution adapter to withdraw rewards
+    _, err = k.distributionAdapter.WithdrawDelegationRewards(ctx, contractAddr, valAddr)
+    return err
+}
+
+func (k Keeper) handleWithdrawValidatorCommission(
+    ctx sdk.Context,
+    contractAddr sdk.AccAddress,
+    msg *WithdrawValidatorCommissionMsg,
+) error {
+    valAddr, err := sdk.ValAddressFromBech32(msg.ValidatorAddress)
+    if err != nil {
+        return err
+    }
+    
+    // Check if contract is authorized to withdraw commission for this validator
+    // This would require additional authorization logic
+    
+    if k.wasmKeeper == nil {
+        return ErrWasmNotInitialized
+    }
+    
+    // Withdraw validator commission
+    _, err = k.distributionKeeper.WithdrawValidatorCommission(ctx, valAddr)
+    return err
+}
+
+func (k Keeper) handleFundCommunityPool(
+    ctx sdk.Context,
+    contractAddr sdk.AccAddress,
+    msg *FundCommunityPoolMsg,
+) error {
+    if k.wasmKeeper == nil {
+        return ErrWasmNotInitialized
+    }
+    
+    // Transfer tokens from contract to community pool
+    return k.distributionKeeper.FundCommunityPool(ctx, msg.Amount, contractAddr)
+}
+```
+
+## Testing Strategy
+
+### Unit Tests
+```go
+// File: x/contracts/keeper/distribution_test.go
+func TestDistributionIntegration(t *testing.T) {
+    // Test delegation reward withdrawals
+    // Test validator commission operations
+    // Test community pool interactions
+    // Test query functionality
+}
+
+func TestWithdrawDelegationRewards(t *testing.T) {
+    // Setup test environment with staking and distribution
+    // Create delegation from contract
+    // Generate rewards
+    // Test withdrawal
+    // Verify balances
+}
+
+func TestValidatorCommissionWithdrawal(t *testing.T) {
+    // Setup validator with commission
+    // Test authorized withdrawal
+    // Test unauthorized withdrawal
+    // Verify commission distribution
+}
+
+func TestCommunityPoolOperations(t *testing.T) {
+    // Test funding community pool from contract
+    // Test querying community pool balance
+    // Test community pool spending proposals
+}
+```
+
+### Integration Tests
+```go
+// File: x/contracts/integration/distribution_integration_test.go
+func TestFullDistributionWorkflow(t *testing.T) {
+    // Test complete staking and reward cycle
+    // Test automated reward compounding
+    // Test validator operations
+}
+```
+
+## Contract Examples
+
+### Reward Auto-Compounder
+```rust
+// Example contract that automatically compounds staking rewards
+#[entry_point]
+pub fn execute(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
+    match msg {
+        ExecuteMsg::CompoundRewards { validator_address } => {
+            // Query current rewards
+            let rewards_query = DistributionQuery::DelegationRewards {
+                delegator_address: env.contract.address.to_string(),
+                validator_address: validator_address.clone(),
+            };
+            
+            let rewards: DelegationRewardsResponse = deps.querier.query(&QueryRequest::Custom(rewards_query))?;
+            
+            if rewards.rewards.is_empty() {
+                return Err(ContractError::NoRewardsToCompound {});
+            }
+            
+            // Withdraw rewards
+            let withdraw_msg = DistributionMsg::WithdrawDelegationRewards {
+                validator_address: validator_address.clone(),
+            };
+            
+            // Re-stake the rewards
+            let delegate_msg = StakingMsg::Delegate {
+                validator: validator_address,
+                amount: rewards.rewards[0].amount, // Assuming single denom
+            };
+            
+            Ok(Response::new()
+                .add_message(withdraw_msg)
+                .add_message(delegate_msg)
+                .add_attribute("action", "compound_rewards")
+                .add_attribute("amount", rewards.rewards[0].amount.to_string()))
+        }
+    }
+}
+```
+
+### Validator Commission Manager
+```rust
+// Example contract for managing validator commissions
+#[entry_point]
+pub fn execute(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
+    match msg {
+        ExecuteMsg::WithdrawCommission { validator_address } => {
+            // Verify authorization
+            let config: Config = CONFIG.load(deps.storage)?;
+            if info.sender != config.validator_operator {
+                return Err(ContractError::Unauthorized {});
+            }
+            
+            // Query commission amount
+            let commission_query = DistributionQuery::ValidatorCommission {
+                validator_address: validator_address.clone(),
+            };
+            
+            let commission: ValidatorCommissionResponse = deps.querier.query(&QueryRequest::Custom(commission_query))?;
+            
+            // Withdraw commission
+            let withdraw_msg = DistributionMsg::WithdrawValidatorCommission {
+                validator_address,
+            };
+            
+            // Distribute commission according to contract logic
+            let distribution_msgs = distribute_commission(commission.commission)?;
+            
+            Ok(Response::new()
+                .add_message(withdraw_msg)
+                .add_messages(distribution_msgs)
+                .add_attribute("action", "withdraw_commission"))
+        }
+    }
+}
+```
+
+### Community Pool DAO
+```rust
+// Example contract for community pool governance
+#[entry_point]
+pub fn execute(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
+    match msg {
+        ExecuteMsg::ProposeSpending { 
+            recipient, 
+            amount, 
+            description 
+        } => {
+            // Create governance proposal for community pool spending
+            let proposal = CommunitySpendProposal {
+                recipient,
+                amount: amount.clone(),
+                description,
+                proposer: info.sender.to_string(),
+                created_at: env.block.time,
+            };
+            
+            // Store proposal for voting
+            let proposal_id = get_next_proposal_id(deps.storage)?;
+            PROPOSALS.save(deps.storage, proposal_id, &proposal)?;
+            
+            // Optionally fund the proposal with community pool
+            let fund_msg = DistributionMsg::FundCommunityPool {
+                amount: vec![amount],
+            };
+            
+            Ok(Response::new()
+                .add_message(fund_msg)
+                .add_attribute("action", "propose_spending")
+                .add_attribute("proposal_id", proposal_id.to_string()))
+        }
+    }
+}
+```
+
+## Migration Strategy
+
+### Phase 1: Non-Breaking Enhancement
+1. Add distribution adapter alongside existing nil implementation
+2. Make distribution dependency optional in depinject
+3. Maintain backward compatibility with existing contracts
+
+### Phase 2: Full Integration
+1. Enable distribution functionality in all contracts
+2. Add comprehensive testing and documentation
+3. Create example contracts demonstrating features
+
+### Phase 3: Advanced Features
+1. Implement custom reward distribution algorithms
+2. Add automated reward management
+3. Enable complex validator operations
+
+## Benefits After Implementation
+
+### For Developers
+- **Automated Reward Management**: Build contracts that handle staking rewards automatically
+- **Validator Tooling**: Create sophisticated validator management systems
+- **DeFi Integration**: Combine staking rewards with DeFi protocols
+- **Community Governance**: Build DAO contracts that manage community funds
+
+### For Users
+- **Simplified Staking**: Auto-compounding and management of staking rewards
+- **Better Returns**: Optimized reward strategies through smart contracts
+- **Transparent Governance**: Community pool management through smart contracts
+- **Reduced Complexity**: Automated handling of validator operations
+
+## Success Metrics
+
+### Technical Metrics
+- [ ] Distribution adapter fully implements wasmd interface
+- [ ] 100% test coverage for distribution functionality
+- [ ] Reward withdrawals working from contracts
+- [ ] Community pool operations functional
+
+### Integration Metrics
+- [ ] Compatible with all staking operations
+- [ ] Seamless integration with existing validators
+- [ ] No impact on distribution module performance
+- [ ] Backward compatibility maintained
+
+### Performance Metrics
+- [ ] Reward queries under 100ms response time
+- [ ] Withdrawal operations complete within block time
+- [ ] Efficient gas usage for distribution operations
+- [ ] Scalable to thousands of delegations
+
+## Future Enhancements
+
+### Advanced Distribution Features
+- **Custom Reward Algorithms**: Contract-defined reward distribution logic
+- **Multi-Token Rewards**: Support for multiple reward tokens
+- **Liquid Staking Integration**: Seamless integration with liquid staking protocols
+- **Cross-Chain Rewards**: Distribute rewards across multiple chains
+
+### Validator Enhancement Tools
+- **Performance Tracking**: Monitor and reward validator performance
+- **Automated Operations**: Smart contract-based validator management
+- **Commission Optimization**: Dynamic commission adjustment based on performance
+- **Delegation Strategies**: Automated delegation based on validator metrics
+
+## References
+
+### Documentation
+- [Cosmos SDK Distribution Module](https://docs.cosmos.network/main/modules/distribution)
+- [wasmd Distribution Integration](https://github.com/CosmWasm/wasmd/tree/main/x/wasm)
+- [Staking and Distribution Guide](https://tutorials.cosmos.network/hands-on-exercise/5-run-in-prod/4-distribution.html)
+
+### Implementation Examples
+- [Juno Staking Contracts](https://github.com/CosmosContracts/juno)
+- [Osmosis Staking Integration](https://github.com/osmosis-labs/osmosis)
+- [Terra Staking Contracts](https://github.com/terra-money/core)
+
+## Priority: Medium-High
+**Timeline**: 1-2 months for full implementation
+**Complexity**: Medium (well-defined interfaces)
+**Impact**: High (enables staking-based DeFi)
+**Dependencies**: Stable core contracts module (✅ Complete)
+description:
+globs:
+alwaysApply: false
+---

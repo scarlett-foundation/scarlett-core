@@ -1,0 +1,1050 @@
+# Contracts Module Refactoring & Best Practices
+
+## Overview
+This document outlines refactoring opportunities and best practices to improve the contracts module's code quality, maintainability, performance, and developer experience.
+
+## Current Architecture Assessment
+
+### Strengths ✅
+- **Functional Core**: All basic smart contract operations work correctly
+- **Clean Separation**: Clear separation between wasmd integration and custom logic
+- **Error Handling**: Proper error types and graceful degradation
+- **Documentation**: Comprehensive README and examples
+- **Testing Foundation**: Basic test structure in place
+
+### Areas for Improvement ⚠️
+- **Code Duplication**: Similar patterns across message handlers
+- **Missing Abstractions**: Direct wasmd keeper access without abstractions
+- **Limited Testing**: Missing comprehensive integration tests
+- **Configuration Management**: Hard-coded values and limited configurability
+- **Performance Optimization**: Opportunities for caching and optimization
+
+## Refactoring Opportunities
+
+### 1. Message Handler Abstraction
+
+#### Current Pattern (Repetitive)
+```go
+// Each message handler has similar boilerplate
+func (k msgServer) StoreCode(goCtx context.Context, msg *types.MsgStoreCode) (*types.MsgStoreCodeResponse, error) {
+    ctx := sdk.UnwrapSDKContext(goCtx)
+    
+    // Check if wasm keeper is initialized
+    if k.wasmKeeper == nil {
+        return nil, types.ErrWasmNotInitialized
+    }
+    
+    // Convert message
+    wasmMsg := &wasmtypes.MsgStoreCode{...}
+    
+    // Delegate to wasmd
+    wasmMsgServer := wasmkeeper.NewMsgServerImpl(k.wasmKeeper)
+    resp, err := wasmMsgServer.StoreCode(ctx, wasmMsg)
+    
+    // Convert response
+    return &types.MsgStoreCodeResponse{...}, err
+}
+```
+
+#### Improved Pattern (DRY)
+```go
+// File: x/contracts/keeper/message_handler.go
+type MessageHandler struct {
+    keeper Keeper
+}
+
+func NewMessageHandler(keeper Keeper) *MessageHandler {
+    return &MessageHandler{keeper: keeper}
+}
+
+// Generic handler wrapper
+func (h *MessageHandler) HandleWasmMessage(
+    ctx context.Context,
+    msgConverter func() (sdk.Msg, error),
+    responseConverter func(interface{}) (interface{}, error),
+    handler func(context.Context, sdk.Msg) (interface{}, error),
+) (interface{}, error) {
+    // Common validation
+    if h.keeper.wasmKeeper == nil {
+        return nil, types.ErrWasmNotInitialized
+    }
+    
+    // Convert message
+    wasmMsg, err := msgConverter()
+    if err != nil {
+        return nil, err
+    }
+    
+    // Execute handler
+    resp, err := handler(ctx, wasmMsg)
+    if err != nil {
+        return nil, err
+    }
+    
+    // Convert response
+    return responseConverter(resp)
+}
+
+// Simplified message handlers
+func (k msgServer) StoreCode(goCtx context.Context, msg *types.MsgStoreCode) (*types.MsgStoreCodeResponse, error) {
+    handler := NewMessageHandler(k.Keeper)
+    
+    resp, err := handler.HandleWasmMessage(
+        goCtx,
+        func() (sdk.Msg, error) {
+            return &wasmtypes.MsgStoreCode{
+                Sender:       msg.Creator,
+                WASMByteCode: msg.WasmByteCode,
+                InstantiatePermission: &wasmtypes.AccessConfig{
+                    Permission: wasmtypes.AccessTypeEverybody,
+                },
+            }, nil
+        },
+        func(resp interface{}) (interface{}, error) {
+            wasmResp := resp.(*wasmtypes.MsgStoreCodeResponse)
+            return &types.MsgStoreCodeResponse{CodeId: wasmResp.CodeID}, nil
+        },
+        func(ctx context.Context, msg sdk.Msg) (interface{}, error) {
+            wasmMsgServer := wasmkeeper.NewMsgServerImpl(k.wasmKeeper)
+            return wasmMsgServer.StoreCode(ctx, msg.(*wasmtypes.MsgStoreCode))
+        },
+    )
+    
+    return resp.(*types.MsgStoreCodeResponse), err
+}
+```
+
+### 2. Configuration Management
+
+#### Current Issues
+- Hard-coded directory paths
+- Fixed feature sets
+- No runtime configuration
+
+#### Improved Configuration
+```go
+// File: x/contracts/types/config.go
+package types
+
+import (
+    "time"
+    wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+)
+
+// ContractsConfig defines module configuration
+type ContractsConfig struct {
+    // VM Configuration
+    VMConfig VMConfig `json:"vm_config"`
+    
+    // Node Configuration  
+    NodeConfig NodeConfig `json:"node_config"`
+    
+    // Feature Configuration
+    Features FeatureConfig `json:"features"`
+    
+    // Performance Configuration
+    Performance PerformanceConfig `json:"performance"`
+    
+    // Security Configuration
+    Security SecurityConfig `json:"security"`
+}
+
+type VMConfig struct {
+    // Memory limit for contract execution (MB)
+    MemoryLimit uint32 `json:"memory_limit"`
+    
+    // Gas limit for contract queries
+    QueryGasLimit uint64 `json:"query_gas_limit"`
+    
+    // Cache directory path
+    CacheDir string `json:"cache_dir"`
+    
+    // Cache size (MB)
+    CacheSize uint32 `json:"cache_size"`
+}
+
+type NodeConfig struct {
+    // Maximum contract size (bytes)
+    MaxContractSize uint64 `json:"max_contract_size"`
+    
+    // Maximum contract gas
+    MaxContractGas uint64 `json:"max_contract_gas"`
+    
+    // Contract execution timeout
+    ExecutionTimeout time.Duration `json:"execution_timeout"`
+}
+
+type FeatureConfig struct {
+    // Enabled CosmWasm features
+    EnabledFeatures []string `json:"enabled_features"`
+    
+    // Enable IBC integration
+    EnableIBC bool `json:"enable_ibc"`
+    
+    // Enable distribution integration
+    EnableDistribution bool `json:"enable_distribution"`
+    
+    // Enable custom queries
+    EnableCustomQueries bool `json:"enable_custom_queries"`
+}
+
+type PerformanceConfig struct {
+    // Enable contract caching
+    EnableCaching bool `json:"enable_caching"`
+    
+    // Cache TTL
+    CacheTTL time.Duration `json:"cache_ttl"`
+    
+    // Maximum concurrent executions
+    MaxConcurrentExecutions uint32 `json:"max_concurrent_executions"`
+    
+    // Enable query result caching
+    EnableQueryCaching bool `json:"enable_query_caching"`
+}
+
+type SecurityConfig struct {
+    // Allowed contract uploaders (empty = everyone)
+    AllowedUploaders []string `json:"allowed_uploaders"`
+    
+    // Allowed instantiators (empty = everyone) 
+    AllowedInstantiators []string `json:"allowed_instantiators"`
+    
+    // Enable code verification
+    EnableCodeVerification bool `json:"enable_code_verification"`
+    
+    // Maximum contract age before requiring update
+    MaxContractAge time.Duration `json:"max_contract_age"`
+}
+
+// DefaultContractsConfig returns default configuration
+func DefaultContractsConfig() ContractsConfig {
+    return ContractsConfig{
+        VMConfig: VMConfig{
+            MemoryLimit:   128,
+            QueryGasLimit: 3000000,
+            CacheDir:      "data/wasm",
+            CacheSize:     32,
+        },
+        NodeConfig: NodeConfig{
+            MaxContractSize:  800 * 1024, // 800KB
+            MaxContractGas:   400000000,   // 400M gas
+            ExecutionTimeout: 30 * time.Second,
+        },
+        Features: FeatureConfig{
+            EnabledFeatures: []string{
+                "iterator", "staking", "stargate",
+                "cosmwasm_1_1", "cosmwasm_1_2", "cosmwasm_1_3", "cosmwasm_1_4",
+                "cosmwasm_2_0", "cosmwasm_2_1", "cosmwasm_2_2",
+            },
+            EnableIBC:           false, // Will be enabled when IBC integration is complete
+            EnableDistribution:  false, // Will be enabled when distribution integration is complete
+            EnableCustomQueries: true,
+        },
+        Performance: PerformanceConfig{
+            EnableCaching:           true,
+            CacheTTL:               5 * time.Minute,
+            MaxConcurrentExecutions: 10,
+            EnableQueryCaching:      true,
+        },
+        Security: SecurityConfig{
+            AllowedUploaders:        []string{}, // Permissionless by default
+            AllowedInstantiators:    []string{}, // Permissionless by default
+            EnableCodeVerification:  false,
+            MaxContractAge:         0, // No age limit by default
+        },
+    }
+}
+```
+
+### 3. Keeper Interface Abstraction
+
+#### Current Direct Access
+```go
+// Direct wasmd keeper access throughout codebase
+k.wasmKeeper.GetContractInfo(ctx, contractAddr)
+k.wasmKeeper.QuerySmart(ctx, contractAddr, queryData)
+```
+
+#### Improved Interface Layer
+```go
+// File: x/contracts/keeper/interfaces.go
+package keeper
+
+// ContractKeeper defines the interface for contract operations
+type ContractKeeper interface {
+    // Contract lifecycle
+    StoreContract(ctx context.Context, creator sdk.AccAddress, wasmCode []byte) (uint64, error)
+    InstantiateContract(ctx context.Context, codeID uint64, creator sdk.AccAddress, admin sdk.AccAddress, msg []byte, label string, funds sdk.Coins) (sdk.AccAddress, error)
+    ExecuteContract(ctx context.Context, contractAddr sdk.AccAddress, caller sdk.AccAddress, msg []byte, funds sdk.Coins) error
+    
+    // Contract queries
+    QueryContract(ctx context.Context, contractAddr sdk.AccAddress, queryMsg []byte) ([]byte, error)
+    GetContractInfo(ctx context.Context, contractAddr sdk.AccAddress) (*ContractInfo, error)
+    GetCodeInfo(ctx context.Context, codeID uint64) (*CodeInfo, error)
+    
+    // Contract management
+    UpdateContractAdmin(ctx context.Context, contractAddr sdk.AccAddress, caller sdk.AccAddress, newAdmin sdk.AccAddress) error
+    MigrateContract(ctx context.Context, contractAddr sdk.AccAddress, caller sdk.AccAddress, newCodeID uint64, msg []byte) error
+    
+    // Contract state
+    GetContractState(ctx context.Context, contractAddr sdk.AccAddress) ([]ContractStateEntry, error)
+    GetContractHistory(ctx context.Context, contractAddr sdk.AccAddress) ([]ContractCodeHistoryEntry, error)
+}
+
+// Implementation that wraps wasmd keeper
+type wasmContractKeeper struct {
+    wasmKeeper *wasmkeeper.Keeper
+    config     ContractsConfig
+    logger     log.Logger
+}
+
+func NewContractKeeper(wasmKeeper *wasmkeeper.Keeper, config ContractsConfig, logger log.Logger) ContractKeeper {
+    return &wasmContractKeeper{
+        wasmKeeper: wasmKeeper,
+        config:     config,
+        logger:     logger,
+    }
+}
+
+func (k *wasmContractKeeper) StoreContract(ctx context.Context, creator sdk.AccAddress, wasmCode []byte) (uint64, error) {
+    // Add validation, logging, metrics
+    if len(wasmCode) > int(k.config.NodeConfig.MaxContractSize) {
+        return 0, fmt.Errorf("contract size %d exceeds maximum %d", len(wasmCode), k.config.NodeConfig.MaxContractSize)
+    }
+    
+    // Check security constraints
+    if len(k.config.Security.AllowedUploaders) > 0 {
+        if !contains(k.config.Security.AllowedUploaders, creator.String()) {
+            return 0, fmt.Errorf("uploader %s not in allowed list", creator.String())
+        }
+    }
+    
+    k.logger.Info("Storing contract", "creator", creator.String(), "size", len(wasmCode))
+    
+    // Delegate to wasmd with proper error handling
+    msg := &wasmtypes.MsgStoreCode{
+        Sender:       creator.String(),
+        WASMByteCode: wasmCode,
+        InstantiatePermission: &wasmtypes.AccessConfig{
+            Permission: wasmtypes.AccessTypeEverybody,
+        },
+    }
+    
+    msgServer := wasmkeeper.NewMsgServerImpl(k.wasmKeeper)
+    resp, err := msgServer.StoreCode(ctx, msg)
+    if err != nil {
+        k.logger.Error("Failed to store contract", "error", err)
+        return 0, err
+    }
+    
+    k.logger.Info("Successfully stored contract", "code_id", resp.CodeID)
+    return resp.CodeID, nil
+}
+```
+
+### 4. Enhanced Error Handling
+
+#### Current Basic Errors
+```go
+var (
+    ErrInvalidSigner      = errors.Register(ModuleName, 1100, "expected gov account as only signer for proposal message")
+    ErrWasmNotInitialized = errors.Register(ModuleName, 1101, "wasm keeper not initialized")
+)
+```
+
+#### Comprehensive Error System
+```go
+// File: x/contracts/types/errors.go
+package types
+
+import (
+    "cosmossdk.io/errors"
+    "fmt"
+)
+
+// Error codes
+const (
+    // System errors (1100-1199)
+    CodeInvalidSigner      = 1100
+    CodeWasmNotInitialized = 1101
+    CodeConfigurationError = 1102
+    CodeSystemUnavailable  = 1103
+    
+    // Contract errors (1200-1299)
+    CodeContractNotFound     = 1200
+    CodeInvalidContractCode  = 1201
+    CodeContractSizeTooLarge = 1202
+    CodeInvalidContractMsg   = 1203
+    CodeContractExecutionFailed = 1204
+    CodeInsufficientFunds    = 1205
+    
+    // Permission errors (1300-1399)
+    CodeUnauthorizedUploader     = 1300
+    CodeUnauthorizedInstantiator = 1301
+    CodeUnauthorizedExecutor     = 1302
+    CodeInvalidAdmin            = 1303
+    
+    // Validation errors (1400-1499)
+    CodeInvalidAddress     = 1400
+    CodeInvalidCodeID      = 1401
+    CodeInvalidMessage     = 1402
+    CodeInvalidFunds       = 1403
+    
+    // Integration errors (1500-1599)
+    CodeIBCNotAvailable          = 1500
+    CodeDistributionNotAvailable = 1501
+    CodeStakingError            = 1502
+)
+
+// System errors
+var (
+    ErrInvalidSigner      = errors.Register(ModuleName, CodeInvalidSigner, "expected gov account as only signer for proposal message")
+    ErrWasmNotInitialized = errors.Register(ModuleName, CodeWasmNotInitialized, "wasm keeper not initialized")
+    ErrConfigurationError = errors.Register(ModuleName, CodeConfigurationError, "module configuration error")
+    ErrSystemUnavailable  = errors.Register(ModuleName, CodeSystemUnavailable, "contracts system temporarily unavailable")
+)
+
+// Contract errors
+var (
+    ErrContractNotFound         = errors.Register(ModuleName, CodeContractNotFound, "contract not found")
+    ErrInvalidContractCode      = errors.Register(ModuleName, CodeInvalidContractCode, "invalid contract code")
+    ErrContractSizeTooLarge     = errors.Register(ModuleName, CodeContractSizeTooLarge, "contract size exceeds maximum allowed")
+    ErrInvalidContractMsg       = errors.Register(ModuleName, CodeInvalidContractMsg, "invalid contract message")
+    ErrContractExecutionFailed  = errors.Register(ModuleName, CodeContractExecutionFailed, "contract execution failed")
+    ErrInsufficientFunds        = errors.Register(ModuleName, CodeInsufficientFunds, "insufficient funds for contract operation")
+)
+
+// Permission errors
+var (
+    ErrUnauthorizedUploader     = errors.Register(ModuleName, CodeUnauthorizedUploader, "unauthorized to upload contracts")
+    ErrUnauthorizedInstantiator = errors.Register(ModuleName, CodeUnauthorizedInstantiator, "unauthorized to instantiate contracts")
+    ErrUnauthorizedExecutor     = errors.Register(ModuleName, CodeUnauthorizedExecutor, "unauthorized to execute contract")
+    ErrInvalidAdmin            = errors.Register(ModuleName, CodeInvalidAdmin, "invalid contract admin")
+)
+
+// Validation errors
+var (
+    ErrInvalidAddress = errors.Register(ModuleName, CodeInvalidAddress, "invalid address")
+    ErrInvalidCodeID  = errors.Register(ModuleName, CodeInvalidCodeID, "invalid code ID")
+    ErrInvalidMessage = errors.Register(ModuleName, CodeInvalidMessage, "invalid message format")
+    ErrInvalidFunds   = errors.Register(ModuleName, CodeInvalidFunds, "invalid funds specification")
+)
+
+// Integration errors
+var (
+    ErrIBCNotAvailable          = errors.Register(ModuleName, CodeIBCNotAvailable, "IBC integration not available")
+    ErrDistributionNotAvailable = errors.Register(ModuleName, CodeDistributionNotAvailable, "distribution integration not available")
+    ErrStakingError            = errors.Register(ModuleName, CodeStakingError, "staking operation failed")
+)
+
+// Error builders for contextual errors
+func NewContractSizeError(size, maxSize uint64) error {
+    return errors.Wrapf(ErrContractSizeTooLarge, "contract size %d exceeds maximum %d", size, maxSize)
+}
+
+func NewUnauthorizedError(operation, address string) error {
+    return errors.Wrapf(ErrUnauthorizedExecutor, "address %s not authorized for operation %s", address, operation)
+}
+
+func NewContractExecutionError(contractAddr string, err error) error {
+    return errors.Wrapf(ErrContractExecutionFailed, "execution failed for contract %s: %v", contractAddr, err)
+}
+
+func NewInvalidMessageError(msgType string, err error) error {
+    return errors.Wrapf(ErrInvalidMessage, "invalid %s message: %v", msgType, err)
+}
+```
+
+### 5. Performance Optimizations
+
+#### Caching Layer
+```go
+// File: x/contracts/keeper/cache.go
+package keeper
+
+import (
+    "context"
+    "sync"
+    "time"
+    
+    "github.com/hashicorp/golang-lru/v2"
+    sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
+// CacheManager handles contract-related caching
+type CacheManager struct {
+    contractInfoCache *lru.Cache[string, *ContractInfo]
+    codeInfoCache     *lru.Cache[uint64, *CodeInfo]
+    queryResultCache *lru.Cache[string, QueryResult]
+    
+    cacheTTL time.Duration
+    mutex    sync.RWMutex
+}
+
+type QueryResult struct {
+    Data      []byte
+    Timestamp time.Time
+}
+
+func NewCacheManager(config PerformanceConfig) *CacheManager {
+    contractInfoCache, _ := lru.New[string, *ContractInfo](1000)
+    codeInfoCache, _ := lru.New[uint64, *CodeInfo](500)
+    queryResultCache, _ := lru.New[string, QueryResult](2000)
+    
+    return &CacheManager{
+        contractInfoCache: contractInfoCache,
+        codeInfoCache:     codeInfoCache,
+        queryResultCache:  queryResultCache,
+        cacheTTL:         config.CacheTTL,
+    }
+}
+
+func (cm *CacheManager) GetContractInfo(contractAddr string) (*ContractInfo, bool) {
+    cm.mutex.RLock()
+    defer cm.mutex.RUnlock()
+    
+    info, exists := cm.contractInfoCache.Get(contractAddr)
+    return info, exists
+}
+
+func (cm *CacheManager) SetContractInfo(contractAddr string, info *ContractInfo) {
+    cm.mutex.Lock()
+    defer cm.mutex.Unlock()
+    
+    cm.contractInfoCache.Add(contractAddr, info)
+}
+
+func (cm *CacheManager) GetQueryResult(key string) ([]byte, bool) {
+    cm.mutex.RLock()
+    defer cm.mutex.RUnlock()
+    
+    result, exists := cm.queryResultCache.Get(key)
+    if !exists {
+        return nil, false
+    }
+    
+    // Check if result is still valid
+    if time.Since(result.Timestamp) > cm.cacheTTL {
+        cm.mutex.RUnlock()
+        cm.mutex.Lock()
+        cm.queryResultCache.Remove(key)
+        cm.mutex.Unlock()
+        cm.mutex.RLock()
+        return nil, false
+    }
+    
+    return result.Data, true
+}
+
+func (cm *CacheManager) SetQueryResult(key string, data []byte) {
+    cm.mutex.Lock()
+    defer cm.mutex.Unlock()
+    
+    result := QueryResult{
+        Data:      data,
+        Timestamp: time.Now(),
+    }
+    cm.queryResultCache.Add(key, result)
+}
+
+func (cm *CacheManager) InvalidateContract(contractAddr string) {
+    cm.mutex.Lock()
+    defer cm.mutex.Unlock()
+    
+    cm.contractInfoCache.Remove(contractAddr)
+    
+    // Remove related query results
+    for _, key := range cm.queryResultCache.Keys() {
+        if strings.Contains(key, contractAddr) {
+            cm.queryResultCache.Remove(key)
+        }
+    }
+}
+```
+
+#### Metrics and Monitoring
+```go
+// File: x/contracts/keeper/metrics.go
+package keeper
+
+import (
+    "time"
+    
+    "github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+// Metrics for contracts module
+type Metrics struct {
+    // Contract operations
+    contractStores       prometheus.Counter
+    contractInstantiates prometheus.Counter
+    contractExecutions   prometheus.Counter
+    contractQueries      prometheus.Counter
+    
+    // Performance metrics
+    executionDuration   prometheus.Histogram
+    queryDuration      prometheus.Histogram
+    cacheHitRate       prometheus.Counter
+    cacheMissRate      prometheus.Counter
+    
+    // Error metrics
+    executionErrors    prometheus.Counter
+    validationErrors   prometheus.Counter
+    systemErrors       prometheus.Counter
+}
+
+func NewMetrics() *Metrics {
+    return &Metrics{
+        contractStores: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_stores_total",
+            Help: "Total number of contract stores",
+        }),
+        contractInstantiates: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_instantiates_total", 
+            Help: "Total number of contract instantiations",
+        }),
+        contractExecutions: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_executions_total",
+            Help: "Total number of contract executions",
+        }),
+        contractQueries: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_queries_total",
+            Help: "Total number of contract queries",
+        }),
+        executionDuration: promauto.NewHistogram(prometheus.HistogramOpts{
+            Name:    "contracts_execution_duration_seconds",
+            Help:    "Duration of contract executions",
+            Buckets: prometheus.DefBuckets,
+        }),
+        queryDuration: promauto.NewHistogram(prometheus.HistogramOpts{
+            Name:    "contracts_query_duration_seconds", 
+            Help:    "Duration of contract queries",
+            Buckets: prometheus.DefBuckets,
+        }),
+        cacheHitRate: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_cache_hits_total",
+            Help: "Total cache hits",
+        }),
+        cacheMissRate: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_cache_misses_total",
+            Help: "Total cache misses", 
+        }),
+        executionErrors: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_execution_errors_total",
+            Help: "Total contract execution errors",
+        }),
+        validationErrors: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_validation_errors_total",
+            Help: "Total validation errors",
+        }),
+        systemErrors: promauto.NewCounter(prometheus.CounterOpts{
+            Name: "contracts_system_errors_total",
+            Help: "Total system errors",
+        }),
+    }
+}
+
+func (m *Metrics) RecordExecution(duration time.Duration, success bool) {
+    m.contractExecutions.Inc()
+    m.executionDuration.Observe(duration.Seconds())
+    
+    if !success {
+        m.executionErrors.Inc()
+    }
+}
+
+func (m *Metrics) RecordQuery(duration time.Duration, cacheHit bool) {
+    m.contractQueries.Inc()
+    m.queryDuration.Observe(duration.Seconds())
+    
+    if cacheHit {
+        m.cacheHitRate.Inc()
+    } else {
+        m.cacheMissRate.Inc()
+    }
+}
+```
+
+## Testing Improvements
+
+### 1. Comprehensive Test Suite Structure
+
+```
+x/contracts/
+├── keeper/
+│   ├── keeper_test.go          # Basic keeper tests
+│   ├── integration_test.go     # Integration tests
+│   ├── performance_test.go     # Performance benchmarks
+│   └── fuzz_test.go           # Fuzz testing
+├── types/
+│   ├── types_test.go          # Type validation tests
+│   └── errors_test.go         # Error handling tests
+├── testutil/
+│   ├── setup.go               # Test setup utilities
+│   ├── mocks.go               # Mock implementations
+│   └── fixtures.go            # Test fixtures
+└── integration/
+    ├── full_workflow_test.go   # End-to-end tests
+    ├── stress_test.go          # Stress testing
+    └── compatibility_test.go   # Compatibility tests
+```
+
+### 2. Test Utilities and Mocks
+
+```go
+// File: x/contracts/testutil/setup.go
+package testutil
+
+import (
+    "testing"
+    
+    "cosmossdk.io/log"
+    storetypes "cosmossdk.io/store/types"
+    "github.com/cosmos/cosmos-sdk/runtime"
+    "github.com/cosmos/cosmos-sdk/testutil"
+    sdk "github.com/cosmos/cosmos-sdk/types"
+    moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+    
+    "scarlett-core/x/contracts/keeper"
+    "scarlett-core/x/contracts/types"
+)
+
+// TestFixture provides a complete test environment
+type TestFixture struct {
+    Ctx           sdk.Context
+    Keeper        keeper.Keeper
+    StoreKey      *storetypes.KVStoreKey
+    AccountKeeper *MockAccountKeeper
+    BankKeeper    *MockBankKeeper
+    StakingKeeper *MockStakingKeeper
+}
+
+func NewTestFixture(t *testing.T) *TestFixture {
+    encCfg := moduletestutil.MakeTestEncodingConfig()
+    storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+    storeService := runtime.NewKVStoreService(storeKey)
+    ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_test")).Ctx
+    
+    accountKeeper := NewMockAccountKeeper()
+    bankKeeper := NewMockBankKeeper()
+    stakingKeeper := NewMockStakingKeeper()
+    
+    k := keeper.NewKeeper(
+        encCfg.Codec,
+        storeService,
+        log.NewNopLogger(),
+        accountKeeper,
+        bankKeeper,
+        stakingKeeper,
+        t.TempDir(), // Use temp directory for tests
+    )
+    
+    return &TestFixture{
+        Ctx:           ctx,
+        Keeper:        k,
+        StoreKey:      storeKey,
+        AccountKeeper: accountKeeper,
+        BankKeeper:    bankKeeper,
+        StakingKeeper: stakingKeeper,
+    }
+}
+
+// Helper methods for common test operations
+func (f *TestFixture) StoreTestContract(t *testing.T) uint64 {
+    // Store a simple test contract
+    wasmCode := GetTestContractCode()
+    creator := sdk.AccAddress("creator")
+    
+    codeID, err := f.Keeper.StoreContract(f.Ctx, creator, wasmCode)
+    require.NoError(t, err)
+    require.Greater(t, codeID, uint64(0))
+    
+    return codeID
+}
+
+func (f *TestFixture) InstantiateTestContract(t *testing.T, codeID uint64) sdk.AccAddress {
+    creator := sdk.AccAddress("creator")
+    initMsg := []byte(`{"count": 0}`)
+    
+    contractAddr, err := f.Keeper.InstantiateContract(
+        f.Ctx, codeID, creator, nil, initMsg, "test-contract", nil,
+    )
+    require.NoError(t, err)
+    require.NotEmpty(t, contractAddr)
+    
+    return contractAddr
+}
+```
+
+### 3. Property-Based Testing
+
+```go
+// File: x/contracts/keeper/fuzz_test.go
+package keeper_test
+
+import (
+    "testing"
+    "github.com/dvyukov/go-fuzz/go-fuzz-build"
+    
+    "scarlett-core/x/contracts/testutil"
+)
+
+func FuzzContractExecution(f *testing.F) {
+    // Seed with known good inputs
+    f.Add([]byte(`{"increment":{}}`))
+    f.Add([]byte(`{"reset":{"count":42}}`))
+    f.Add([]byte(`{"get_count":{}}`))
+    
+    f.Fuzz(func(t *testing.T, executeMsg []byte) {
+        fixture := testutil.NewTestFixture(t)
+        
+        // Setup contract
+        codeID := fixture.StoreTestContract(t)
+        contractAddr := fixture.InstantiateTestContract(t, codeID)
+        
+        // Fuzz execution - should not panic
+        caller := sdk.AccAddress("caller")
+        err := fixture.Keeper.ExecuteContract(
+            fixture.Ctx, contractAddr, caller, executeMsg, nil,
+        )
+        
+        // We expect some executions to fail with invalid messages,
+        // but they should fail gracefully, not panic
+        if err != nil {
+            t.Logf("Expected error for message %s: %v", string(executeMsg), err)
+        }
+    })
+}
+```
+
+## Documentation Improvements
+
+### 1. API Documentation
+
+```go
+// File: x/contracts/keeper/keeper.go
+
+// Keeper provides the contracts module functionality.
+// It wraps wasmd's keeper to provide a Scarlett-specific interface
+// while maintaining full compatibility with CosmWasm contracts.
+//
+// The keeper handles:
+//   - Contract lifecycle management (store, instantiate, execute)
+//   - Contract queries and state access
+//   - Integration with other Cosmos SDK modules
+//   - Performance optimization through caching
+//   - Security enforcement and access control
+//
+// Example usage:
+//   keeper := NewKeeper(...)
+//   codeID, err := keeper.StoreContract(ctx, creator, wasmCode)
+//   contractAddr, err := keeper.InstantiateContract(ctx, codeID, ...)
+//   err = keeper.ExecuteContract(ctx, contractAddr, caller, msg, funds)
+type Keeper struct {
+    // ... fields
+}
+
+// StoreContract uploads WASM bytecode to the blockchain and returns a code ID.
+//
+// The contract code is validated for:
+//   - Size limits (configured via module parameters)
+//   - Security constraints (uploader permissions)
+//   - WASM format validity
+//
+// Parameters:
+//   - ctx: The context for the operation
+//   - creator: The address uploading the contract
+//   - wasmCode: The compiled WASM bytecode
+//
+// Returns:
+//   - codeID: Unique identifier for the stored code
+//   - error: Any validation or storage error
+//
+// Errors:
+//   - ErrContractSizeTooLarge: If code exceeds size limits
+//   - ErrUnauthorizedUploader: If creator lacks upload permissions
+//   - ErrInvalidContractCode: If WASM code is malformed
+func (k Keeper) StoreContract(ctx context.Context, creator sdk.AccAddress, wasmCode []byte) (uint64, error) {
+    // Implementation...
+}
+```
+
+### 2. Architecture Decision Records (ADRs)
+
+```markdown
+<!-- File: docs/architecture/adr-001-contracts-module-design.md -->
+# ADR 001: Contracts Module Design
+
+## Status
+
+ACCEPTED
+
+## Context
+
+We need to integrate CosmWasm smart contract functionality into the Scarlett blockchain while maintaining:
+- Full compatibility with existing CosmWasm contracts
+- Integration with Scarlett's custom modules (emissions, scarlettcore)
+- Performance and security requirements
+- Maintainability and upgrade path
+
+## Decision
+
+We will implement a wrapper approach around wasmd v0.61.0:
+
+1. **Wrapper Pattern**: Create a custom keeper that wraps wasmd's keeper
+2. **Gradual Integration**: Start with nil implementations for optional modules (IBC, distribution)
+3. **Configuration Management**: Implement comprehensive configuration system
+4. **Performance Optimization**: Add caching and metrics layers
+5. **Security First**: Implement proper access controls and validation
+
+## Consequences
+
+### Positive
+- ✅ Full CosmWasm compatibility out of the box
+- ✅ Incremental enhancement without breaking changes
+- ✅ Clear separation of concerns
+- ✅ Easy to maintain and upgrade
+
+### Negative
+- ⚠️ Additional abstraction layer adds complexity
+- ⚠️ Some features require custom adapter implementations
+- ⚠️ Performance overhead from wrapper pattern
+
+### Neutral
+- 🔄 Requires ongoing maintenance to stay current with wasmd updates
+- 🔄 Documentation needs to cover both Scarlett-specific and CosmWasm features
+
+## Implementation
+
+See implementation in `x/contracts/` module.
+```
+
+## Migration and Upgrade Strategy
+
+### 1. Backward Compatibility
+
+```go
+// File: x/contracts/keeper/migration.go
+package keeper
+
+import (
+    "context"
+    
+    sdk "github.com/cosmos/cosmos-sdk/types"
+    "github.com/cosmos/cosmos-sdk/types/module"
+)
+
+// Migrator handles module migrations
+type Migrator struct {
+    keeper Keeper
+}
+
+func NewMigrator(keeper Keeper) Migrator {
+    return Migrator{keeper: keeper}
+}
+
+// Migrate1to2 migrates from version 1 to 2
+func (m Migrator) Migrate1to2(ctx sdk.Context) error {
+    // Migration logic for version 1 to 2
+    return nil
+}
+
+// MigrateParams migrates module parameters
+func (m Migrator) MigrateParams(ctx sdk.Context) error {
+    // Migrate old parameter format to new configuration system
+    return nil
+}
+```
+
+### 2. Feature Flags
+
+```go
+// File: x/contracts/types/features.go
+package types
+
+// FeatureFlag represents a feature that can be toggled
+type FeatureFlag string
+
+const (
+    FeatureIBCIntegration          FeatureFlag = "ibc_integration"
+    FeatureDistributionIntegration FeatureFlag = "distribution_integration"
+    FeatureCaching                 FeatureFlag = "caching"
+    FeatureMetrics                 FeatureFlag = "metrics"
+    FeatureAdvancedSecurity        FeatureFlag = "advanced_security"
+)
+
+// FeatureManager handles feature flag logic
+type FeatureManager struct {
+    enabledFeatures map[FeatureFlag]bool
+}
+
+func NewFeatureManager(config ContractsConfig) *FeatureManager {
+    enabled := make(map[FeatureFlag]bool)
+    
+    enabled[FeatureIBCIntegration] = config.Features.EnableIBC
+    enabled[FeatureDistributionIntegration] = config.Features.EnableDistribution
+    enabled[FeatureCaching] = config.Performance.EnableCaching
+    enabled[FeatureMetrics] = true // Always enabled
+    enabled[FeatureAdvancedSecurity] = config.Security.EnableCodeVerification
+    
+    return &FeatureManager{enabledFeatures: enabled}
+}
+
+func (fm *FeatureManager) IsEnabled(feature FeatureFlag) bool {
+    return fm.enabledFeatures[feature]
+}
+```
+
+## Success Metrics
+
+### Code Quality Metrics
+- [ ] Test coverage > 90%
+- [ ] Cyclomatic complexity < 10 per function
+- [ ] No code duplication > 5%
+- [ ] All public APIs documented
+- [ ] Zero security vulnerabilities
+
+### Performance Metrics  
+- [ ] Contract execution < 100ms (95th percentile)
+- [ ] Query response time < 50ms (95th percentile)
+- [ ] Cache hit rate > 80%
+- [ ] Memory usage < 512MB under normal load
+- [ ] No memory leaks in long-running tests
+
+### Maintainability Metrics
+- [ ] Clear separation of concerns
+- [ ] Minimal coupling between components
+- [ ] Comprehensive error handling
+- [ ] Easy configuration management
+- [ ] Smooth upgrade path
+
+## Implementation Timeline
+
+### Phase 1: Foundation (2 weeks)
+- [ ] Configuration management system
+- [ ] Enhanced error handling
+- [ ] Basic caching implementation
+- [ ] Metrics and monitoring
+
+### Phase 2: Optimization (2 weeks)  
+- [ ] Message handler abstraction
+- [ ] Performance optimizations
+- [ ] Comprehensive testing
+- [ ] Documentation improvements
+
+### Phase 3: Advanced Features (2 weeks)
+- [ ] Feature flag system
+- [ ] Migration framework
+- [ ] Security enhancements
+- [ ] Final integration testing
+
+## Priority: High
+**Timeline**: 6 weeks for complete refactoring
+**Complexity**: Medium (incremental improvements)
+**Impact**: High (improved maintainability and performance)
+**Dependencies**: Stable core contracts module (✅ Complete)
+description:
+globs:
+alwaysApply: false
+---

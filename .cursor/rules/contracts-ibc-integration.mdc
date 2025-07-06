@@ -1,0 +1,414 @@
+# Contracts Module IBC Integration Enhancement
+
+## Overview
+This document outlines the plan to enhance the contracts module with full IBC integration, enabling advanced cross-chain smart contract functionality.
+
+## Current Status
+
+### What's Working ✅
+- Basic IBC infrastructure is available in the app
+- IBC port ID tracking in contract info
+- Contracts can use stargate queries for IBC state
+- Basic cross-chain queries work
+
+### What's Missing ⚠️
+```go
+// Current nil implementations in keeper.go:
+var ics4Wrapper wasmtypes.ICS4Wrapper = nil
+var channelKeeperV2 wasmtypes.ChannelKeeperV2 = nil
+var portSource wasmtypes.ICS20TransferPortSource = nil
+var channelKeeperCompat wasmtypes.ChannelKeeper = nil
+```
+
+## Enhancement Goals
+
+### Phase 1: Basic IBC Integration
+1. **ICS4 Wrapper Implementation**
+   - Enable contracts to send IBC packets
+   - Handle packet acknowledgments
+   - Manage channel state
+
+2. **Channel Keeper Integration**
+   - Allow contracts to open IBC channels
+   - Handle channel handshakes
+   - Manage channel lifecycle
+
+3. **Port Source Integration**
+   - Enable IBC transfer functionality from contracts
+   - Handle cross-chain token transfers
+   - Manage port binding
+
+### Phase 2: Advanced IBC Features
+1. **IBC Callbacks**
+   - Contract execution on packet receipt
+   - Acknowledgment handling in contracts
+   - Timeout handling
+
+2. **Cross-Chain Contract Calls**
+   - Remote contract execution
+   - Cross-chain state synchronization
+   - Multi-chain workflows
+
+## Implementation Plan
+
+### Step 1: Create IBC Adapter Layer
+
+```go
+// File: x/contracts/keeper/ibc_adapter.go
+package keeper
+
+import (
+    wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+    channeltypes "github.com/cosmos/ibc-go/v10/modules/core/04-channel/types"
+    porttypes "github.com/cosmos/ibc-go/v10/modules/core/05-port/types"
+)
+
+// ICS4WrapperAdapter adapts Scarlett's IBC keeper to wasmd's interface
+type ICS4WrapperAdapter struct {
+    channelKeeper channeltypes.ChannelKeeper
+    portKeeper    porttypes.PortKeeper
+}
+
+func NewICS4WrapperAdapter(
+    channelKeeper channeltypes.ChannelKeeper,
+    portKeeper porttypes.PortKeeper,
+) *ICS4WrapperAdapter {
+    return &ICS4WrapperAdapter{
+        channelKeeper: channelKeeper,
+        portKeeper:    portKeeper,
+    }
+}
+
+// Implement wasmtypes.ICS4Wrapper interface
+func (w *ICS4WrapperAdapter) SendPacket(
+    ctx sdk.Context,
+    sourcePort, sourceChannel string,
+    timeoutHeight clienttypes.Height,
+    timeoutTimestamp uint64,
+    data []byte,
+) (uint64, error) {
+    // Implementation details
+}
+
+func (w *ICS4WrapperAdapter) WriteAcknowledgement(
+    ctx sdk.Context,
+    packet channeltypes.Packet,
+    acknowledgement []byte,
+) error {
+    // Implementation details
+}
+```
+
+### Step 2: Update Keeper Constructor
+
+```go
+// File: x/contracts/keeper/keeper.go
+func NewKeeper(
+    cdc codec.Codec,
+    storeService store.KVStoreService,
+    logger log.Logger,
+    accountKeeper authkeeper.AccountKeeper,
+    bankKeeper bankkeeper.Keeper,
+    stakingKeeper stakingkeeper.Keeper,
+    // Add IBC keepers
+    channelKeeper channeltypes.ChannelKeeper,
+    portKeeper porttypes.PortKeeper,
+    transferKeeper ibctransferkeeper.Keeper,
+    homeDir string,
+) Keeper {
+    // Create IBC adapters
+    ics4Wrapper := NewICS4WrapperAdapter(channelKeeper, portKeeper)
+    channelKeeperAdapter := NewChannelKeeperAdapter(channelKeeper)
+    portSource := NewPortSourceAdapter(transferKeeper)
+    
+    // Update wasmd keeper initialization
+    wasmKeeperValue := wasmkeeper.NewKeeper(
+        k.cdc,
+        k.storeService,
+        k.accountKeeper,
+        k.bankKeeper,
+        k.stakingKeeper,
+        distributionKeeperCompat, // Still nil for now
+        ics4Wrapper,              // Now implemented
+        channelKeeperAdapter,     // Now implemented
+        channelKeeperV2,          // Can implement later
+        portSource,               // Now implemented
+        messageRouter,
+        grpcQueryRouter,
+        wasmDir,
+        nodeConfig,
+        vmConfig,
+        supportedFeatures,
+        authority,
+    )
+}
+```
+
+### Step 3: Implement Channel Keeper Adapter
+
+```go
+// File: x/contracts/keeper/channel_adapter.go
+type ChannelKeeperAdapter struct {
+    channelKeeper channeltypes.ChannelKeeper
+}
+
+func NewChannelKeeperAdapter(channelKeeper channeltypes.ChannelKeeper) *ChannelKeeperAdapter {
+    return &ChannelKeeperAdapter{channelKeeper: channelKeeper}
+}
+
+// Implement wasmtypes.ChannelKeeper interface methods
+func (c *ChannelKeeperAdapter) GetChannel(ctx sdk.Context, portID, channelID string) (channeltypes.Channel, bool) {
+    return c.channelKeeper.GetChannel(ctx, portID, channelID)
+}
+
+func (c *ChannelKeeperAdapter) GetNextSequenceSend(ctx sdk.Context, portID, channelID string) (uint64, bool) {
+    return c.channelKeeper.GetNextSequenceSend(ctx, portID, channelID)
+}
+```
+
+### Step 4: Implement Port Source Adapter
+
+```go
+// File: x/contracts/keeper/port_adapter.go
+type PortSourceAdapter struct {
+    transferKeeper ibctransferkeeper.Keeper
+}
+
+func NewPortSourceAdapter(transferKeeper ibctransferkeeper.Keeper) *PortSourceAdapter {
+    return &PortSourceAdapter{transferKeeper: transferKeeper}
+}
+
+// Implement wasmtypes.ICS20TransferPortSource interface
+func (p *PortSourceAdapter) GetPort(ctx sdk.Context) string {
+    return ibctransfertypes.PortID
+}
+```
+
+### Step 5: Update Module Dependencies
+
+```go
+// File: x/contracts/module/depinject.go
+type ModuleInputs struct {
+    depinject.In
+
+    Cdc           codec.Codec
+    StoreService  store.KVStoreService
+    Logger        log.Logger
+    AccountKeeper authkeeper.AccountKeeper
+    BankKeeper    bankkeeper.Keeper
+    StakingKeeper *stakingkeeper.Keeper
+    
+    // Add IBC dependencies
+    IBCKeeper      *ibckeeper.Keeper         `optional:"true"`
+    TransferKeeper ibctransferkeeper.Keeper  `optional:"true"`
+
+    Config *contractstypes.Module
+}
+
+func ProvideModule(in ModuleInputs) ModuleOutputs {
+    var channelKeeper channeltypes.ChannelKeeper
+    var portKeeper porttypes.PortKeeper
+    var transferKeeper ibctransferkeeper.Keeper
+    
+    if in.IBCKeeper != nil {
+        channelKeeper = in.IBCKeeper.ChannelKeeper
+        portKeeper = in.IBCKeeper.PortKeeper
+    }
+    
+    if in.TransferKeeper != nil {
+        transferKeeper = in.TransferKeeper
+    }
+
+    k := keeper.NewKeeper(
+        in.Cdc,
+        in.StoreService,
+        in.Logger,
+        in.AccountKeeper,
+        in.BankKeeper,
+        *in.StakingKeeper,
+        channelKeeper,
+        portKeeper,
+        transferKeeper,
+        defaultHomeDir,
+    )
+    
+    // ... rest of implementation
+}
+```
+
+## Testing Strategy
+
+### Unit Tests
+```go
+// File: x/contracts/keeper/ibc_test.go
+func TestIBCIntegration(t *testing.T) {
+    // Test IBC packet sending
+    // Test channel operations
+    // Test cross-chain token transfers
+}
+```
+
+### Integration Tests
+```go
+// File: x/contracts/integration/ibc_integration_test.go
+func TestCrossChainContractCall(t *testing.T) {
+    // Test full cross-chain workflow
+    // Test contract-to-contract IBC calls
+    // Test error handling and timeouts
+}
+```
+
+## Contract Examples
+
+### Cross-Chain Token Transfer
+```rust
+// Example contract using IBC transfers
+#[entry_point]
+pub fn execute(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
+    match msg {
+        ExecuteMsg::TransferToChain { 
+            recipient, 
+            amount, 
+            destination_chain 
+        } => {
+            let ibc_msg = IbcMsg::Transfer {
+                channel_id: "channel-0".to_string(),
+                to_address: recipient,
+                amount: amount,
+                timeout: env.block.time.plus_seconds(3600),
+            };
+            
+            Ok(Response::new()
+                .add_message(ibc_msg)
+                .add_attribute("action", "cross_chain_transfer"))
+        }
+    }
+}
+```
+
+### Cross-Chain Contract Call
+```rust
+#[entry_point]
+pub fn execute(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
+    match msg {
+        ExecuteMsg::CallRemoteContract { 
+            channel_id, 
+            remote_contract, 
+            call_data 
+        } => {
+            let packet_data = CrossChainCallData {
+                contract_address: remote_contract,
+                msg: call_data,
+                sender: info.sender.to_string(),
+            };
+            
+            let ibc_msg = IbcMsg::SendPacket {
+                channel_id,
+                data: to_binary(&packet_data)?,
+                timeout: env.block.time.plus_seconds(600),
+            };
+            
+            Ok(Response::new()
+                .add_message(ibc_msg)
+                .add_attribute("action", "cross_chain_call"))
+        }
+    }
+}
+```
+
+## Migration Strategy
+
+### Phase 1: Non-Breaking Enhancement
+1. Add IBC adapters alongside existing nil implementations
+2. Make IBC dependencies optional in depinject
+3. Maintain backward compatibility
+
+### Phase 2: Full Integration
+1. Update all contracts to use IBC features
+2. Add comprehensive testing
+3. Update documentation
+
+### Phase 3: Advanced Features
+1. Implement IBC callbacks
+2. Add cross-chain state synchronization
+3. Enable multi-chain workflows
+
+## Benefits After Implementation
+
+### For Developers
+- **Cross-Chain DeFi**: Build protocols spanning multiple chains
+- **Multi-Chain NFTs**: Create NFTs that work across ecosystems
+- **Chain Abstraction**: Hide chain complexity from users
+- **Liquidity Bridging**: Move assets seamlessly between chains
+
+### For Users
+- **Unified Experience**: Interact with multiple chains transparently
+- **Lower Costs**: Choose optimal chains for different operations
+- **Better Liquidity**: Access to assets across all connected chains
+- **Enhanced Security**: Distributed risk across multiple chains
+
+## Success Metrics
+
+### Technical Metrics
+- [ ] All IBC adapter interfaces implemented
+- [ ] 100% test coverage for IBC functionality
+- [ ] Cross-chain contract calls working
+- [ ] IBC token transfers functional
+
+### Integration Metrics
+- [ ] Compatible with all major IBC-enabled chains
+- [ ] Support for standard IBC applications
+- [ ] Seamless wasmd v0.61.0 integration
+- [ ] No breaking changes to existing contracts
+
+### Performance Metrics
+- [ ] IBC packet processing under 5 seconds
+- [ ] Cross-chain calls complete within 30 seconds
+- [ ] No impact on non-IBC contract performance
+- [ ] Efficient resource usage
+
+## Future Enhancements
+
+### Advanced IBC Features
+- **Interchain Accounts**: Control accounts on remote chains
+- **Interchain Queries**: Query remote chain state
+- **IBC Middleware**: Custom packet processing logic
+- **Multi-Hop Routing**: Route packets through multiple chains
+
+### Cross-Chain Protocols
+- **Cross-Chain DEX**: Trade assets across chains
+- **Multi-Chain Governance**: Coordinate governance across ecosystems
+- **Cross-Chain Staking**: Stake assets on remote chains
+- **Universal Liquidity**: Share liquidity across all chains
+
+## References
+
+### Documentation
+- [IBC Protocol Specification](https://github.com/cosmos/ibc)
+- [wasmd IBC Integration](https://github.com/CosmWasm/wasmd/tree/main/x/wasm/ibc)
+- [Cosmos SDK IBC Module](https://ibc.cosmos.network/)
+
+### Implementation Examples
+- [Juno IBC Integration](https://github.com/CosmosContracts/juno)
+- [Osmosis IBC Contracts](https://github.com/osmosis-labs/osmosis)
+- [Neutron IBC Features](https://github.com/neutron-org/neutron)
+
+## Priority: Medium
+**Timeline**: 2-3 months for full implementation
+**Complexity**: High (requires deep IBC knowledge)
+**Impact**: High (enables advanced cross-chain features)
+**Dependencies**: Stable core contracts module (✅ Complete)
+description:
+globs:
+alwaysApply: false
+---
