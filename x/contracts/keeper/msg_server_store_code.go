@@ -13,10 +13,9 @@ import (
 func (k msgServer) StoreCode(goCtx context.Context, msg *types.MsgStoreCode) (*types.MsgStoreCodeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// Get the wasm keeper with error handling
-	wasmKeeper, err := k.getWasmKeeper()
-	if err != nil {
-		return nil, err
+	// Check if wasm keeper is initialized
+	if k.wasmKeeper == nil {
+		return nil, types.ErrWasmNotInitialized
 	}
 
 	// Convert our message to wasmd's message format
@@ -30,7 +29,7 @@ func (k msgServer) StoreCode(goCtx context.Context, msg *types.MsgStoreCode) (*t
 	}
 
 	// Create a message server for wasmd
-	wasmMsgServer := wasmkeeper.NewMsgServerImpl(wasmKeeper)
+	wasmMsgServer := wasmkeeper.NewMsgServerImpl(k.wasmKeeper)
 
 	// Delegate to wasmd's store code handler
 	resp, err := wasmMsgServer.StoreCode(ctx, wasmMsg)

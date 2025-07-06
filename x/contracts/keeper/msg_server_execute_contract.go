@@ -20,10 +20,9 @@ func (k msgServer) ExecuteContract(goCtx context.Context, msg *types.MsgExecuteC
 		return nil, errorsmod.Wrap(err, "invalid creator address")
 	}
 
-	// Get the wasm keeper with error handling
-	wasmKeeper, err := k.getWasmKeeper()
-	if err != nil {
-		return nil, err
+	// Check if wasm keeper is initialized
+	if k.wasmKeeper == nil {
+		return nil, types.ErrWasmNotInitialized
 	}
 
 	// Convert our message to wasmd's message format
@@ -36,7 +35,7 @@ func (k msgServer) ExecuteContract(goCtx context.Context, msg *types.MsgExecuteC
 	}
 
 	// Create a message server for wasmd
-	wasmMsgServer := wasmkeeper.NewMsgServerImpl(wasmKeeper)
+	wasmMsgServer := wasmkeeper.NewMsgServerImpl(k.wasmKeeper)
 
 	// Delegate to wasmd's execute contract handler
 	resp, err := wasmMsgServer.ExecuteContract(ctx, wasmMsg)

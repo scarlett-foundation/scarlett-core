@@ -34,14 +34,13 @@ func (q queryServer) SmartContractState(goCtx context.Context, req *types.QueryS
 		return nil, errorsmod.Wrap(err, "invalid contract address")
 	}
 
-	// Get the wasm keeper with error handling
-	wasmKeeper, err := q.k.getWasmKeeper()
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	// Check if wasm keeper is initialized
+	if q.k.wasmKeeper == nil {
+		return nil, status.Error(codes.Internal, "wasm keeper not initialized")
 	}
 
 	// Execute smart contract query via wasmd
-	queryResult, err := wasmKeeper.QuerySmart(ctx, contractAddr, req.QueryData)
+	queryResult, err := q.k.wasmKeeper.QuerySmart(ctx, contractAddr, req.QueryData)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

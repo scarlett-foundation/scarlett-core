@@ -29,14 +29,13 @@ func (q queryServer) ContractInfo(goCtx context.Context, req *types.QueryContrac
 		return nil, errorsmod.Wrap(err, "invalid contract address")
 	}
 
-	// Get the wasm keeper with error handling
-	wasmKeeper, err := q.k.getWasmKeeper()
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+	// Check if wasm keeper is initialized
+	if q.k.wasmKeeper == nil {
+		return nil, status.Error(codes.Internal, "wasm keeper not initialized")
 	}
 
 	// Query contract info from wasmd
-	contractInfo := wasmKeeper.GetContractInfo(ctx, contractAddr)
+	contractInfo := q.k.wasmKeeper.GetContractInfo(ctx, contractAddr)
 	if contractInfo == nil {
 		return nil, status.Error(codes.NotFound, "contract not found")
 	}
