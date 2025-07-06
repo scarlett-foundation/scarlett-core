@@ -7,13 +7,16 @@ import (
 	"cosmossdk.io/depinject/appconfig"
 	"cosmossdk.io/log"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
+	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	"github.com/spf13/cast"
 
 	"scarlett-core/x/contracts/keeper"
-	"scarlett-core/x/contracts/types"
+	contractstypes "scarlett-core/x/contracts/types"
 )
 
 var _ depinject.OnePerModuleType = AppModule{}
@@ -22,7 +25,7 @@ var _ depinject.OnePerModuleType = AppModule{}
 func (am AppModule) IsOnePerModuleType() {}
 
 func init() {
-	appconfig.RegisterModule(&types.Module{},
+	appconfig.RegisterModule(&contractstypes.Module{},
 		appconfig.Provide(ProvideModule),
 	)
 }
@@ -33,6 +36,7 @@ type ModuleInputs struct {
 	Cdc          codec.Codec
 	StoreService store.KVStoreService
 	Logger       log.Logger
+	AppOpts      servertypes.AppOptions
 
 	// Use the exact same pattern as the emissions module
 	// Some keepers are value types, some are pointer types
@@ -51,6 +55,12 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
+	// Get home directory from app options
+	homeDir := cast.ToString(in.AppOpts.Get(flags.FlagHome))
+	if homeDir == "" {
+		homeDir = "~/.scarlett-core" // fallback to default
+	}
+
 	// Create the contracts keeper which will handle the manual wasm.Keeper instantiation
 	keeper := keeper.NewKeeper(
 		in.Cdc,
@@ -59,6 +69,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.AccountKeeper,
 		in.BankKeeper,
 		*in.StakingKeeper,
+		homeDir,
 	)
 
 	m := NewAppModule(in.Cdc, keeper)

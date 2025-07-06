@@ -2,8 +2,7 @@ package keeper
 
 import (
 	"context"
-	"fmt"
-	"os"
+	"path/filepath"
 	"sync"
 
 	"cosmossdk.io/core/store"
@@ -27,6 +26,9 @@ type Keeper struct {
 	bankKeeper    bankkeeper.Keeper
 	stakingKeeper stakingkeeper.Keeper
 
+	// wasmd configuration
+	homeDir string
+
 	// Lazy-initialized wasm keeper
 	wasmKeeper *wasmkeeper.Keeper
 	once       sync.Once
@@ -40,6 +42,7 @@ func NewKeeper(
 	accountKeeper authkeeper.AccountKeeper,
 	bankKeeper bankkeeper.Keeper,
 	stakingKeeper stakingkeeper.Keeper,
+	homeDir string,
 ) Keeper {
 	return Keeper{
 		cdc:           cdc,
@@ -48,17 +51,18 @@ func NewKeeper(
 		accountKeeper: accountKeeper,
 		bankKeeper:    bankKeeper,
 		stakingKeeper: stakingKeeper,
+		homeDir:       homeDir,
 	}
 }
 
 // getWasmKeeper lazily initializes the wasm keeper on first access
 func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 	k.once.Do(func() {
-		// Create wasm configuration to support bulk memory operations
-		nodeConfig := wasmtypes.NodeConfig{}
+		// Use wasmd's default configuration approach
+		wasmDir := filepath.Join(k.homeDir, "data", "wasm")
 
-		// Configure VM to accept bulk memory operations
-		// This may require wasmvm v3.0.0+ with proper bulk memory support
+		// Create wasm configuration using wasmd's default approach
+		nodeConfig := wasmtypes.NodeConfig{}
 		vmConfig := wasmtypes.VMConfig{}
 
 		// Set available capabilities for wasmd v0.61.0 + wasmvm v3.0.0 compatibility
@@ -71,10 +75,6 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 
 		// Authority for governance (should be governance module address)
 		authority := "cosmos10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47" // placeholder
-
-		// Home directory for wasm - use a consistent path for this keeper instance
-		// Use PID to make it unique per process but consistent within the process
-		homeDir := fmt.Sprintf("/tmp/wasm-contracts-%d", os.Getpid())
 
 		// For the parameters that wasmd v0.61.0 expects but we don't have compatible implementations,
 		// we'll use nil for now. This is compatible with the wasmd v0.61.0 NewKeeper signature.
@@ -103,9 +103,9 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 			portSource,
 			messageRouter,
 			grpcQueryRouter,
-			homeDir,
-			nodeConfig,
-			vmConfig,
+			wasmDir,    // Use proper wasmd directory structure
+			nodeConfig, // Use wasmd's NodeConfig
+			vmConfig,   // Use wasmd's VMConfig
 			supportedFeatures,
 			authority,
 		)

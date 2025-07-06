@@ -1,7 +1,5 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Open Module Registration Feature Implementation - Step-by-Step Guide
 
