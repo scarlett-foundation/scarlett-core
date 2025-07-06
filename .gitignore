@@ -9,3 +9,15 @@ release/
 *.ign
 wRj9iwrJkJ7sTuWdCGHk.HTQ2LN\!Ba
 wRj9iwrJkJ7sTuWdCGHk.HTQ2LN\!Ba.pub
+# Rust/Cargo cache files
+examples/contracts/*/target/
+**/target/
+**/.rustc_info.json
+
+# WASM VM cache files
+**/.scarlett-core/data/wasm/
+**/wasm/exclusive.lock
+**/wasm/cache/
+
+# Temporary files
+/tmp/*.json
