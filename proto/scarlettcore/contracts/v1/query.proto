@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package scarlettcore.contracts.v1;
 
 import "amino/amino.proto";
@@ -15,6 +16,16 @@ service Query {
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/scarlett-core/contracts/v1/params";
   }
+
+  // ContractInfo Queries a list of ContractInfo items.
+  rpc ContractInfo(QueryContractInfoRequest) returns (QueryContractInfoResponse) {
+    option (google.api.http).get = "/scarlett-core/contracts/v1/contract_info/{contract}";
+  }
+
+  // SmartContractState Queries a list of SmartContractState items.
+  rpc SmartContractState(QuerySmartContractStateRequest) returns (QuerySmartContractStateResponse) {
+    option (google.api.http).get = "/scarlett-core/contracts/v1/smart_contract_state/{contract}/{query_data}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -28,3 +39,20 @@ message QueryParamsResponse {
     (amino.dont_omitempty) = true
   ];
 }
+
+// QueryContractInfoRequest defines the QueryContractInfoRequest message.
+message QueryContractInfoRequest {
+  string contract = 1;
+}
+
+// QueryContractInfoResponse defines the QueryContractInfoResponse message.
+message QueryContractInfoResponse {}
+
+// QuerySmartContractStateRequest defines the QuerySmartContractStateRequest message.
+message QuerySmartContractStateRequest {
+  string contract = 1;
+  bytes query_data = 2;
+}
+
+// QuerySmartContractStateResponse defines the QuerySmartContractStateResponse message.
+message QuerySmartContractStateResponse {}

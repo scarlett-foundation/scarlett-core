@@ -1,0 +1,32 @@
+package simulation
+
+import (
+	"math/rand"
+
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+
+	"scarlett-core/x/contracts/keeper"
+	"scarlett-core/x/contracts/types"
+)
+
+func SimulateMsgStoreCode(
+	ak types.AuthKeeper,
+	bk types.BankKeeper,
+	k keeper.Keeper,
+	txGen client.TxConfig,
+) simtypes.Operation {
+	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
+	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
+		simAccount, _ := simtypes.RandomAcc(r, accs)
+		msg := &types.MsgStoreCode{
+			Creator: simAccount.Address.String(),
+		}
+
+		// TODO: Handle the StoreCode simulation
+
+		return simtypes.NoOpMsg(types.ModuleName, sdk.MsgTypeURL(msg), "StoreCode simulation not implemented"), nil, nil
+	}
+}
