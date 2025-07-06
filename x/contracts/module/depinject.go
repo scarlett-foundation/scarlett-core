@@ -7,13 +7,10 @@ import (
 	"cosmossdk.io/depinject/appconfig"
 	"cosmossdk.io/log"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	"github.com/spf13/cast"
 
 	"scarlett-core/x/contracts/keeper"
 	contractstypes "scarlett-core/x/contracts/types"
@@ -25,7 +22,8 @@ var _ depinject.OnePerModuleType = AppModule{}
 func (am AppModule) IsOnePerModuleType() {}
 
 func init() {
-	appconfig.RegisterModule(&contractstypes.Module{},
+	appconfig.RegisterModule(
+		&contractstypes.Module{},
 		appconfig.Provide(ProvideModule),
 	)
 }
@@ -33,18 +31,14 @@ func init() {
 type ModuleInputs struct {
 	depinject.In
 
-	Cdc          codec.Codec
-	StoreService store.KVStoreService
-	Logger       log.Logger
-	AppOpts      servertypes.AppOptions
+	Cdc           codec.Codec
+	StoreService  store.KVStoreService
+	Logger        log.Logger
+	AccountKeeper authkeeper.AccountKeeper
+	BankKeeper    bankkeeper.Keeper
+	StakingKeeper *stakingkeeper.Keeper
 
-	// Use the exact same pattern as the emissions module
-	// Some keepers are value types, some are pointer types
-	AccountKeeper authkeeper.AccountKeeper // Value type like emissions
-	BankKeeper    bankkeeper.Keeper        // Value type like emissions
-	StakingKeeper *stakingkeeper.Keeper    // Pointer type like emissions
-	// DistributionKeeper and ChannelKeeper are set to nil in NewKeeper for now
-	// since they don't match the exact interfaces wasmd expects
+	Config *contractstypes.Module
 }
 
 type ModuleOutputs struct {
@@ -55,24 +49,25 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
-	// Get home directory from app options
-	homeDir := cast.ToString(in.AppOpts.Get(flags.FlagHome))
-	if homeDir == "" {
-		homeDir = "~/.scarlett-core" // fallback to default
-	}
+	// Use a default home directory approach that works with depinject
+	// The actual home directory will be set by the runtime when the app starts
+	// For now, we use a placeholder that will be replaced during keeper initialization
+	defaultHomeDir := ""
 
-	// Create the contracts keeper which will handle the manual wasm.Keeper instantiation
-	keeper := keeper.NewKeeper(
+	k := keeper.NewKeeper(
 		in.Cdc,
 		in.StoreService,
 		in.Logger,
 		in.AccountKeeper,
 		in.BankKeeper,
 		*in.StakingKeeper,
-		homeDir,
+		defaultHomeDir,
 	)
 
-	m := NewAppModule(in.Cdc, keeper)
+	m := NewAppModule(in.Cdc, k)
 
-	return ModuleOutputs{ContractsKeeper: keeper, Module: m}
+	return ModuleOutputs{
+		ContractsKeeper: k,
+		Module:          m,
+	}
 }

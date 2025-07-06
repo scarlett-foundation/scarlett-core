@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"sync"
 
@@ -12,7 +13,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
@@ -44,6 +47,11 @@ func NewKeeper(
 	stakingKeeper stakingkeeper.Keeper,
 	homeDir string,
 ) Keeper {
+	// Use default home directory if not provided
+	if homeDir == "" {
+		homeDir = getDefaultHomeDir()
+	}
+
 	return Keeper{
 		cdc:           cdc,
 		storeService:  storeService,
@@ -55,13 +63,22 @@ func NewKeeper(
 	}
 }
 
+// getDefaultHomeDir returns the default home directory for the chain
+func getDefaultHomeDir() string {
+	// Try to get from environment or use default
+	if home := os.Getenv("HOME"); home != "" {
+		return filepath.Join(home, ".scarlett-core")
+	}
+	return ".scarlett-core" // fallback for CI/testing environments
+}
+
 // getWasmKeeper lazily initializes the wasm keeper on first access
 func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 	k.once.Do(func() {
-		// Use wasmd's default configuration approach
+		// Use wasmd's standard directory structure
 		wasmDir := filepath.Join(k.homeDir, "data", "wasm")
 
-		// Create wasm configuration using wasmd's default approach
+		// Create wasm configuration using wasmd's approach for v0.61.0
 		nodeConfig := wasmtypes.NodeConfig{}
 		vmConfig := wasmtypes.VMConfig{}
 
@@ -73,8 +90,8 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 			"cosmwasm_2_0", "cosmwasm_2_1", "cosmwasm_2_2",
 		}
 
-		// Authority for governance (should be governance module address)
-		authority := "cosmos10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47" // placeholder
+		// Use proper governance module address for authority
+		authority := authtypes.NewModuleAddress(govtypes.ModuleName).String()
 
 		// For the parameters that wasmd v0.61.0 expects but we don't have compatible implementations,
 		// we'll use nil for now. This is compatible with the wasmd v0.61.0 NewKeeper signature.
