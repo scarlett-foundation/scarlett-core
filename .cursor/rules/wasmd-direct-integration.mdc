@@ -1,0 +1,155 @@
+---
+alwaysApply: true
+---
+# Direct wasmd Integration for Cache Management
+
+## Overview
+Instead of replicating wasmd's cache implementation, we'll use their implementation directly through proper configuration of the wasmd keeper.
+
+## Current Implementation Issues
+```go
+// Current problematic approach
+homeDir := fmt.Sprintf("/tmp/wasm-contracts-%d", os.Getpid())
+```
+
+## Better Approach: Direct wasmd Integration
+
+### 1. Use wasmd Configuration
+```go
+// In app/config.go or similar
+func GetWasmConfig(appOpts servertypes.AppOptions) *wasmtypes.WasmConfig {
+    return &wasmtypes.WasmConfig{
+        // Use wasmd's config structure directly
+        SmartQueryGasLimit: 3000000,
+        MemoryCacheSize:    32, // 32 MiB
+        SimulationGasLimit: 400000,
+        // Let wasmd manage its own cache directory
+        CacheDir: filepath.Join(appHomeDir, "data", "wasm"),
+    }
+}
+```
+
+### 2. Proper Keeper Initialization
+```go
+// In x/contracts/keeper/keeper.go
+func NewKeeper(
+    cdc codec.Codec,
+    storeService store.KVStoreService,
+    logger log.Logger,
+    accountKeeper authkeeper.AccountKeeper,
+    bankKeeper bankkeeper.Keeper,
+    stakingKeeper stakingkeeper.Keeper,
+    wasmConfig *wasmtypes.WasmConfig,  // Add this parameter
+) Keeper {
+    return Keeper{
+        cdc:           cdc,
+        storeService:  storeService,
+        logger:        logger,
+        accountKeeper: accountKeeper,
+        bankKeeper:    bankKeeper,
+        stakingKeeper: stakingKeeper,
+        // Let wasmd config handle the directory and cache settings
+        wasmConfig:    wasmConfig,
+    }
+}
+```
+
+### 3. Update Lazy Initialization
+```go
+func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
+    k.once.Do(func() {
+        // Use wasmd's configuration directly
+        wasmKeeperValue := wasmkeeper.NewKeeper(
+            k.cdc,
+            k.storeService,
+            k.accountKeeper,
+            k.bankKeeper,
+            k.stakingKeeper,
+            distributionKeeperCompat,
+            ics4Wrapper,
+            channelKeeperCompat,
+            channelKeeperV2,
+            portSource,
+            messageRouter,
+            grpcQueryRouter,
+            k.wasmConfig.CacheDir,  // Use wasmd's configured cache dir
+            wasmtypes.DefaultWasmConfig(), // Or pass k.wasmConfig
+            supportedFeatures,
+            authority,
+        )
+        k.wasmKeeper = &wasmKeeperValue
+    })
+    return k.wasmKeeper
+}
+```
+
+## Implementation Steps
+
+1. **Remove Custom Cache Logic**
+   - Delete any custom cache management code
+   - Remove temporary directory creation
+   - Let wasmd handle all caching
+
+2. **Add Proper Configuration**
+   - Add wasmd config to app configuration
+   - Pass configuration through to keeper
+
+3. **Update Keeper Interface**
+   - Modify keeper to accept wasmd config
+   - Remove custom cache directory handling
+
+## Benefits
+
+1. ✅ Use battle-tested wasmd implementation
+2. ✅ Automatic compatibility with wasmd updates
+3. ✅ Proper cache management out of the box
+4. ✅ Consistent with wasmd best practices
+5. ✅ Reduced maintenance burden
+
+## Migration Notes
+
+1. **Backup Existing Data**
+```bash
+mv /tmp/wasm-contracts-* /tmp/wasm-backup/
+```
+
+2. **Configuration Update**
+```toml
+# In app.toml
+[wasm]
+# Standard wasmd configuration
+smart_query_gas_limit = 3000000
+memory_cache_size = 32
+simulation_gas_limit = 400000
+```
+
+## Verification Steps
+
+1. **Check Configuration**
+```bash
+scarlett-cored config
+# Should show wasmd configuration section
+```
+
+2. **Verify Directory Structure**
+```bash
+ls -R ~/.scarlett-core/data/wasm/
+# Should show wasmd's standard directory structure
+```
+
+## Success Criteria
+
+1. ✅ All cache management delegated to wasmd
+2. ✅ No custom cache implementation
+3. ✅ Proper configuration through app.toml
+4. ✅ Standard wasmd directory structure
+5. ✅ No more temporary directories
+
+## References
+
+1. wasmd Keeper Configuration:
+   https://pkg.go.dev/github.com/CosmWasm/wasmd@v0.61.0/x/wasm/keeper#NewKeeper
+
+2. wasmd Default Config:
+   https://pkg.go.dev/github.com/CosmWasm/wasmd@v0.61.0/x/wasm/types#DefaultWasmConfig
+
