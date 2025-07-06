@@ -5,20 +5,21 @@ import (
 
 	"scarlett-core/x/contracts/types"
 
-	errorsmod "cosmossdk.io/errors"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k msgServer) StoreCode(ctx context.Context, msg *types.MsgStoreCode) (*types.MsgStoreCodeResponse, error) {
-	// Validate creator address using SDK validation
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+func (k msgServer) StoreCode(goCtx context.Context, msg *types.MsgStoreCode) (*types.MsgStoreCodeResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// Get the wasm keeper with error handling
+	wasmKeeper, err := k.getWasmKeeper()
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "invalid creator address")
+		return nil, err
 	}
 
-	// Create wasmd StoreCode message
+	// Convert our message to wasmd's message format
 	wasmMsg := &wasmtypes.MsgStoreCode{
 		Sender:       msg.Creator,
 		WASMByteCode: msg.WasmByteCode,
@@ -28,24 +29,16 @@ func (k msgServer) StoreCode(ctx context.Context, msg *types.MsgStoreCode) (*typ
 		},
 	}
 
-	// Get the wasm keeper and create a message server for it
-	wasmKeeper := k.getWasmKeeper()
+	// Create a message server for wasmd
 	wasmMsgServer := wasmkeeper.NewMsgServerImpl(wasmKeeper)
 
-	// Delegate to wasmd's StoreCode handler
-	wasmResponse, err := wasmMsgServer.StoreCode(ctx, wasmMsg)
+	// Delegate to wasmd's store code handler
+	resp, err := wasmMsgServer.StoreCode(ctx, wasmMsg)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to store wasm code")
+		return nil, err
 	}
 
-	// Log the successful code storage
-	k.Logger(ctx).Info("Successfully stored wasm code",
-		"code_id", wasmResponse.CodeID,
-		"checksum", wasmResponse.Checksum,
-		"creator", msg.Creator)
-
-	// Return response with the generated code ID
 	return &types.MsgStoreCodeResponse{
-		CodeId: wasmResponse.CodeID,
+		CodeId: resp.CodeID,
 	}, nil
 }

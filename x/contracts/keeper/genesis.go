@@ -3,22 +3,24 @@ package keeper
 import (
 	"context"
 
+	"scarlett-core/x/contracts/types"
+
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"scarlett-core/x/contracts/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.
-// This sets up permissionless parameters for the wasm module.
-func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
-	// Convert context to SDK context for compatibility
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
+func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) {
+	// Get the wasm keeper with error handling
+	wasmKeeper, err := k.getWasmKeeper()
+	if err != nil {
+		panic(err) // Genesis initialization should not fail
+	}
 
-	k.getWasmKeeper().Logger(sdkCtx).Info("🚀 Initializing contracts module genesis")
+	wasmKeeper.Logger(sdk.UnwrapSDKContext(ctx)).Info("🚀 Initializing contracts module genesis")
 
 	// Set permissionless parameters for the wasm module
-	// This makes contract deployment permissionless from genesis
+	// This allows anyone to upload and instantiate contracts
 	wasmParams := wasmtypes.Params{
 		CodeUploadAccess: wasmtypes.AccessConfig{
 			Permission: wasmtypes.AccessTypeEverybody,
@@ -27,23 +29,27 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 	}
 
 	// Set the permissionless parameters using the lazy-loaded keeper
-	if err := k.getWasmKeeper().SetParams(ctx, wasmParams); err != nil {
-		return err
+	if err := wasmKeeper.SetParams(ctx, wasmParams); err != nil {
+		panic(err)
 	}
 
-	k.getWasmKeeper().Logger(sdkCtx).Info("✅ Contracts module genesis initialized with permissionless parameters")
-
-	return nil
+	wasmKeeper.Logger(sdk.UnwrapSDKContext(ctx)).Info("✅ Contracts module genesis initialized with permissionless parameters")
 }
 
 // ExportGenesis returns the module's exported genesis state.
-func (k Keeper) ExportGenesis(ctx context.Context) types.GenesisState {
-	// Convert context to SDK context for compatibility
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
+func (k Keeper) ExportGenesis(ctx context.Context) *types.GenesisState {
+	genesis := types.DefaultGenesis()
 
-	k.getWasmKeeper().Logger(sdkCtx).Info("📤 Exporting contracts module genesis")
+	// Get the wasm keeper with error handling
+	wasmKeeper, err := k.getWasmKeeper()
+	if err != nil {
+		panic(err) // Genesis export should not fail
+	}
 
-	// For our wrapper module, we just export the default genesis state
-	// The actual wasm state is handled by the lazy-loaded keeper internally
-	return *types.DefaultGenesis()
+	// Export any wasm-specific state
+	// This would typically include code storage, contract instances, etc.
+	// For now, we'll just export the basic params
+	_ = wasmKeeper
+
+	return genesis
 }

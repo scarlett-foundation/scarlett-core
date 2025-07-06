@@ -11,29 +11,37 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k msgServer) ExecuteContract(ctx context.Context, msg *types.MsgExecuteContract) (*types.MsgExecuteContractResponse, error) {
+func (k msgServer) ExecuteContract(goCtx context.Context, msg *types.MsgExecuteContract) (*types.MsgExecuteContractResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
 	// Validate creator address
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, errorsmod.Wrap(err, "invalid creator address")
 	}
 
-	// Create wasmd ExecuteContract message
+	// Get the wasm keeper with error handling
+	wasmKeeper, err := k.getWasmKeeper()
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert our message to wasmd's message format
 	wasmMsg := &wasmtypes.MsgExecuteContract{
 		Sender:   msg.Creator,
 		Contract: msg.Contract,
 		Msg:      msg.Msg,
-		Funds:    nil, // TODO: Parse funds from string
+		// Convert funds from string to sdk.Coins
+		Funds: nil, // TODO: Parse funds string to sdk.Coins
 	}
 
-	// Get the wasm keeper and create a message server for it
-	wasmKeeper := k.getWasmKeeper()
+	// Create a message server for wasmd
 	wasmMsgServer := wasmkeeper.NewMsgServerImpl(wasmKeeper)
 
-	// Delegate to wasmd's ExecuteContract handler
-	wasmResponse, err := wasmMsgServer.ExecuteContract(ctx, wasmMsg)
+	// Delegate to wasmd's execute contract handler
+	resp, err := wasmMsgServer.ExecuteContract(ctx, wasmMsg)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to execute contract")
+		return nil, err
 	}
 
 	// Log the successful contract execution
@@ -41,8 +49,7 @@ func (k msgServer) ExecuteContract(ctx context.Context, msg *types.MsgExecuteCon
 		"contract", msg.Contract,
 		"creator", msg.Creator)
 
-	// Return response with the execution data
 	return &types.MsgExecuteContractResponse{
-		Data: wasmResponse.Data,
+		Data: resp.Data,
 	}, nil
 }

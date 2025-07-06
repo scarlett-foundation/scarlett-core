@@ -11,10 +11,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (q queryServer) ContractInfo(ctx context.Context, req *types.QueryContractInfoRequest) (*types.QueryContractInfoResponse, error) {
+func (q queryServer) ContractInfo(goCtx context.Context, req *types.QueryContractInfoRequest) (*types.QueryContractInfoResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// Validate contract address
 	if req.Contract == "" {
@@ -27,10 +29,10 @@ func (q queryServer) ContractInfo(ctx context.Context, req *types.QueryContractI
 		return nil, errorsmod.Wrap(err, "invalid contract address")
 	}
 
-	// Get the wasm keeper
-	wasmKeeper := q.k.getWasmKeeper()
-	if wasmKeeper == nil {
-		return nil, status.Error(codes.Internal, "wasm keeper not initialized")
+	// Get the wasm keeper with error handling
+	wasmKeeper, err := q.k.getWasmKeeper()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	// Query contract info from wasmd

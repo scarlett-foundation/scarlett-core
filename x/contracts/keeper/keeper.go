@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -35,6 +36,7 @@ type Keeper struct {
 	// Lazy-initialized wasm keeper
 	wasmKeeper *wasmkeeper.Keeper
 	once       sync.Once
+	initError  error // Store any initialization error
 }
 
 // NewKeeper creates a new contracts keeper with lazy wasm initialization
@@ -72,11 +74,35 @@ func getDefaultHomeDir() string {
 	return ".scarlett-core" // fallback for CI/testing environments
 }
 
+// ensureWasmDir creates the wasm directory if it doesn't exist
+func (k *Keeper) ensureWasmDir(wasmDir string) error {
+	if err := os.MkdirAll(wasmDir, 0755); err != nil {
+		return fmt.Errorf("failed to create wasm directory %s: %w", wasmDir, err)
+	}
+
+	// Verify directory is writable
+	testFile := filepath.Join(wasmDir, ".write_test")
+	if err := os.WriteFile(testFile, []byte("test"), 0644); err != nil {
+		return fmt.Errorf("wasm directory %s is not writable: %w", wasmDir, err)
+	}
+	os.Remove(testFile) // Clean up test file
+
+	return nil
+}
+
 // getWasmKeeper lazily initializes the wasm keeper on first access
-func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
+func (k *Keeper) getWasmKeeper() (*wasmkeeper.Keeper, error) {
 	k.once.Do(func() {
+		k.logger.Info("Initializing wasmd keeper", "homeDir", k.homeDir)
+
 		// Use wasmd's standard directory structure
 		wasmDir := filepath.Join(k.homeDir, "data", "wasm")
+
+		// Ensure the wasm directory exists and is writable
+		if err := k.ensureWasmDir(wasmDir); err != nil {
+			k.initError = fmt.Errorf("failed to setup wasm directory: %w", err)
+			return
+		}
 
 		// Create wasm configuration using wasmd's approach for v0.61.0
 		nodeConfig := wasmtypes.NodeConfig{}
@@ -92,6 +118,7 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 
 		// Use proper governance module address for authority
 		authority := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+		k.logger.Info("Using governance authority for wasmd", "authority", authority)
 
 		// For the parameters that wasmd v0.61.0 expects but we don't have compatible implementations,
 		// we'll use nil for now. This is compatible with the wasmd v0.61.0 NewKeeper signature.
@@ -104,6 +131,11 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 		// Use nil for distribution and channel keepers since they don't match interfaces exactly
 		var distributionKeeperCompat wasmtypes.DistributionKeeper = nil
 		var channelKeeperCompat wasmtypes.ChannelKeeper = nil
+
+		k.logger.Info("Creating wasmd keeper",
+			"wasmDir", wasmDir,
+			"features", supportedFeatures,
+		)
 
 		// Manually instantiate the wasm.Keeper with all required dependencies
 		// NewKeeper returns a value type, so we need to store it and then take a pointer
@@ -127,24 +159,44 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 			authority,
 		)
 		k.wasmKeeper = &wasmKeeperValue
+		k.logger.Info("Successfully initialized wasmd keeper")
 	})
-	return k.wasmKeeper
+
+	if k.initError != nil {
+		return nil, k.initError
+	}
+	return k.wasmKeeper, nil
 }
 
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx context.Context) log.Logger {
+	wasmKeeper, err := k.getWasmKeeper()
+	if err != nil {
+		k.logger.Error("Failed to get wasm keeper for logger", "error", err)
+		return k.logger
+	}
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return k.getWasmKeeper().Logger(sdkCtx)
+	return wasmKeeper.Logger(sdkCtx)
 }
 
 // GetContractInfo returns contract info from the embedded wasm keeper
 func (k Keeper) GetContractInfo(ctx context.Context, contractAddr sdk.AccAddress) *wasmtypes.ContractInfo {
-	return k.getWasmKeeper().GetContractInfo(ctx, contractAddr)
+	wasmKeeper, err := k.getWasmKeeper()
+	if err != nil {
+		k.logger.Error("Failed to get wasm keeper for GetContractInfo", "error", err)
+		return nil
+	}
+	return wasmKeeper.GetContractInfo(ctx, contractAddr)
 }
 
 // GetCodeInfo returns code info from the embedded wasm keeper
 func (k Keeper) GetCodeInfo(ctx context.Context, codeID uint64) *wasmtypes.CodeInfo {
-	return k.getWasmKeeper().GetCodeInfo(ctx, codeID)
+	wasmKeeper, err := k.getWasmKeeper()
+	if err != nil {
+		k.logger.Error("Failed to get wasm keeper for GetCodeInfo", "error", err)
+		return nil
+	}
+	return wasmKeeper.GetCodeInfo(ctx, codeID)
 }
 
 // Additional wrapper methods can be added here as needed

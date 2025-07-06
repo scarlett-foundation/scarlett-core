@@ -11,10 +11,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (q queryServer) SmartContractState(ctx context.Context, req *types.QuerySmartContractStateRequest) (*types.QuerySmartContractStateResponse, error) {
+func (q queryServer) SmartContractState(goCtx context.Context, req *types.QuerySmartContractStateRequest) (*types.QuerySmartContractStateResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// Validate contract address
 	if req.Contract == "" {
@@ -32,16 +34,16 @@ func (q queryServer) SmartContractState(ctx context.Context, req *types.QuerySma
 		return nil, errorsmod.Wrap(err, "invalid contract address")
 	}
 
-	// Get the wasm keeper
-	wasmKeeper := q.k.getWasmKeeper()
-	if wasmKeeper == nil {
-		return nil, status.Error(codes.Internal, "wasm keeper not initialized")
+	// Get the wasm keeper with error handling
+	wasmKeeper, err := q.k.getWasmKeeper()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	// Execute smart contract query via wasmd
 	queryResult, err := wasmKeeper.QuerySmart(ctx, contractAddr, req.QueryData)
 	if err != nil {
-		return nil, errorsmod.Wrap(err, "failed to execute smart contract query")
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	// Create response with query result data
