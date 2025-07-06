@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"sync"
 
 	"cosmossdk.io/core/store"
@@ -52,18 +54,25 @@ func NewKeeper(
 // getWasmKeeper lazily initializes the wasm keeper on first access
 func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 	k.once.Do(func() {
-		// Create wasm configuration with permissionless defaults
+		// Create wasm configuration with explicit WebAssembly 2.0 support
+		// Use empty configs to allow wasmvm v3.0.0 to use its defaults
 		nodeConfig := wasmtypes.NodeConfig{}
 		vmConfig := wasmtypes.VMConfig{}
 
-		// Set available capabilities including bulk memory for modern contracts
-		supportedFeatures := []string{"iterator", "staking", "stargate", "cosmwasm_1_1", "cosmwasm_1_2", "cosmwasm_1_3", "cosmwasm_1_4"}
+		// Set available capabilities for wasmd v0.61.0 + wasmvm v3.0.0 compatibility
+		// This matches the full feature set supported by wasmd v0.61.0
+		supportedFeatures := []string{
+			"iterator", "staking", "stargate",
+			"cosmwasm_1_1", "cosmwasm_1_2", "cosmwasm_1_3", "cosmwasm_1_4",
+			"cosmwasm_2_0", "cosmwasm_2_1", "cosmwasm_2_2",
+		}
 
 		// Authority for governance (should be governance module address)
 		authority := "cosmos10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47" // placeholder
 
 		// Home directory for wasm - use a unique path to avoid conflicts
-		homeDir := "/tmp/wasm-contracts"
+		// Generate unique directory to prevent multiple VM instances from conflicting
+		homeDir := fmt.Sprintf("/tmp/wasm-contracts-%d", os.Getpid())
 
 		// For the parameters that wasmd v0.61.0 expects but we don't have compatible implementations,
 		// we'll use nil for now. This is compatible with the wasmd v0.61.0 NewKeeper signature.
