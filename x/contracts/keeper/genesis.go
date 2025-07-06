@@ -15,7 +15,7 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 	// Convert context to SDK context for compatibility
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	k.Keeper.Logger(sdkCtx).Info("🚀 Initializing contracts module genesis")
+	k.getWasmKeeper().Logger(sdkCtx).Info("🚀 Initializing contracts module genesis")
 
 	// Set permissionless parameters for the wasm module
 	// This makes contract deployment permissionless from genesis
@@ -26,12 +26,12 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		InstantiateDefaultPermission: wasmtypes.AccessTypeEverybody,
 	}
 
-	// Set the permissionless parameters using the embedded keeper
-	if err := k.Keeper.SetParams(ctx, wasmParams); err != nil {
+	// Set the permissionless parameters using the lazy-loaded keeper
+	if err := k.getWasmKeeper().SetParams(ctx, wasmParams); err != nil {
 		return err
 	}
 
-	k.Keeper.Logger(sdkCtx).Info("✅ Contracts module genesis initialized with permissionless parameters")
+	k.getWasmKeeper().Logger(sdkCtx).Info("✅ Contracts module genesis initialized with permissionless parameters")
 
 	return nil
 }
@@ -41,9 +41,9 @@ func (k Keeper) ExportGenesis(ctx context.Context) types.GenesisState {
 	// Convert context to SDK context for compatibility
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	k.Keeper.Logger(sdkCtx).Info("📤 Exporting contracts module genesis")
+	k.getWasmKeeper().Logger(sdkCtx).Info("📤 Exporting contracts module genesis")
 
 	// For our wrapper module, we just export the default genesis state
-	// The actual wasm state is handled by the embedded keeper internally
+	// The actual wasm state is handled by the lazy-loaded keeper internally
 	return *types.DefaultGenesis()
 }

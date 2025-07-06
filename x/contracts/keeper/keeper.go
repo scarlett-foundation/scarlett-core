@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"sync"
 
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/log"
@@ -14,14 +15,22 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
-// Keeper wraps wasmd's keeper by embedding it directly and provides a clean interface
-// for our contracts module while maintaining 100% compatibility with wasmd v0.61.0
+// Keeper wraps wasmd's keeper using lazy initialization to avoid lock file issues
 type Keeper struct {
-	wasmkeeper.Keeper
+	// Configuration for lazy initialization
+	cdc           codec.Codec
+	storeService  store.KVStoreService
+	logger        log.Logger
+	accountKeeper authkeeper.AccountKeeper
+	bankKeeper    bankkeeper.Keeper
+	stakingKeeper stakingkeeper.Keeper
+
+	// Lazy-initialized wasm keeper
+	wasmKeeper *wasmkeeper.Keeper
+	once       sync.Once
 }
 
-// NewKeeper creates a new contracts keeper that embeds wasm.Keeper
-// This function handles the manual instantiation of wasm.Keeper with all required dependencies
+// NewKeeper creates a new contracts keeper with lazy wasm initialization
 func NewKeeper(
 	cdc codec.Codec,
 	storeService store.KVStoreService,
@@ -30,74 +39,85 @@ func NewKeeper(
 	bankKeeper bankkeeper.Keeper,
 	stakingKeeper stakingkeeper.Keeper,
 ) Keeper {
-	// Create wasm configuration with permissionless defaults
-	nodeConfig := wasmtypes.NodeConfig{}
-	vmConfig := wasmtypes.VMConfig{}
-
-	// Set available capabilities (minimal set for security)
-	supportedFeatures := []string{"iterator", "staking", "stargate"}
-
-	// Authority for governance (should be governance module address)
-	authority := "cosmos10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47" // placeholder
-
-	// Home directory for wasm
-	homeDir := "/tmp/wasm"
-
-	// For the parameters that wasmd v0.61.0 expects but we don't have compatible implementations,
-	// we'll use nil for now. This is compatible with the wasmd v0.61.0 NewKeeper signature.
-	// These can be implemented later when we need the specific functionality.
-	var ics4Wrapper wasmtypes.ICS4Wrapper = nil
-	var channelKeeperV2 wasmtypes.ChannelKeeperV2 = nil
-	var portSource wasmtypes.ICS20TransferPortSource = nil
-	var messageRouter wasmkeeper.MessageRouter = nil
-	var grpcQueryRouter wasmkeeper.GRPCQueryRouter = nil
-
-	// Use nil for distribution and channel keepers since they don't match interfaces exactly
-	// This is acceptable for basic wasm functionality
-	var distributionKeeperCompat wasmtypes.DistributionKeeper = nil
-	var channelKeeperCompat wasmtypes.ChannelKeeper = nil
-
-	// Manually instantiate the wasm.Keeper with all required dependencies
-	wasmKeeper := wasmkeeper.NewKeeper(
-		cdc,
-		storeService,
-		accountKeeper,            // implements wasmtypes.AccountKeeper
-		bankKeeper,               // implements wasmtypes.BankKeeper
-		stakingKeeper,            // implements wasmtypes.StakingKeeper
-		distributionKeeperCompat, // nil for now - distribution queries not needed for basic functionality
-		ics4Wrapper,
-		channelKeeperCompat, // nil for now - IBC functionality not needed for basic contracts
-		channelKeeperV2,
-		portSource,
-		messageRouter,
-		grpcQueryRouter,
-		homeDir,
-		nodeConfig,
-		vmConfig,
-		supportedFeatures,
-		authority,
-	)
-
 	return Keeper{
-		Keeper: wasmKeeper,
+		cdc:           cdc,
+		storeService:  storeService,
+		logger:        logger,
+		accountKeeper: accountKeeper,
+		bankKeeper:    bankKeeper,
+		stakingKeeper: stakingKeeper,
 	}
+}
+
+// getWasmKeeper lazily initializes the wasm keeper on first access
+func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
+	k.once.Do(func() {
+		// Create wasm configuration with permissionless defaults
+		nodeConfig := wasmtypes.NodeConfig{}
+		vmConfig := wasmtypes.VMConfig{}
+
+		// Set available capabilities (minimal set for security)
+		supportedFeatures := []string{"iterator", "staking", "stargate"}
+
+		// Authority for governance (should be governance module address)
+		authority := "cosmos10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47" // placeholder
+
+		// Home directory for wasm - use a unique path to avoid conflicts
+		homeDir := "/tmp/wasm-contracts"
+
+		// For the parameters that wasmd v0.61.0 expects but we don't have compatible implementations,
+		// we'll use nil for now. This is compatible with the wasmd v0.61.0 NewKeeper signature.
+		var ics4Wrapper wasmtypes.ICS4Wrapper = nil
+		var channelKeeperV2 wasmtypes.ChannelKeeperV2 = nil
+		var portSource wasmtypes.ICS20TransferPortSource = nil
+		var messageRouter wasmkeeper.MessageRouter = nil
+		var grpcQueryRouter wasmkeeper.GRPCQueryRouter = nil
+
+		// Use nil for distribution and channel keepers since they don't match interfaces exactly
+		var distributionKeeperCompat wasmtypes.DistributionKeeper = nil
+		var channelKeeperCompat wasmtypes.ChannelKeeper = nil
+
+		// Manually instantiate the wasm.Keeper with all required dependencies
+		// NewKeeper returns a value type, so we need to store it and then take a pointer
+		wasmKeeperValue := wasmkeeper.NewKeeper(
+			k.cdc,
+			k.storeService,
+			k.accountKeeper,          // implements wasmtypes.AccountKeeper
+			k.bankKeeper,             // implements wasmtypes.BankKeeper
+			k.stakingKeeper,          // implements wasmtypes.StakingKeeper
+			distributionKeeperCompat, // nil for now - distribution queries not needed for basic functionality
+			ics4Wrapper,
+			channelKeeperCompat, // nil for now - IBC functionality not needed for basic contracts
+			channelKeeperV2,
+			portSource,
+			messageRouter,
+			grpcQueryRouter,
+			homeDir,
+			nodeConfig,
+			vmConfig,
+			supportedFeatures,
+			authority,
+		)
+		k.wasmKeeper = &wasmKeeperValue
+	})
+	return k.wasmKeeper
 }
 
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx context.Context) log.Logger {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return k.Keeper.Logger(sdkCtx)
+	return k.getWasmKeeper().Logger(sdkCtx)
 }
 
 // GetContractInfo returns contract info from the embedded wasm keeper
 func (k Keeper) GetContractInfo(ctx context.Context, contractAddr sdk.AccAddress) *wasmtypes.ContractInfo {
-	return k.Keeper.GetContractInfo(ctx, contractAddr)
+	return k.getWasmKeeper().GetContractInfo(ctx, contractAddr)
 }
 
 // GetCodeInfo returns code info from the embedded wasm keeper
 func (k Keeper) GetCodeInfo(ctx context.Context, codeID uint64) *wasmtypes.CodeInfo {
-	return k.Keeper.GetCodeInfo(ctx, codeID)
+	return k.getWasmKeeper().GetCodeInfo(ctx, codeID)
 }
 
 // Additional wrapper methods can be added here as needed
-// All other wasm functionality is available through the embedded Keeper
+// All wasm functionality is available through the lazy-loaded keeper
