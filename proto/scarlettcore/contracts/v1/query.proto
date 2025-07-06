@@ -46,7 +46,22 @@ message QueryContractInfoRequest {
 }
 
 // QueryContractInfoResponse defines the QueryContractInfoResponse message.
-message QueryContractInfoResponse {}
+message QueryContractInfoResponse {
+  // contract_address is the bech32 address of the contract
+  string contract_address = 1;
+  // creator is the bech32 address of the contract creator
+  string creator = 2;
+  // admin is the bech32 address of the contract admin (if any)
+  string admin = 3;
+  // code_id is the reference to the stored WASM code
+  uint64 code_id = 4;
+  // label is a human-readable name for this contract
+  string label = 5;
+  // created contains information about when the contract was created
+  AbsoluteTxPosition created = 6;
+  // ibc_port_id is the unique identifier for the IBC port (if IBC enabled)
+  string ibc_port_id = 7;
+}
 
 // QuerySmartContractStateRequest defines the QuerySmartContractStateRequest message.
 message QuerySmartContractStateRequest {
@@ -55,4 +70,15 @@ message QuerySmartContractStateRequest {
 }
 
 // QuerySmartContractStateResponse defines the QuerySmartContractStateResponse message.
-message QuerySmartContractStateResponse {}
+message QuerySmartContractStateResponse {
+  // data is the raw bytes returned by the smart contract query
+  bytes data = 1;
+}
+
+// AbsoluteTxPosition contains the block height and transaction index
+message AbsoluteTxPosition {
+  // block_height is the block the contract was created at
+  uint64 block_height = 1;
+  // tx_index is the transaction index within the block
+  uint64 tx_index = 2;
+}
