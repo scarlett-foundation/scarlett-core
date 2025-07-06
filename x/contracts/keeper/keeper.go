@@ -56,8 +56,8 @@ func (k *Keeper) getWasmKeeper() *wasmkeeper.Keeper {
 		nodeConfig := wasmtypes.NodeConfig{}
 		vmConfig := wasmtypes.VMConfig{}
 
-		// Set available capabilities (minimal set for security)
-		supportedFeatures := []string{"iterator", "staking", "stargate"}
+		// Set available capabilities including bulk memory for modern contracts
+		supportedFeatures := []string{"iterator", "staking", "stargate", "cosmwasm_1_1", "cosmwasm_1_2", "cosmwasm_1_3", "cosmwasm_1_4"}
 
 		// Authority for governance (should be governance module address)
 		authority := "cosmos10d07y265gmmuvt4z0w9aw880jnsr700juxf7n47" // placeholder
