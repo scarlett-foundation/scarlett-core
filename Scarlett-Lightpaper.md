@@ -1,10 +1,26 @@
 # Scarlett: The Decentralised AI Operating System
 
+**Scarlett is a sovereign, decentralized AI operating system built to do what Bittensor could not: deliver real value, real governance, and real decentralisation from genesis.**
+
 ## Abstract
 
 The rapid acceleration of AI capabilities has been nothing short of transformative. Yet beneath this progress lies a critical flaw: the infrastructure that powers AI is profoundly centralised. Today, a small handful of corporations control the models, the data, and the platforms. This leads to data monopolies, opaque algorithms, and extractive economics—bottlenecks that constrain innovation and disempower users.
 
-**Scarlett offers an alternative.** It is a sovereign, proof-of-stake blockchain purpose-built to serve as the foundational layer for a new generation of decentralised, transparent, and community-owned AI applications—a true operating system for the AI age.
+Bittensor emerged as the first major attempt to solve this centralization crisis. It promised decentralized AI infrastructure, community governance, and fair value distribution. **But Bittensor has become part of the problem, not the solution.**
+
+**Bittensor's infrastructure is plagued by fundamental flaws.** The original root network was controlled by validator oligarchies via opaque weight-setting mechanisms. When dTAO was introduced to "fix" this, it merely shifted control to market speculators—while founder influence remained intact, a de facto "head of state" capable of pumping subnets with a single X post.
+
+The top-10 subnets are still dominated by OGs and insiders, proving that dTAO didn't democratize access—it just added a speculation layer atop the same centralized structure. dTAO made emissions dynamic—but not meritocratic. Emissions are now tied to the price of subnet-specific tokens—but this market-based system **rewards speculation over performance**. There is still no connection to real-world utility, model quality, or code transparency.
+
+Case in point: **Subnet 5 has received over $5.8 million in $TAO emissions since April 29th—without even maintaining a public GitHub, whitepaper, or roadmap.** It hasn't updated its subnet ID or shipped visible code, yet continues to receive rewards due to speculative staking dynamics. 
+
+This isn't value creation—it's inertia rewarded by hype. Governance remains pseudo-democratic at best: there is no real voting, and core decisions are made by a centralized cabal. The system continues to issue hundreds of millions of dollars in emissions annually without transparent value justification.
+
+**This is Bittensor's Ethereum moment.** Just as Ethereum became slow, expensive, and centralized despite its revolutionary promise, Bittensor's execution is fundamentally flawed and becoming more centralized over time. The market clearly wants decentralized AI infrastructure—but Bittensor's decentralization is pure theater, and its architecture cannot deliver the real thing.
+
+**Scarlett offers the real solution.** Built on the lessons of Bittensor's failures, Scarlett is the decentralized AI operating system that actually works. Founded by true anonymous builders with no "head of state," Scarlett achieves genuine decentralization from genesis. It features real-time adaptive emissions that respond to genuine utility metrics, true democratic governance with transparent on-chain voting, and a provably fair launch with no insider advantages. Where Bittensor rewards speculation, Scarlett rewards real value creation.
+
+**Scarlett is to Bittensor what Solana was to Ethereum: faster, more adaptive, and purpose-built to scale.** The future of AI will not be owned by corporations or controlled by oligarchies. It will be built—together—on Scarlett.
 
 By integrating a provably fair launch, a community-directed economy, and a multi-layered development environment, Scarlett delivers the essential infrastructure for decentralised AI: verifiable compute, programmable incentives, and democratic governance.
 
@@ -12,7 +28,7 @@ By integrating a provably fair launch, a community-directed economy, and a multi
 
 ## 1. The End of the App: A New Paradigm for Intelligence
 
-We are witnessing the early stages of a profound technological shift—one that renders the traditional “app model” obsolete. Tech visionaries like Jony Ive and Sam Altman are reportedly working on a post-smartphone interface: a screenless, ambient AI device designed for seamless interaction.
+We are witnessing the early stages of a profound technological shift—one that renders the traditional "app model" obsolete. Tech visionaries like Jony Ive and Sam Altman are reportedly working on a post-smartphone interface: a screenless, ambient AI device designed for seamless interaction.
 
 Their insight is clear: the current paradigm—fragmented, app-centric, and screen-bound—is no longer fit for purpose. Accomplishing even simple goals requires context-switching between siloed applications. Our devices serve us, but on their terms.
 
@@ -34,17 +50,17 @@ Scarlett offers developers a foundation they can build on with confidence—know
 
 - **Economic Bandwidth**: A programmable token supply (`sclt`) governed on-chain and allocated by the community to fund compute, reward data, and incentivise innovation.
 - **Permissionless Innovation**: A developer-first platform supporting both native modules and smart contracts, enabling a permissionless AI ecosystem.
-- **Democratic Governance**: A powerful on-chain governance system that allows users, developers, and stakeholders to co-determine the protocol’s future.
+- **Democratic Governance**: A powerful on-chain governance system that allows users, developers, and stakeholders to co-determine the protocol's future.
 
 ---
 
-## 3. The Four Pillars of Scarlett
+## 3. Scarlett's Foundations: A New Operating System for Intelligence
 
 Scarlett rests on four core design principles that together form a self-sustaining, decentralised AI ecosystem.
 
 ### Pillar 1: A Provably Fair & Decentralised Genesis
 
-Scarlett’s legitimacy begins at genesis. It implements a **Satoshi-style fair launch**: no venture capital, no pre-mine, no insiders. Instead, the founding stake is programmatically burned over time through on-chain transactions.
+Scarlett's legitimacy begins at genesis. It implements a **Satoshi-style fair launch**: no venture capital, no pre-mine, no insiders. Instead, the founding stake is programmatically burned over time through on-chain transactions.
 
 This mechanism achieves two outcomes:
 - **Credible Neutrality**: No privileged parties. The protocol evolves solely through community consensus.
@@ -52,7 +68,7 @@ This mechanism achieves two outcomes:
 
 ### Pillar 2: A Community-Directed Economy
 
-Scarlett’s monetary policy is not hard-coded—it’s a living system governed on-chain. The community collectively determines how token emissions are allocated, turning inflation into fuel for innovation.
+Scarlett's monetary policy is not hard-coded—it's a living system governed on-chain. The community collectively determines how token emissions are allocated, turning inflation into fuel for innovation.
 
 Holders can:
 - **Direct Emissions**: Specify how newly minted tokens are distributed.
@@ -94,7 +110,7 @@ The result is a powerful, compounding growth loop:
 5. **Successful Applications** attract users and capital, increasing platform utility.
 6. **Platform Utility** drives further developer interest and token demand—reinforcing the cycle.
 
-Scarlett’s architecture ensures that every new participant strengthens the system. Growth funds more growth.
+Scarlett's architecture ensures that every new participant strengthens the system. Growth funds more growth.
 
 ---
 
