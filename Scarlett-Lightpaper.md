@@ -4,9 +4,16 @@
 
 ## Abstract
 
-The rapid acceleration of AI capabilities has been nothing short of transformative. Yet beneath this progress lies a critical flaw: the infrastructure that powers AI is profoundly centralised. Today, a small handful of corporations control the models, the data, and the platforms. This leads to data monopolies, opaque algorithms, and extractive economics—bottlenecks that constrain innovation and disempower users.
 
-Bittensor emerged as the first major attempt to solve this centralization crisis. It promised decentralized AI infrastructure, community governance, and fair value distribution. **But Bittensor has become part of the problem, not the solution.**
+The rapid acceleration of AI capabilities has been nothing short of transformative. Yet beneath this progress lies a critical flaw: the infrastructure that powers AI is profoundly centralized. Today, a small handful of corporations—and increasingly, insiders within so-called “decentralized” protocols—control the models, the data, and the emissions. This leads to extractive economics, opaque incentives, and systems that reward insiders and low-liquidity subnets that are easy to pump and dump.
+
+**Bittensor emerged as the first serious attempt to decentralize AI infrastructure—but its economic model is fundamentally broken.** Through dTAO, emissions are routed to tokenized subnets via speculative staking. The result: **dTAO Alpha tokens—which supposedly represent the intrinsic “value” of subnets—are dumped daily by the root network and recipients such as miners, creating a persistent down-only feedback loop.** There is no utility, no accountability, and no protocol-level incentive to *buy or use* the tokens receiving emissions.
+
+The promise that future revenue will “unlock” Alpha token value is fundamentally flawed. While corporations conduct stock buybacks with mature profits, early-stage subnets need capital to grow—not to prop up illiquid assets. **Spending emissions on buying back Alpha tokens is naïve and economically inefficient—it’s like forcing a startup to spend its seed round or early revenues on stock buybacks.** Valuable capital is squandered on optics instead of building, marketing, and scaling the subnet.
+
+What began as a meritocracy of AI has devolved into a high-yield emission farm for early insiders.
+
+Scarlett was designed to fix this.
 
 **Bittensor's infrastructure is plagued by fundamental flaws.** The original root network was controlled by validator oligarchies via opaque weight-setting mechanisms. When dTAO was introduced to "fix" this, it merely shifted control to market speculators—while founder influence remained intact, a de facto "head of state" capable of pumping subnets with a single X post.
 
@@ -20,7 +27,16 @@ This isn't value creation—it's inertia rewarded by hype. Governance remains ps
 
 **Scarlett offers the real solution.** Built on the lessons of Bittensor's failures, Scarlett is the decentralized AI operating system that actually works. Founded by true anonymous builders with no "head of state," Scarlett achieves genuine decentralization from genesis. It features real-time adaptive emissions that respond to genuine utility metrics, true democratic governance with transparent on-chain voting, and a provably fair launch with no insider advantages. Where Bittensor rewards speculation, Scarlett rewards real value creation.
 
-**Scarlett is to Bittensor what Solana was to Ethereum: faster, more adaptive, and purpose-built to scale.** The future of AI will not be owned by corporations or controlled by oligarchies. It will be built—together—on Scarlett.
+
+**Scarlett is a sovereign, decentralized AI operating system with a radically different economic architecture—one that aligns emissions with performance, not position.** It replaces speculative staking with programmable degenomics: an open token launch system where creators receive emissions only if their tokens appreciate in value. This ties emissions directly to price action, liquidity, and demand—not hype, insider status, or early access. Scarlett understands that memes are more than jokes—they’re market signals. In a decentralized AI economy, emissions shouldn’t follow committee decisions or insider staking—they should follow attention, demand, and price action. Scarlett fuses the seriousness of infrastructure with the energy of open markets.
+
+By combining a fair launch, democratic governance, and a memetic token launch engine, Scarlett becomes the first decentralized AI chain with real incentive alignment between builders, traders, and infrastructure providers.
+
+**Scarlett is to Bittensor what Solana was to Ethereum: faster, more adaptive, and ruthlessly aligned with the market.**
+
+The future of AI won't be built by validators dumping Alpha bags—it will be bootstrapped by memes, markets, and the ungovernable energy of on-chain coordination.
+
+Scarlett is the next chapter.
 
 By integrating a provably fair launch, a community-directed economy, and a multi-layered development environment, Scarlett delivers the essential infrastructure for decentralised AI: verifiable compute, programmable incentives, and democratic governance.
 
@@ -77,6 +93,8 @@ Holders can:
 
 The result is a self-managed treasury that behaves like a decentralised venture fund—continuously reinvesting in growth.
 
+> *Emissions can also be allocated to token creators through the Launch Module (see Section 6), based on the market performance of tokens launched on Scarlett's native DEX. This prevents the "down-only" subsidy problem seen in dTAO and rewards tokens that generate real economic energy.*
+
 ### Pillar 3: A Multi-Layered Application Environment
 
 Scarlett supports two development tracks, optimised for different use cases:
@@ -105,18 +123,74 @@ The result is a powerful, compounding growth loop:
 
 1. **A Fair Launch** builds trust and bootstraps decentralisation.
 2. **Developers** join to build applications and stake `sclt` for eligibility.
-3. **Demand for `sclt`** grows as staking and usage increase.
-4. **The Community** allocates emissions to valuable projects via governance.
-5. **Successful Applications** attract users and capital, increasing platform utility.
-6. **Platform Utility** drives further developer interest and token demand—reinforcing the cycle.
+3. **Token Creators** launch new assets via bonding curves and LPs.
+4. **Demand for `sclt`** grows as staking, usage, and token launches increase.
+5. **The Community** allocates emissions to valuable projects and high-performing tokens.
+6. **Successful Applications and Tokens** attract users and capital, increasing platform utility.
+7. **Platform Utility** drives further developer and memetic interest—reinforcing the cycle.
 
-Scarlett's architecture ensures that every new participant strengthens the system. Growth funds more growth.
+Scarlett turns memecoins into coordination engines. Every token is a signal. Every price a feedback loop. Every emission a vote for what the network wants to become.
 
 ---
 
-## 5. Conclusion: Intelligence as a Public Good
+## 5. Incentivised Token Launches: Degenomics Done Right
 
-Scarlett is not just a blockchain. It is a public good—a decentralised operating system designed to support the next era of intelligent systems. It empowers developers, rewards contributors, and returns control to users.
+To supercharge community creativity and grassroots participation, Scarlett introduces a new economic primitive: **Incentivised Token Launches**, powered by a native **Launch Module** that rewards creators for building markets on top of Scarlett.
+
+This system draws inspiration from platforms like *pump.fun* and *virtuals*, while fixing the flaws of Bittensor's dTAO. Instead of routing emissions to low liquidity subnets, Scarlett links emissions directly to **market-based performance**, directly to owners of liquidity pools that have graduated from the bonding curve. If your token goes up in price and holds liquidity, you earn emissions. If not—you don't.
+
+### The Mechanism: Stake, Launch, Earn
+
+1. **Token Initialization via Bonding Curve**
+   A new token is deployed with a bonding curve denominated in `sclt`. Prices increase with demand, creating instant market price discovery.
+
+2. **Graduation Threshold & Pool Creation**
+   Once the curve hits a funding threshold (e.g., 420,000 `sclt`), it graduates:
+
+   * Curve terminates
+   * Funds seed a `sclt/token` LP
+   * Token becomes tradable on Scarlett's native DEX
+
+3. **Emissions via the Launch Module**
+   A portion of protocol emissions (e.g., 5%) is allocated to Launch Module participants. Tokens are **ranked by price performance** and emissions are distributed **pro rata** to their creators.
+
+> This design flips the dTAO model on its head: emissions are not guaranteed—they're earned through memetic market success.
+
+### Governance & Guardrails
+
+* Governance sets:
+
+  * Graduation threshold
+  * Emissions % allocated to the Launch Module
+  * Minimum liquidity requirement for eligibility
+* Launchers must stake `sclt` to initiate, ensuring Sybil resistance
+
+### Why It Matters
+
+Scarlett's Launch Module introduces a new model for protocol emissions: one that rewards economic energy, not capital inertia, or insiders DCA'ing their favorite subnets.
+
+* dTAO distributes emissions to tokens with no utility and no demand, there are many examples of ghost subnets taking a large % of emissions
+* Scarlett distributes emissions only to tokens that are held, traded, and valued by the community through oure market forces
+* This creates a memetic flywheel that sustains itself through price-based feedback - the cream rises to the top no matter what one person thinks
+
+In short: Scarlett doesn't reward bags—it rewards belief and free markets.
+
+### The Outcome: From Meme to Market
+
+* Launch a token in minutes
+* Bootstrap liquidity without VCs
+* Earn emissions only if your token performs
+* Grow your community through value—not
+
+Scarlett transforms emissions into **programmable venture capital**, governed by markets, executed on-chain.
+
+---
+
+## 6. Conclusion: Intelligence as a Public Good
+
+AI infrastructure must be built—but it must also be adopted. Scarlett does both. It builds verifiable, decentralized compute—and uses memetic token launches to coordinate the communities that will use it. In Scarlett, memes aren’t noise—they’re the liquidity layer of intelligence.
+
+Scarlett is a public good—a decentralised operating system designed to support the next era of intelligent systems. It empowers developers, rewards contributors, and returns control to users.
 
 The centralised era of AI is reaching its limits. Scarlett is the next chapter: open, composable, trustless.
 
