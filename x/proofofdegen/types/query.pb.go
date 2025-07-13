@@ -302,6 +302,194 @@ func (m *QueryAllCampaignResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
+// QueryGetEligibleWalletRequest defines the QueryGetEligibleWalletRequest message.
+type QueryGetEligibleWalletRequest struct {
+	Index string `protobuf:"bytes,1,opt,name=index,proto3" json:"index,omitempty"`
+}
+
+func (m *QueryGetEligibleWalletRequest) Reset()         { *m = QueryGetEligibleWalletRequest{} }
+func (m *QueryGetEligibleWalletRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetEligibleWalletRequest) ProtoMessage()    {}
+func (*QueryGetEligibleWalletRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d2a2b66ad200e2d0, []int{6}
+}
+func (m *QueryGetEligibleWalletRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetEligibleWalletRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetEligibleWalletRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetEligibleWalletRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetEligibleWalletRequest.Merge(m, src)
+}
+func (m *QueryGetEligibleWalletRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetEligibleWalletRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetEligibleWalletRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetEligibleWalletRequest proto.InternalMessageInfo
+
+func (m *QueryGetEligibleWalletRequest) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+// QueryGetEligibleWalletResponse defines the QueryGetEligibleWalletResponse message.
+type QueryGetEligibleWalletResponse struct {
+	EligibleWallet EligibleWallet `protobuf:"bytes,1,opt,name=eligible_wallet,json=eligibleWallet,proto3" json:"eligible_wallet"`
+}
+
+func (m *QueryGetEligibleWalletResponse) Reset()         { *m = QueryGetEligibleWalletResponse{} }
+func (m *QueryGetEligibleWalletResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetEligibleWalletResponse) ProtoMessage()    {}
+func (*QueryGetEligibleWalletResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d2a2b66ad200e2d0, []int{7}
+}
+func (m *QueryGetEligibleWalletResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetEligibleWalletResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetEligibleWalletResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetEligibleWalletResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetEligibleWalletResponse.Merge(m, src)
+}
+func (m *QueryGetEligibleWalletResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetEligibleWalletResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetEligibleWalletResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetEligibleWalletResponse proto.InternalMessageInfo
+
+func (m *QueryGetEligibleWalletResponse) GetEligibleWallet() EligibleWallet {
+	if m != nil {
+		return m.EligibleWallet
+	}
+	return EligibleWallet{}
+}
+
+// QueryAllEligibleWalletRequest defines the QueryAllEligibleWalletRequest message.
+type QueryAllEligibleWalletRequest struct {
+	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryAllEligibleWalletRequest) Reset()         { *m = QueryAllEligibleWalletRequest{} }
+func (m *QueryAllEligibleWalletRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryAllEligibleWalletRequest) ProtoMessage()    {}
+func (*QueryAllEligibleWalletRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d2a2b66ad200e2d0, []int{8}
+}
+func (m *QueryAllEligibleWalletRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAllEligibleWalletRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllEligibleWalletRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAllEligibleWalletRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllEligibleWalletRequest.Merge(m, src)
+}
+func (m *QueryAllEligibleWalletRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAllEligibleWalletRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllEligibleWalletRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllEligibleWalletRequest proto.InternalMessageInfo
+
+func (m *QueryAllEligibleWalletRequest) GetPagination() *query.PageRequest {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryAllEligibleWalletResponse defines the QueryAllEligibleWalletResponse message.
+type QueryAllEligibleWalletResponse struct {
+	EligibleWallet []EligibleWallet    `protobuf:"bytes,1,rep,name=eligible_wallet,json=eligibleWallet,proto3" json:"eligible_wallet"`
+	Pagination     *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryAllEligibleWalletResponse) Reset()         { *m = QueryAllEligibleWalletResponse{} }
+func (m *QueryAllEligibleWalletResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAllEligibleWalletResponse) ProtoMessage()    {}
+func (*QueryAllEligibleWalletResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d2a2b66ad200e2d0, []int{9}
+}
+func (m *QueryAllEligibleWalletResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAllEligibleWalletResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllEligibleWalletResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAllEligibleWalletResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllEligibleWalletResponse.Merge(m, src)
+}
+func (m *QueryAllEligibleWalletResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAllEligibleWalletResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllEligibleWalletResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllEligibleWalletResponse proto.InternalMessageInfo
+
+func (m *QueryAllEligibleWalletResponse) GetEligibleWallet() []EligibleWallet {
+	if m != nil {
+		return m.EligibleWallet
+	}
+	return nil
+}
+
+func (m *QueryAllEligibleWalletResponse) GetPagination() *query.PageResponse {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "scarlettcore.proofofdegen.v1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "scarlettcore.proofofdegen.v1.QueryParamsResponse")
@@ -309,6 +497,10 @@ func init() {
 	proto.RegisterType((*QueryGetCampaignResponse)(nil), "scarlettcore.proofofdegen.v1.QueryGetCampaignResponse")
 	proto.RegisterType((*QueryAllCampaignRequest)(nil), "scarlettcore.proofofdegen.v1.QueryAllCampaignRequest")
 	proto.RegisterType((*QueryAllCampaignResponse)(nil), "scarlettcore.proofofdegen.v1.QueryAllCampaignResponse")
+	proto.RegisterType((*QueryGetEligibleWalletRequest)(nil), "scarlettcore.proofofdegen.v1.QueryGetEligibleWalletRequest")
+	proto.RegisterType((*QueryGetEligibleWalletResponse)(nil), "scarlettcore.proofofdegen.v1.QueryGetEligibleWalletResponse")
+	proto.RegisterType((*QueryAllEligibleWalletRequest)(nil), "scarlettcore.proofofdegen.v1.QueryAllEligibleWalletRequest")
+	proto.RegisterType((*QueryAllEligibleWalletResponse)(nil), "scarlettcore.proofofdegen.v1.QueryAllEligibleWalletResponse")
 }
 
 func init() {
@@ -316,40 +508,49 @@ func init() {
 }
 
 var fileDescriptor_d2a2b66ad200e2d0 = []byte{
-	// 518 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0x41, 0x6b, 0x13, 0x41,
-	0x14, 0xc7, 0x33, 0xb5, 0x0d, 0x76, 0xea, 0xc5, 0x31, 0x60, 0x09, 0x65, 0x95, 0x41, 0x4d, 0x5b,
-	0xe9, 0x8e, 0x5b, 0x51, 0x2f, 0x5e, 0x8c, 0x60, 0x3c, 0x78, 0xa8, 0x7b, 0xf4, 0x20, 0x4c, 0x92,
-	0xe9, 0xb2, 0x90, 0xec, 0x9b, 0xee, 0x4c, 0x43, 0x8b, 0x78, 0xf1, 0x0b, 0x28, 0x78, 0xf5, 0x03,
-	0x78, 0x51, 0xbc, 0xf8, 0x1d, 0x7a, 0x2c, 0x78, 0xf1, 0x24, 0x92, 0x08, 0x7e, 0x0d, 0xc9, 0xcc,
-	0x6c, 0xdd, 0x75, 0xcb, 0x26, 0xf1, 0x12, 0x26, 0xb3, 0xef, 0xff, 0xde, 0xef, 0xed, 0xff, 0xcf,
-	0xe2, 0x4d, 0xd5, 0xe3, 0xe9, 0x40, 0x68, 0xdd, 0x83, 0x54, 0x30, 0x99, 0x02, 0xec, 0xc3, 0x7e,
-	0x5f, 0x44, 0x22, 0x61, 0xa3, 0x80, 0x1d, 0x1c, 0x8a, 0xf4, 0xd8, 0x97, 0x29, 0x68, 0x20, 0x1b,
-	0xf9, 0x4a, 0x3f, 0x5f, 0xe9, 0x8f, 0x82, 0xe6, 0x65, 0x3e, 0x8c, 0x13, 0x60, 0xe6, 0xd7, 0x0a,
-	0x9a, 0xdb, 0x3d, 0x50, 0x43, 0x50, 0xac, 0xcb, 0x95, 0xb0, 0x9d, 0xd8, 0x28, 0xe8, 0x0a, 0xcd,
-	0x03, 0x26, 0x79, 0x14, 0x27, 0x5c, 0xc7, 0x90, 0xb8, 0xda, 0x46, 0x04, 0x11, 0x98, 0x23, 0x9b,
-	0x9e, 0xdc, 0xed, 0x46, 0x04, 0x10, 0x0d, 0x04, 0xe3, 0x32, 0x66, 0x3c, 0x49, 0x40, 0x1b, 0x89,
-	0x72, 0x4f, 0x6f, 0x57, 0xa2, 0xf7, 0xf8, 0x50, 0xf2, 0x38, 0xca, 0x06, 0x6c, 0x55, 0x16, 0x4b,
-	0x9e, 0xf2, 0xa1, 0xeb, 0x4b, 0x1b, 0x98, 0x3c, 0x9f, 0xd2, 0xee, 0x99, 0xcb, 0x50, 0x1c, 0x1c,
-	0x0a, 0xa5, 0xe9, 0x4b, 0x7c, 0xa5, 0x70, 0xab, 0x24, 0x24, 0x4a, 0x90, 0x0e, 0xae, 0x5b, 0xf1,
-	0x3a, 0xba, 0x8e, 0x36, 0xd7, 0x76, 0x6f, 0xf8, 0x55, 0xaf, 0xc9, 0xb7, 0xea, 0xf6, 0xea, 0xc9,
-	0x8f, 0x6b, 0xb5, 0x8f, 0xbf, 0xbf, 0x6c, 0xa3, 0xd0, 0xc9, 0x29, 0xc3, 0x57, 0x4d, 0xff, 0x8e,
-	0xd0, 0x8f, 0x1d, 0xba, 0x1b, 0x4d, 0x1a, 0x78, 0x25, 0x4e, 0xfa, 0xe2, 0xc8, 0x8c, 0x58, 0x0d,
-	0xed, 0x1f, 0xda, 0xc7, 0xeb, 0x65, 0x81, 0xa3, 0x7a, 0x8a, 0x2f, 0x66, 0xfb, 0x3b, 0xae, 0x5b,
-	0xd5, 0x5c, 0x59, 0x87, 0xf6, 0xf2, 0x94, 0x2c, 0x3c, 0x53, 0x53, 0xee, 0xb0, 0x1e, 0x0d, 0x06,
-	0xff, 0x62, 0x3d, 0xc1, 0xf8, 0xaf, 0x8f, 0x67, 0x63, 0xac, 0xe9, 0xfe, 0xd4, 0x74, 0xdf, 0xc6,
-	0xc7, 0x99, 0xee, 0xef, 0xf1, 0x48, 0x38, 0x6d, 0x98, 0x53, 0xd2, 0x4f, 0xc8, 0x6d, 0x52, 0x98,
-	0x71, 0xee, 0x26, 0x17, 0xfe, 0x7f, 0x13, 0xd2, 0x29, 0xe0, 0x2e, 0x19, 0xdc, 0xd6, 0x4c, 0x5c,
-	0x8b, 0x91, 0xe7, 0xdd, 0x7d, 0xbb, 0x8c, 0x57, 0x0c, 0x2f, 0xf9, 0x80, 0x70, 0xdd, 0x3a, 0x4a,
-	0xee, 0x54, 0x53, 0x95, 0x03, 0xd5, 0x0c, 0x16, 0x50, 0x58, 0x0a, 0xba, 0xf3, 0xe6, 0xdb, 0xaf,
-	0xf7, 0x4b, 0x2d, 0x72, 0x93, 0x65, 0xd2, 0x9d, 0x8a, 0x38, 0x93, 0xaf, 0x08, 0xaf, 0xe5, 0xd2,
-	0x41, 0xee, 0xcd, 0x31, 0xb1, 0x1c, 0xbf, 0xe6, 0xfd, 0x45, 0x65, 0x8e, 0xf6, 0x81, 0xa1, 0x0d,
-	0x08, 0x9b, 0x41, 0x9b, 0x39, 0xc4, 0x5e, 0x99, 0x60, 0xbf, 0x26, 0x9f, 0x11, 0xbe, 0xf4, 0x2c,
-	0x56, 0x8b, 0x81, 0x97, 0x03, 0x3a, 0x17, 0xf8, 0x39, 0x99, 0xa3, 0xcc, 0x80, 0x6f, 0x91, 0xd6,
-	0x9c, 0xe0, 0xed, 0x87, 0x27, 0x63, 0x0f, 0x9d, 0x8e, 0x3d, 0xf4, 0x73, 0xec, 0xa1, 0x77, 0x13,
-	0xaf, 0x76, 0x3a, 0xf1, 0x6a, 0xdf, 0x27, 0x5e, 0xed, 0x05, 0x2d, 0x76, 0x38, 0x2a, 0xf6, 0xd0,
-	0xc7, 0x52, 0xa8, 0x6e, 0xdd, 0x7c, 0x76, 0xee, 0xfe, 0x09, 0x00, 0x00, 0xff, 0xff, 0x2e, 0x2e,
-	0xfa, 0xc2, 0x8b, 0x05, 0x00, 0x00,
+	// 665 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x95, 0x4f, 0x6b, 0x13, 0x4f,
+	0x18, 0xc7, 0x33, 0xed, 0xaf, 0xfd, 0xd9, 0xa9, 0x28, 0x1d, 0x0b, 0x96, 0x50, 0x57, 0x19, 0xd4,
+	0xb4, 0xd5, 0xee, 0x74, 0x23, 0x8d, 0x82, 0x45, 0x68, 0x44, 0xe3, 0xc1, 0x43, 0xcd, 0x45, 0x50,
+	0x50, 0x26, 0xc9, 0x74, 0x59, 0xd8, 0xec, 0x6c, 0x77, 0xb7, 0xb1, 0x45, 0x7a, 0xf1, 0x15, 0x08,
+	0x5e, 0x7d, 0x01, 0x22, 0x28, 0x5e, 0x7c, 0x0b, 0xda, 0x93, 0x14, 0xbc, 0x78, 0x12, 0x49, 0x04,
+	0xdf, 0x86, 0x64, 0xf6, 0xd9, 0x98, 0xcd, 0x9f, 0xcd, 0x1f, 0x72, 0x29, 0xdb, 0xe9, 0x7c, 0x9f,
+	0xe7, 0xf3, 0x9d, 0xe7, 0x4f, 0xf1, 0x8a, 0x5f, 0xe6, 0x9e, 0x2d, 0x82, 0xa0, 0x2c, 0x3d, 0xc1,
+	0x5c, 0x4f, 0xca, 0x5d, 0xb9, 0x5b, 0x11, 0xa6, 0x70, 0x58, 0xcd, 0x60, 0x7b, 0xfb, 0xc2, 0x3b,
+	0xd4, 0x5d, 0x4f, 0x06, 0x92, 0x2c, 0xb7, 0xdf, 0xd4, 0xdb, 0x6f, 0xea, 0x35, 0x23, 0xbd, 0xc0,
+	0xab, 0x96, 0x23, 0x99, 0xfa, 0x19, 0x0a, 0xd2, 0x6b, 0x65, 0xe9, 0x57, 0xa5, 0xcf, 0x4a, 0xdc,
+	0x17, 0x61, 0x24, 0x56, 0x33, 0x4a, 0x22, 0xe0, 0x06, 0x73, 0xb9, 0x69, 0x39, 0x3c, 0xb0, 0xa4,
+	0x03, 0x77, 0x17, 0x4d, 0x69, 0x4a, 0xf5, 0xc9, 0x9a, 0x5f, 0x70, 0xba, 0x6c, 0x4a, 0x69, 0xda,
+	0x82, 0x71, 0xd7, 0x62, 0xdc, 0x71, 0x64, 0xa0, 0x24, 0x3e, 0xfc, 0xf5, 0x5a, 0x22, 0x7a, 0x99,
+	0x57, 0x5d, 0x6e, 0x99, 0x51, 0x82, 0x6c, 0xe2, 0x65, 0x61, 0x5b, 0xa6, 0x55, 0xb2, 0xc5, 0xf3,
+	0x17, 0xdc, 0xb6, 0x45, 0x00, 0x9a, 0xd5, 0x44, 0x8d, 0xcb, 0x3d, 0x5e, 0x05, 0x16, 0xba, 0x88,
+	0xc9, 0xa3, 0xa6, 0xc3, 0x1d, 0x75, 0x58, 0x14, 0x7b, 0xfb, 0xc2, 0x0f, 0xe8, 0x33, 0x7c, 0x2e,
+	0x76, 0xea, 0xbb, 0xd2, 0xf1, 0x05, 0x29, 0xe0, 0xd9, 0x50, 0xbc, 0x84, 0x2e, 0xa1, 0x95, 0xf9,
+	0xec, 0x65, 0x3d, 0xe9, 0x69, 0xf5, 0x50, 0x9d, 0x9f, 0x3b, 0xfe, 0x79, 0x31, 0xf5, 0xee, 0xcf,
+	0xa7, 0x35, 0x54, 0x04, 0x39, 0x65, 0xf8, 0xbc, 0x8a, 0x5f, 0x10, 0xc1, 0x5d, 0xb0, 0x0b, 0xa9,
+	0xc9, 0x22, 0x9e, 0xb1, 0x9c, 0x8a, 0x38, 0x50, 0x29, 0xe6, 0x8a, 0xe1, 0x2f, 0xb4, 0x82, 0x97,
+	0xba, 0x05, 0x40, 0xf5, 0x00, 0x9f, 0x8a, 0xde, 0x0c, 0xb8, 0xae, 0x26, 0x73, 0x45, 0x11, 0xf2,
+	0xff, 0x35, 0xc9, 0x8a, 0x2d, 0x35, 0xe5, 0x80, 0xb5, 0x6d, 0xdb, 0x9d, 0x58, 0xf7, 0x31, 0xfe,
+	0x57, 0xfb, 0x56, 0x9a, 0xb0, 0x51, 0xf4, 0x66, 0xa3, 0xe8, 0x61, 0xcb, 0x41, 0xa3, 0xe8, 0x3b,
+	0xdc, 0x14, 0xa0, 0x2d, 0xb6, 0x29, 0xe9, 0x07, 0x04, 0x4e, 0x62, 0x39, 0x7a, 0x3a, 0x99, 0x1e,
+	0xdf, 0x09, 0x29, 0xc4, 0x70, 0xa7, 0x14, 0x6e, 0x66, 0x20, 0x6e, 0x88, 0x11, 0xe3, 0xdd, 0xc4,
+	0x17, 0xa2, 0x87, 0xbf, 0x07, 0xbd, 0xf6, 0x58, 0xb5, 0x5a, 0x72, 0xbd, 0x8e, 0xb0, 0xd6, 0x4f,
+	0x06, 0x5e, 0x9f, 0xe2, 0xb3, 0x1d, 0xcd, 0x0b, 0xaf, 0x7a, 0x3d, 0xd9, 0x72, 0x3c, 0x1c, 0x18,
+	0x3f, 0x23, 0x62, 0xa7, 0xd4, 0x04, 0xea, 0x6d, 0xdb, 0xee, 0x4d, 0x3d, 0xa9, 0x72, 0x7e, 0x41,
+	0x60, 0xb4, 0x47, 0xa6, 0x24, 0xa3, 0xd3, 0x93, 0x31, 0x3a, 0xb1, 0x3a, 0x67, 0xdf, 0xff, 0x8f,
+	0x67, 0x94, 0x11, 0xf2, 0x16, 0xe1, 0xd9, 0x70, 0x72, 0xc9, 0x46, 0x32, 0x61, 0xf7, 0xe2, 0x48,
+	0x1b, 0x23, 0x28, 0x42, 0x0a, 0xba, 0xfe, 0xea, 0xfb, 0xef, 0x37, 0x53, 0x19, 0x72, 0x85, 0x45,
+	0xd2, 0xf5, 0x84, 0xb5, 0x45, 0x3e, 0x23, 0x3c, 0xdf, 0xb6, 0x05, 0xc8, 0xe6, 0x10, 0x19, 0xbb,
+	0xd7, 0x4c, 0x3a, 0x37, 0xaa, 0x0c, 0x68, 0x6f, 0x2a, 0x5a, 0x83, 0xb0, 0x01, 0xb4, 0xd1, 0x24,
+	0xb2, 0x97, 0x6a, 0x20, 0x8e, 0xc8, 0x47, 0x84, 0x4f, 0x3f, 0xb4, 0xfc, 0xd1, 0xc0, 0xbb, 0x17,
+	0xd1, 0x50, 0xe0, 0x3d, 0x76, 0x0b, 0x65, 0x0a, 0x7c, 0x95, 0x64, 0x86, 0x04, 0x27, 0xdf, 0x10,
+	0x5e, 0xe8, 0x1a, 0x5f, 0x72, 0x7b, 0xb8, 0x77, 0xeb, 0x39, 0x75, 0xe9, 0xad, 0xf1, 0xc4, 0xe0,
+	0xe0, 0x8e, 0x72, 0x70, 0x8b, 0xe4, 0x06, 0x38, 0xe8, 0x98, 0xb6, 0x56, 0x05, 0xbe, 0x22, 0x4c,
+	0x9a, 0x15, 0x18, 0xc3, 0x51, 0xbf, 0x3d, 0x32, 0x94, 0xa3, 0xbe, 0xab, 0x81, 0xe6, 0x94, 0xa3,
+	0x0d, 0xa2, 0x8f, 0xe6, 0x28, 0xbf, 0x75, 0x5c, 0xd7, 0xd0, 0x49, 0x5d, 0x43, 0xbf, 0xea, 0x1a,
+	0x7a, 0xdd, 0xd0, 0x52, 0x27, 0x0d, 0x2d, 0xf5, 0xa3, 0xa1, 0xa5, 0x9e, 0xd0, 0x78, 0xa0, 0x83,
+	0x78, 0xa8, 0xe0, 0xd0, 0x15, 0x7e, 0x69, 0x56, 0xfd, 0xe7, 0xbf, 0xf1, 0x37, 0x00, 0x00, 0xff,
+	0xff, 0xb0, 0x82, 0xf2, 0x52, 0x42, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -370,6 +571,10 @@ type QueryClient interface {
 	GetCampaign(ctx context.Context, in *QueryGetCampaignRequest, opts ...grpc.CallOption) (*QueryGetCampaignResponse, error)
 	// ListCampaign defines the ListCampaign RPC.
 	ListCampaign(ctx context.Context, in *QueryAllCampaignRequest, opts ...grpc.CallOption) (*QueryAllCampaignResponse, error)
+	// ListEligibleWallet Queries a list of EligibleWallet items.
+	GetEligibleWallet(ctx context.Context, in *QueryGetEligibleWalletRequest, opts ...grpc.CallOption) (*QueryGetEligibleWalletResponse, error)
+	// ListEligibleWallet defines the ListEligibleWallet RPC.
+	ListEligibleWallet(ctx context.Context, in *QueryAllEligibleWalletRequest, opts ...grpc.CallOption) (*QueryAllEligibleWalletResponse, error)
 }
 
 type queryClient struct {
@@ -407,6 +612,24 @@ func (c *queryClient) ListCampaign(ctx context.Context, in *QueryAllCampaignRequ
 	return out, nil
 }
 
+func (c *queryClient) GetEligibleWallet(ctx context.Context, in *QueryGetEligibleWalletRequest, opts ...grpc.CallOption) (*QueryGetEligibleWalletResponse, error) {
+	out := new(QueryGetEligibleWalletResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Query/GetEligibleWallet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) ListEligibleWallet(ctx context.Context, in *QueryAllEligibleWalletRequest, opts ...grpc.CallOption) (*QueryAllEligibleWalletResponse, error) {
+	out := new(QueryAllEligibleWalletResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Query/ListEligibleWallet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
@@ -415,6 +638,10 @@ type QueryServer interface {
 	GetCampaign(context.Context, *QueryGetCampaignRequest) (*QueryGetCampaignResponse, error)
 	// ListCampaign defines the ListCampaign RPC.
 	ListCampaign(context.Context, *QueryAllCampaignRequest) (*QueryAllCampaignResponse, error)
+	// ListEligibleWallet Queries a list of EligibleWallet items.
+	GetEligibleWallet(context.Context, *QueryGetEligibleWalletRequest) (*QueryGetEligibleWalletResponse, error)
+	// ListEligibleWallet defines the ListEligibleWallet RPC.
+	ListEligibleWallet(context.Context, *QueryAllEligibleWalletRequest) (*QueryAllEligibleWalletResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -429,6 +656,12 @@ func (*UnimplementedQueryServer) GetCampaign(ctx context.Context, req *QueryGetC
 }
 func (*UnimplementedQueryServer) ListCampaign(ctx context.Context, req *QueryAllCampaignRequest) (*QueryAllCampaignResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListCampaign not implemented")
+}
+func (*UnimplementedQueryServer) GetEligibleWallet(ctx context.Context, req *QueryGetEligibleWalletRequest) (*QueryGetEligibleWalletResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEligibleWallet not implemented")
+}
+func (*UnimplementedQueryServer) ListEligibleWallet(ctx context.Context, req *QueryAllEligibleWalletRequest) (*QueryAllEligibleWalletResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEligibleWallet not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -489,6 +722,42 @@ func _Query_ListCampaign_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetEligibleWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetEligibleWalletRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetEligibleWallet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Query/GetEligibleWallet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetEligibleWallet(ctx, req.(*QueryGetEligibleWalletRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_ListEligibleWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAllEligibleWalletRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ListEligibleWallet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Query/ListEligibleWallet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ListEligibleWallet(ctx, req.(*QueryAllEligibleWalletRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scarlettcore.proofofdegen.v1.Query",
@@ -505,6 +774,14 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListCampaign",
 			Handler:    _Query_ListCampaign_Handler,
+		},
+		{
+			MethodName: "GetEligibleWallet",
+			Handler:    _Query_GetEligibleWallet_Handler,
+		},
+		{
+			MethodName: "ListEligibleWallet",
+			Handler:    _Query_ListEligibleWallet_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -714,6 +991,153 @@ func (m *QueryAllCampaignResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryGetEligibleWalletRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetEligibleWalletRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetEligibleWalletRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetEligibleWalletResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetEligibleWalletResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetEligibleWalletResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.EligibleWallet.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAllEligibleWalletRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllEligibleWalletRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllEligibleWalletRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAllEligibleWalletResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllEligibleWalletResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllEligibleWalletResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.EligibleWallet) > 0 {
+		for iNdEx := len(m.EligibleWallet) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.EligibleWallet[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -790,6 +1214,62 @@ func (m *QueryAllCampaignResponse) Size() (n int) {
 	_ = l
 	if len(m.Campaign) > 0 {
 		for _, e := range m.Campaign {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetEligibleWalletRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetEligibleWalletResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.EligibleWallet.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryAllEligibleWalletRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryAllEligibleWalletResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.EligibleWallet) > 0 {
+		for _, e := range m.EligibleWallet {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -1251,6 +1731,377 @@ func (m *QueryAllCampaignResponse) Unmarshal(dAtA []byte) error {
 			}
 			m.Campaign = append(m.Campaign, Campaign{})
 			if err := m.Campaign[len(m.Campaign)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetEligibleWalletRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetEligibleWalletRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetEligibleWalletRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetEligibleWalletResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetEligibleWalletResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetEligibleWalletResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EligibleWallet", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.EligibleWallet.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAllEligibleWalletRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllEligibleWalletRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllEligibleWalletRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAllEligibleWalletResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllEligibleWalletResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllEligibleWalletResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EligibleWallet", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EligibleWallet = append(m.EligibleWallet, EligibleWallet{})
+			if err := m.EligibleWallet[len(m.EligibleWallet)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

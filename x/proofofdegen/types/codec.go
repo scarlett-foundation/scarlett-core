@@ -8,6 +8,12 @@ import (
 
 func RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 	registrar.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgCreateEligibleWallet{},
+		&MsgUpdateEligibleWallet{},
+		&MsgDeleteEligibleWallet{},
+	)
+
+	registrar.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgCreateCampaign{},
 		&MsgUpdateCampaign{},
 		&MsgDeleteCampaign{},

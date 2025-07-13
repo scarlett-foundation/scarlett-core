@@ -29,6 +29,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Alias:          []string{"show-campaign"},
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}},
 				},
+				{
+					RpcMethod: "ListEligibleWallet",
+					Use:       "list-eligible-wallet",
+					Short:     "List all eligible-wallet",
+				},
+				{
+					RpcMethod:      "GetEligibleWallet",
+					Use:            "get-eligible-wallet [id]",
+					Short:          "Gets a eligible-wallet",
+					Alias:          []string{"show-eligible-wallet"},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}},
+				},
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
@@ -56,6 +68,24 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod:      "DeleteCampaign",
 					Use:            "delete-campaign [index]",
 					Short:          "Delete campaign",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}},
+				},
+				{
+					RpcMethod:      "CreateEligibleWallet",
+					Use:            "create-eligible-wallet [index] [address] [claimed] [claim-time] [weight]",
+					Short:          "Create a new eligible-wallet",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}, {ProtoField: "address"}, {ProtoField: "claimed"}, {ProtoField: "claim_time"}, {ProtoField: "weight"}},
+				},
+				{
+					RpcMethod:      "UpdateEligibleWallet",
+					Use:            "update-eligible-wallet [index] [address] [claimed] [claim-time] [weight]",
+					Short:          "Update eligible-wallet",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}, {ProtoField: "address"}, {ProtoField: "claimed"}, {ProtoField: "claim_time"}, {ProtoField: "weight"}},
+				},
+				{
+					RpcMethod:      "DeleteEligibleWallet",
+					Use:            "delete-eligible-wallet [index]",
+					Short:          "Delete eligible-wallet",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx

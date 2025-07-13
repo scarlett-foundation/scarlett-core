@@ -13,6 +13,11 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 			return err
 		}
 	}
+	for _, elem := range genState.EligibleWalletMap {
+		if err := k.EligibleWallet.Set(ctx, elem.Index, elem); err != nil {
+			return err
+		}
+	}
 
 	return k.Params.Set(ctx, genState.Params)
 }
@@ -28,6 +33,12 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 	}
 	if err := k.Campaign.Walk(ctx, nil, func(_ string, val types.Campaign) (stop bool, err error) {
 		genesis.CampaignMap = append(genesis.CampaignMap, val)
+		return false, nil
+	}); err != nil {
+		return nil, err
+	}
+	if err := k.EligibleWallet.Walk(ctx, nil, func(_ string, val types.EligibleWallet) (stop bool, err error) {
+		genesis.EligibleWalletMap = append(genesis.EligibleWalletMap, val)
 		return false, nil
 	}); err != nil {
 		return nil, err

@@ -5,6 +5,7 @@ package scarlettcore.proofofdegen.v1;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 import "scarlettcore/proofofdegen/v1/campaign.proto";
+import "scarlettcore/proofofdegen/v1/eligible_wallet.proto";
 import "scarlettcore/proofofdegen/v1/params.proto";
 
 option go_package = "scarlett-core/x/proofofdegen/types";
@@ -17,4 +18,5 @@ message GenesisState {
     (amino.dont_omitempty) = true
   ];
   repeated Campaign campaign_map = 2 [(gogoproto.nullable) = false];
+  repeated EligibleWallet eligible_wallet_map = 3 [(gogoproto.nullable) = false];
 }

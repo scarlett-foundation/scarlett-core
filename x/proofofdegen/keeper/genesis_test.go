@@ -11,7 +11,7 @@ import (
 func TestGenesis(t *testing.T) {
 	genesisState := types.GenesisState{
 		Params:      types.DefaultParams(),
-		CampaignMap: []types.Campaign{{Index: "0"}, {Index: "1"}}}
+		CampaignMap: []types.Campaign{{Index: "0"}, {Index: "1"}}, EligibleWalletMap: []types.EligibleWallet{{Index: "0"}, {Index: "1"}}}
 
 	f := initFixture(t)
 	err := f.keeper.InitGenesis(f.ctx, genesisState)
@@ -22,5 +22,6 @@ func TestGenesis(t *testing.T) {
 
 	require.EqualExportedValues(t, genesisState.Params, got.Params)
 	require.EqualExportedValues(t, genesisState.CampaignMap, got.CampaignMap)
+	require.EqualExportedValues(t, genesisState.EligibleWalletMap, got.EligibleWalletMap)
 
 }

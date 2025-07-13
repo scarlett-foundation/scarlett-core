@@ -24,6 +24,10 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 			Index: "0",
 		}, {Creator: sample.AccAddress(),
 			Index: "1",
+		}}, EligibleWalletMap: []types.EligibleWallet{{Creator: sample.AccAddress(),
+			Index: "0",
+		}, {Creator: sample.AccAddress(),
+			Index: "1",
 		}}}
 	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(&proofofdegenGenesis)
 }
@@ -78,6 +82,51 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgDeleteCampaign,
 		proofofdegensimulation.SimulateMsgDeleteCampaign(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
+	const (
+		opWeightMsgCreateEligibleWallet          = "op_weight_msg_proofofdegen"
+		defaultWeightMsgCreateEligibleWallet int = 100
+	)
+
+	var weightMsgCreateEligibleWallet int
+	simState.AppParams.GetOrGenerate(opWeightMsgCreateEligibleWallet, &weightMsgCreateEligibleWallet, nil,
+		func(_ *rand.Rand) {
+			weightMsgCreateEligibleWallet = defaultWeightMsgCreateEligibleWallet
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgCreateEligibleWallet,
+		proofofdegensimulation.SimulateMsgCreateEligibleWallet(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
+	const (
+		opWeightMsgUpdateEligibleWallet          = "op_weight_msg_proofofdegen"
+		defaultWeightMsgUpdateEligibleWallet int = 100
+	)
+
+	var weightMsgUpdateEligibleWallet int
+	simState.AppParams.GetOrGenerate(opWeightMsgUpdateEligibleWallet, &weightMsgUpdateEligibleWallet, nil,
+		func(_ *rand.Rand) {
+			weightMsgUpdateEligibleWallet = defaultWeightMsgUpdateEligibleWallet
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgUpdateEligibleWallet,
+		proofofdegensimulation.SimulateMsgUpdateEligibleWallet(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
+	const (
+		opWeightMsgDeleteEligibleWallet          = "op_weight_msg_proofofdegen"
+		defaultWeightMsgDeleteEligibleWallet int = 100
+	)
+
+	var weightMsgDeleteEligibleWallet int
+	simState.AppParams.GetOrGenerate(opWeightMsgDeleteEligibleWallet, &weightMsgDeleteEligibleWallet, nil,
+		func(_ *rand.Rand) {
+			weightMsgDeleteEligibleWallet = defaultWeightMsgDeleteEligibleWallet
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgDeleteEligibleWallet,
+		proofofdegensimulation.SimulateMsgDeleteEligibleWallet(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
 
 	return operations

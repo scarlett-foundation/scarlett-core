@@ -7,6 +7,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "scarlettcore/proofofdegen/v1/campaign.proto";
+import "scarlettcore/proofofdegen/v1/eligible_wallet.proto";
 import "scarlettcore/proofofdegen/v1/params.proto";
 
 option go_package = "scarlett-core/x/proofofdegen/types";
@@ -26,6 +27,16 @@ service Query {
   // ListCampaign defines the ListCampaign RPC.
   rpc ListCampaign(QueryAllCampaignRequest) returns (QueryAllCampaignResponse) {
     option (google.api.http).get = "/scarlett-core/proofofdegen/v1/campaign";
+  }
+
+  // ListEligibleWallet Queries a list of EligibleWallet items.
+  rpc GetEligibleWallet(QueryGetEligibleWalletRequest) returns (QueryGetEligibleWalletResponse) {
+    option (google.api.http).get = "/scarlett-core/proofofdegen/v1/eligible_wallet/{index}";
+  }
+
+  // ListEligibleWallet defines the ListEligibleWallet RPC.
+  rpc ListEligibleWallet(QueryAllEligibleWalletRequest) returns (QueryAllEligibleWalletResponse) {
+    option (google.api.http).get = "/scarlett-core/proofofdegen/v1/eligible_wallet";
   }
 }
 
@@ -59,5 +70,26 @@ message QueryAllCampaignRequest {
 // QueryAllCampaignResponse defines the QueryAllCampaignResponse message.
 message QueryAllCampaignResponse {
   repeated Campaign campaign = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryGetEligibleWalletRequest defines the QueryGetEligibleWalletRequest message.
+message QueryGetEligibleWalletRequest {
+  string index = 1;
+}
+
+// QueryGetEligibleWalletResponse defines the QueryGetEligibleWalletResponse message.
+message QueryGetEligibleWalletResponse {
+  EligibleWallet eligible_wallet = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAllEligibleWalletRequest defines the QueryAllEligibleWalletRequest message.
+message QueryAllEligibleWalletRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAllEligibleWalletResponse defines the QueryAllEligibleWalletResponse message.
+message QueryAllEligibleWalletResponse {
+  repeated EligibleWallet eligible_wallet = 1 [(gogoproto.nullable) = false];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

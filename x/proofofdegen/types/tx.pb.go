@@ -442,6 +442,340 @@ func (m *MsgDeleteCampaignResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgDeleteCampaignResponse proto.InternalMessageInfo
 
+// MsgCreateEligibleWallet defines the MsgCreateEligibleWallet message.
+type MsgCreateEligibleWallet struct {
+	Creator   string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Index     string `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+	Address   string `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	Claimed   bool   `protobuf:"varint,4,opt,name=claimed,proto3" json:"claimed,omitempty"`
+	ClaimTime uint64 `protobuf:"varint,5,opt,name=claim_time,json=claimTime,proto3" json:"claim_time,omitempty"`
+	Weight    uint64 `protobuf:"varint,6,opt,name=weight,proto3" json:"weight,omitempty"`
+}
+
+func (m *MsgCreateEligibleWallet) Reset()         { *m = MsgCreateEligibleWallet{} }
+func (m *MsgCreateEligibleWallet) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateEligibleWallet) ProtoMessage()    {}
+func (*MsgCreateEligibleWallet) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{8}
+}
+func (m *MsgCreateEligibleWallet) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateEligibleWallet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateEligibleWallet.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateEligibleWallet) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateEligibleWallet.Merge(m, src)
+}
+func (m *MsgCreateEligibleWallet) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateEligibleWallet) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateEligibleWallet.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateEligibleWallet proto.InternalMessageInfo
+
+func (m *MsgCreateEligibleWallet) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgCreateEligibleWallet) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+func (m *MsgCreateEligibleWallet) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *MsgCreateEligibleWallet) GetClaimed() bool {
+	if m != nil {
+		return m.Claimed
+	}
+	return false
+}
+
+func (m *MsgCreateEligibleWallet) GetClaimTime() uint64 {
+	if m != nil {
+		return m.ClaimTime
+	}
+	return 0
+}
+
+func (m *MsgCreateEligibleWallet) GetWeight() uint64 {
+	if m != nil {
+		return m.Weight
+	}
+	return 0
+}
+
+// MsgCreateEligibleWalletResponse defines the MsgCreateEligibleWalletResponse message.
+type MsgCreateEligibleWalletResponse struct {
+}
+
+func (m *MsgCreateEligibleWalletResponse) Reset()         { *m = MsgCreateEligibleWalletResponse{} }
+func (m *MsgCreateEligibleWalletResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateEligibleWalletResponse) ProtoMessage()    {}
+func (*MsgCreateEligibleWalletResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{9}
+}
+func (m *MsgCreateEligibleWalletResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateEligibleWalletResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateEligibleWalletResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateEligibleWalletResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateEligibleWalletResponse.Merge(m, src)
+}
+func (m *MsgCreateEligibleWalletResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateEligibleWalletResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateEligibleWalletResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateEligibleWalletResponse proto.InternalMessageInfo
+
+// MsgUpdateEligibleWallet defines the MsgUpdateEligibleWallet message.
+type MsgUpdateEligibleWallet struct {
+	Creator   string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Index     string `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+	Address   string `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	Claimed   bool   `protobuf:"varint,4,opt,name=claimed,proto3" json:"claimed,omitempty"`
+	ClaimTime uint64 `protobuf:"varint,5,opt,name=claim_time,json=claimTime,proto3" json:"claim_time,omitempty"`
+	Weight    uint64 `protobuf:"varint,6,opt,name=weight,proto3" json:"weight,omitempty"`
+}
+
+func (m *MsgUpdateEligibleWallet) Reset()         { *m = MsgUpdateEligibleWallet{} }
+func (m *MsgUpdateEligibleWallet) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateEligibleWallet) ProtoMessage()    {}
+func (*MsgUpdateEligibleWallet) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{10}
+}
+func (m *MsgUpdateEligibleWallet) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateEligibleWallet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateEligibleWallet.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateEligibleWallet) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateEligibleWallet.Merge(m, src)
+}
+func (m *MsgUpdateEligibleWallet) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateEligibleWallet) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateEligibleWallet.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateEligibleWallet proto.InternalMessageInfo
+
+func (m *MsgUpdateEligibleWallet) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgUpdateEligibleWallet) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+func (m *MsgUpdateEligibleWallet) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *MsgUpdateEligibleWallet) GetClaimed() bool {
+	if m != nil {
+		return m.Claimed
+	}
+	return false
+}
+
+func (m *MsgUpdateEligibleWallet) GetClaimTime() uint64 {
+	if m != nil {
+		return m.ClaimTime
+	}
+	return 0
+}
+
+func (m *MsgUpdateEligibleWallet) GetWeight() uint64 {
+	if m != nil {
+		return m.Weight
+	}
+	return 0
+}
+
+// MsgUpdateEligibleWalletResponse defines the MsgUpdateEligibleWalletResponse message.
+type MsgUpdateEligibleWalletResponse struct {
+}
+
+func (m *MsgUpdateEligibleWalletResponse) Reset()         { *m = MsgUpdateEligibleWalletResponse{} }
+func (m *MsgUpdateEligibleWalletResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateEligibleWalletResponse) ProtoMessage()    {}
+func (*MsgUpdateEligibleWalletResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{11}
+}
+func (m *MsgUpdateEligibleWalletResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateEligibleWalletResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateEligibleWalletResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateEligibleWalletResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateEligibleWalletResponse.Merge(m, src)
+}
+func (m *MsgUpdateEligibleWalletResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateEligibleWalletResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateEligibleWalletResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateEligibleWalletResponse proto.InternalMessageInfo
+
+// MsgDeleteEligibleWallet defines the MsgDeleteEligibleWallet message.
+type MsgDeleteEligibleWallet struct {
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Index   string `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+}
+
+func (m *MsgDeleteEligibleWallet) Reset()         { *m = MsgDeleteEligibleWallet{} }
+func (m *MsgDeleteEligibleWallet) String() string { return proto.CompactTextString(m) }
+func (*MsgDeleteEligibleWallet) ProtoMessage()    {}
+func (*MsgDeleteEligibleWallet) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{12}
+}
+func (m *MsgDeleteEligibleWallet) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgDeleteEligibleWallet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgDeleteEligibleWallet.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgDeleteEligibleWallet) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgDeleteEligibleWallet.Merge(m, src)
+}
+func (m *MsgDeleteEligibleWallet) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgDeleteEligibleWallet) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgDeleteEligibleWallet.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgDeleteEligibleWallet proto.InternalMessageInfo
+
+func (m *MsgDeleteEligibleWallet) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgDeleteEligibleWallet) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+// MsgDeleteEligibleWalletResponse defines the MsgDeleteEligibleWalletResponse message.
+type MsgDeleteEligibleWalletResponse struct {
+}
+
+func (m *MsgDeleteEligibleWalletResponse) Reset()         { *m = MsgDeleteEligibleWalletResponse{} }
+func (m *MsgDeleteEligibleWalletResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgDeleteEligibleWalletResponse) ProtoMessage()    {}
+func (*MsgDeleteEligibleWalletResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{13}
+}
+func (m *MsgDeleteEligibleWalletResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgDeleteEligibleWalletResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgDeleteEligibleWalletResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgDeleteEligibleWalletResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgDeleteEligibleWalletResponse.Merge(m, src)
+}
+func (m *MsgDeleteEligibleWalletResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgDeleteEligibleWalletResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgDeleteEligibleWalletResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgDeleteEligibleWalletResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateParamsResponse")
@@ -451,6 +785,12 @@ func init() {
 	proto.RegisterType((*MsgUpdateCampaignResponse)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateCampaignResponse")
 	proto.RegisterType((*MsgDeleteCampaign)(nil), "scarlettcore.proofofdegen.v1.MsgDeleteCampaign")
 	proto.RegisterType((*MsgDeleteCampaignResponse)(nil), "scarlettcore.proofofdegen.v1.MsgDeleteCampaignResponse")
+	proto.RegisterType((*MsgCreateEligibleWallet)(nil), "scarlettcore.proofofdegen.v1.MsgCreateEligibleWallet")
+	proto.RegisterType((*MsgCreateEligibleWalletResponse)(nil), "scarlettcore.proofofdegen.v1.MsgCreateEligibleWalletResponse")
+	proto.RegisterType((*MsgUpdateEligibleWallet)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateEligibleWallet")
+	proto.RegisterType((*MsgUpdateEligibleWalletResponse)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateEligibleWalletResponse")
+	proto.RegisterType((*MsgDeleteEligibleWallet)(nil), "scarlettcore.proofofdegen.v1.MsgDeleteEligibleWallet")
+	proto.RegisterType((*MsgDeleteEligibleWalletResponse)(nil), "scarlettcore.proofofdegen.v1.MsgDeleteEligibleWalletResponse")
 }
 
 func init() {
@@ -458,41 +798,51 @@ func init() {
 }
 
 var fileDescriptor_7a9b8c6b3151bd0d = []byte{
-	// 542 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x94, 0x3d, 0x6f, 0xd3, 0x4e,
-	0x1c, 0xc7, 0x73, 0xff, 0x3c, 0xfc, 0xc9, 0x51, 0x51, 0x7a, 0x8a, 0xa8, 0x63, 0x90, 0x89, 0x2c,
-	0x90, 0xd2, 0xa0, 0xd8, 0x6a, 0x10, 0x20, 0x55, 0x08, 0xa9, 0x29, 0x12, 0x53, 0x24, 0x64, 0xc4,
-	0xc2, 0x52, 0x1d, 0xf6, 0xf5, 0xb0, 0xb0, 0x7d, 0xd6, 0xdd, 0x11, 0xa5, 0x4c, 0x88, 0x91, 0x89,
-	0x97, 0xc1, 0x98, 0x81, 0x57, 0xc0, 0xd4, 0xb1, 0xea, 0xc4, 0x84, 0x50, 0x32, 0xe4, 0x1d, 0x30,
-	0x23, 0x3f, 0xb5, 0xb1, 0x89, 0x92, 0x66, 0x60, 0x60, 0xb1, 0xee, 0xf7, 0xf8, 0xbd, 0xcf, 0xdd,
-	0xcf, 0x07, 0xef, 0x0a, 0x1b, 0x73, 0x8f, 0x48, 0x69, 0x33, 0x4e, 0xcc, 0x90, 0x33, 0x76, 0xc4,
-	0x8e, 0x1c, 0x42, 0x49, 0x60, 0x0e, 0x77, 0x4d, 0x39, 0x32, 0x42, 0xce, 0x24, 0x43, 0xb7, 0xe6,
-	0xd3, 0x8c, 0xf9, 0x34, 0x63, 0xb8, 0xab, 0x6e, 0x61, 0xdf, 0x0d, 0x98, 0x19, 0x7f, 0x93, 0x02,
-	0x75, 0xdb, 0x66, 0xc2, 0x67, 0xc2, 0xf4, 0x05, 0x8d, 0x1a, 0xf9, 0x82, 0xa6, 0x81, 0x66, 0x12,
-	0x38, 0x8c, 0x2d, 0x33, 0x31, 0xd2, 0x50, 0x83, 0x32, 0xca, 0x12, 0x7f, 0xb4, 0x4a, 0xbd, 0x3b,
-	0x4b, 0x77, 0x18, 0x62, 0x8e, 0xfd, 0xb4, 0x81, 0x7e, 0x06, 0xe0, 0xe6, 0x40, 0xd0, 0x97, 0xa1,
-	0x83, 0x25, 0x79, 0x1e, 0x47, 0xd0, 0x43, 0x58, 0xc7, 0xef, 0xe4, 0x1b, 0xc6, 0x5d, 0x79, 0xac,
-	0x80, 0x16, 0x68, 0xd7, 0xfb, 0xca, 0xd9, 0xd7, 0x6e, 0x23, 0x55, 0xde, 0x77, 0x1c, 0x4e, 0x84,
-	0x78, 0x21, 0xb9, 0x1b, 0x50, 0xeb, 0x22, 0x15, 0x3d, 0x83, 0xb5, 0xa4, 0xb7, 0xf2, 0x5f, 0x0b,
-	0xb4, 0xaf, 0xf6, 0xee, 0x18, 0xcb, 0x8e, 0xc0, 0x48, 0xd4, 0xfa, 0xf5, 0x93, 0x1f, 0xb7, 0x4b,
-	0x5f, 0x66, 0xe3, 0x0e, 0xb0, 0xd2, 0xf2, 0xbd, 0x27, 0x1f, 0x67, 0xe3, 0xce, 0x45, 0xe3, 0x4f,
-	0xb3, 0x71, 0xe7, 0x5e, 0x0e, 0x69, 0x94, 0x87, 0x2a, 0x00, 0xe8, 0x4d, 0xb8, 0x5d, 0x70, 0x59,
-	0x44, 0x84, 0x2c, 0x10, 0x44, 0xff, 0x06, 0xe0, 0xd6, 0x40, 0xd0, 0x03, 0x4e, 0xb0, 0x24, 0x07,
-	0xd8, 0x0f, 0xb1, 0x4b, 0x03, 0xd4, 0x83, 0xff, 0xdb, 0x91, 0x87, 0xf1, 0x95, 0xbc, 0x59, 0x22,
-	0x6a, 0xc0, 0xaa, 0x1b, 0x38, 0x64, 0x14, 0xc3, 0xd6, 0xad, 0xc4, 0x40, 0x08, 0x56, 0x02, 0xec,
-	0x13, 0xa5, 0x1c, 0x3b, 0xe3, 0x35, 0xba, 0x01, 0x6b, 0xd8, 0x96, 0xee, 0x90, 0x28, 0x95, 0x16,
-	0x68, 0x5f, 0xb1, 0x52, 0x0b, 0xed, 0xc0, 0xeb, 0x92, 0x49, 0xec, 0x1d, 0x62, 0xcf, 0x63, 0x36,
-	0x96, 0x2e, 0x0b, 0x94, 0x6a, 0x0b, 0xb4, 0x2b, 0xd6, 0x66, 0xec, 0xdf, 0x3f, 0x77, 0xef, 0x6d,
-	0x44, 0x27, 0x92, 0x49, 0xeb, 0x37, 0x61, 0xf3, 0x0f, 0x86, 0x22, 0x61, 0x42, 0xff, 0x6f, 0x13,
-	0xe6, 0x19, 0xce, 0x09, 0xdf, 0xc6, 0x80, 0x4f, 0x89, 0x47, 0xfe, 0x06, 0xe0, 0xc2, 0x9d, 0xe4,
-	0xc5, 0xb2, 0x9d, 0xf4, 0x7e, 0x95, 0x61, 0x79, 0x20, 0x28, 0x92, 0x70, 0x23, 0xf7, 0x07, 0x75,
-	0x97, 0x4f, 0x7e, 0x61, 0x38, 0xd5, 0x07, 0x6b, 0xa5, 0x67, 0xea, 0xe8, 0x3d, 0xbc, 0x56, 0x98,
-	0x63, 0x73, 0x65, 0xa3, 0x7c, 0x81, 0xfa, 0x68, 0xcd, 0x82, 0x79, 0xed, 0xc2, 0x84, 0x99, 0x97,
-	0x84, 0x58, 0x43, 0x7b, 0xf1, 0xfd, 0x47, 0xda, 0x85, 0xcb, 0x5f, 0xad, 0x9d, 0x2f, 0xb8, 0x84,
-	0xf6, 0xe2, 0x1b, 0x57, 0xab, 0x1f, 0xa2, 0x97, 0xaa, 0xff, 0xf8, 0x64, 0xa2, 0x81, 0xd3, 0x89,
-	0x06, 0x7e, 0x4e, 0x34, 0xf0, 0x79, 0xaa, 0x95, 0x4e, 0xa7, 0x5a, 0xe9, 0xfb, 0x54, 0x2b, 0xbd,
-	0xd2, 0xb3, 0xc6, 0xdd, 0x45, 0x2f, 0x95, 0x3c, 0x0e, 0x89, 0x78, 0x5d, 0x8b, 0xdf, 0xde, 0xfb,
-	0xbf, 0x03, 0x00, 0x00, 0xff, 0xff, 0x1b, 0x74, 0x29, 0xee, 0x4a, 0x06, 0x00, 0x00,
+	// 690 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x56, 0x4f, 0x4f, 0xd4, 0x4e,
+	0x18, 0xde, 0xf9, 0x01, 0xcb, 0x6f, 0x47, 0x22, 0x32, 0xd9, 0x48, 0x59, 0xb5, 0xac, 0x1b, 0x4d,
+	0x16, 0x0c, 0xdb, 0x80, 0x41, 0x13, 0xa2, 0x26, 0x80, 0xc6, 0x13, 0x89, 0xa9, 0x1a, 0x13, 0x2f,
+	0x64, 0x68, 0x87, 0x61, 0x62, 0xdb, 0xa9, 0x9d, 0x11, 0xc1, 0x93, 0xf1, 0x68, 0x3c, 0xf8, 0x1d,
+	0xbc, 0x78, 0xe4, 0xe0, 0x27, 0xf0, 0xc4, 0x91, 0x70, 0xf2, 0x60, 0x8c, 0x81, 0x03, 0x5f, 0xc3,
+	0x74, 0xa6, 0x5d, 0x68, 0xad, 0xfb, 0xc7, 0xc8, 0x41, 0x2f, 0x4d, 0xdf, 0xbf, 0xcf, 0xfb, 0x3c,
+	0xed, 0xbc, 0x19, 0x78, 0x55, 0x38, 0x38, 0xf2, 0x88, 0x94, 0x0e, 0x8f, 0x88, 0x15, 0x46, 0x9c,
+	0xaf, 0xf3, 0x75, 0x97, 0x50, 0x12, 0x58, 0x9b, 0xb3, 0x96, 0xdc, 0x6a, 0x85, 0x11, 0x97, 0x1c,
+	0x5d, 0x3c, 0x99, 0xd6, 0x3a, 0x99, 0xd6, 0xda, 0x9c, 0xad, 0x8d, 0x61, 0x9f, 0x05, 0xdc, 0x52,
+	0x4f, 0x5d, 0x50, 0x1b, 0x77, 0xb8, 0xf0, 0xb9, 0xb0, 0x7c, 0x41, 0xe3, 0x46, 0xbe, 0xa0, 0x49,
+	0x60, 0x42, 0x07, 0x56, 0x95, 0x65, 0x69, 0x23, 0x09, 0x55, 0x29, 0xa7, 0x5c, 0xfb, 0xe3, 0xb7,
+	0xc4, 0x3b, 0xd5, 0x71, 0xc2, 0x10, 0x47, 0xd8, 0x4f, 0x1a, 0x34, 0xf6, 0x01, 0x1c, 0x5d, 0x11,
+	0xf4, 0x71, 0xe8, 0x62, 0x49, 0x1e, 0xa8, 0x08, 0xba, 0x01, 0x2b, 0xf8, 0x85, 0xdc, 0xe0, 0x11,
+	0x93, 0xdb, 0x06, 0xa8, 0x83, 0x66, 0x65, 0xc9, 0xd8, 0xff, 0x34, 0x53, 0x4d, 0x90, 0x17, 0x5d,
+	0x37, 0x22, 0x42, 0x3c, 0x94, 0x11, 0x0b, 0xa8, 0x7d, 0x9c, 0x8a, 0xee, 0xc3, 0xb2, 0xee, 0x6d,
+	0xfc, 0x57, 0x07, 0xcd, 0x33, 0x73, 0x57, 0x5a, 0x9d, 0x24, 0x68, 0x69, 0xb4, 0xa5, 0xca, 0xee,
+	0xb7, 0xc9, 0xd2, 0xc7, 0xa3, 0x9d, 0x69, 0x60, 0x27, 0xe5, 0x0b, 0x77, 0xde, 0x1c, 0xed, 0x4c,
+	0x1f, 0x37, 0x7e, 0x7b, 0xb4, 0x33, 0x7d, 0x2d, 0x43, 0x69, 0x2b, 0x4b, 0x2a, 0x47, 0xa0, 0x31,
+	0x01, 0xc7, 0x73, 0x2e, 0x9b, 0x88, 0x90, 0x07, 0x82, 0x34, 0x3e, 0x03, 0x38, 0xb6, 0x22, 0xe8,
+	0x72, 0x44, 0xb0, 0x24, 0xcb, 0xd8, 0x0f, 0x31, 0xa3, 0x01, 0x9a, 0x83, 0xc3, 0x4e, 0xec, 0xe1,
+	0x51, 0x57, 0xbe, 0x69, 0x22, 0xaa, 0xc2, 0x21, 0x16, 0xb8, 0x64, 0x4b, 0x91, 0xad, 0xd8, 0xda,
+	0x40, 0x08, 0x0e, 0x06, 0xd8, 0x27, 0xc6, 0x80, 0x72, 0xaa, 0x77, 0x74, 0x1e, 0x96, 0xb1, 0x23,
+	0xd9, 0x26, 0x31, 0x06, 0xeb, 0xa0, 0xf9, 0xbf, 0x9d, 0x58, 0x68, 0x0a, 0x9e, 0x93, 0x5c, 0x62,
+	0x6f, 0x15, 0x7b, 0x1e, 0x77, 0xb0, 0x64, 0x3c, 0x30, 0x86, 0xea, 0xa0, 0x39, 0x68, 0x8f, 0x2a,
+	0xff, 0x62, 0xdb, 0xbd, 0x30, 0x12, 0x2b, 0x92, 0x42, 0x37, 0x2e, 0xc0, 0x89, 0x9f, 0x38, 0xe4,
+	0x19, 0x6a, 0xf6, 0x7f, 0x37, 0xc3, 0x2c, 0x87, 0x36, 0xc3, 0x67, 0x8a, 0xe0, 0x5d, 0xe2, 0x91,
+	0xd3, 0x20, 0x58, 0x38, 0x49, 0x16, 0xac, 0x3d, 0xc9, 0x57, 0xa0, 0xfe, 0x34, 0xfd, 0x25, 0xee,
+	0x79, 0x8c, 0xb2, 0x35, 0x8f, 0x3c, 0xc1, 0x9e, 0x47, 0xe4, 0x1f, 0x54, 0xdc, 0x80, 0xc3, 0x58,
+	0xe7, 0x27, 0xa2, 0xa7, 0x66, 0x1c, 0x71, 0x3c, 0xcc, 0x7c, 0xe2, 0x26, 0xc2, 0xa7, 0x26, 0xba,
+	0x04, 0xa1, 0x7a, 0x5d, 0x95, 0xcc, 0x27, 0x89, 0xe6, 0x15, 0xe5, 0x79, 0xc4, 0xf4, 0x07, 0x7b,
+	0x49, 0x18, 0xdd, 0x90, 0x46, 0x59, 0x85, 0x12, 0x2b, 0xc7, 0xfd, 0x32, 0x9c, 0xfc, 0x05, 0xbb,
+	0xbc, 0x02, 0xfa, 0x4b, 0xfd, 0xab, 0x0a, 0x14, 0xb1, 0x6b, 0x2b, 0xf0, 0x5c, 0x09, 0xa0, 0x7f,
+	0x90, 0xd3, 0x12, 0xa0, 0x70, 0xaa, 0x22, 0xc8, 0x74, 0xaa, 0xb9, 0x0f, 0xc3, 0x70, 0x60, 0x45,
+	0x50, 0x24, 0xe1, 0x48, 0x66, 0xb7, 0xcf, 0x74, 0xde, 0xc9, 0xb9, 0xb5, 0x59, 0x9b, 0xef, 0x2b,
+	0x3d, 0x45, 0x47, 0xaf, 0xe0, 0xd9, 0xdc, 0x86, 0xb5, 0xba, 0x36, 0xca, 0x16, 0xd4, 0x6e, 0xf6,
+	0x59, 0x70, 0x12, 0x3b, 0xb7, 0xfb, 0xac, 0x1e, 0x49, 0xf4, 0x81, 0x5d, 0xbc, 0x99, 0x62, 0xec,
+	0xdc, 0x5a, 0xea, 0x8e, 0x9d, 0x2d, 0xe8, 0x01, 0xbb, 0x78, 0x17, 0xa1, 0x77, 0x00, 0x56, 0x0b,
+	0x17, 0xd1, 0x7c, 0x8f, 0x4a, 0x66, 0xcb, 0x6a, 0xb7, 0x7f, 0xab, 0x2c, 0x33, 0x4e, 0xe1, 0x56,
+	0xe8, 0xf5, 0x97, 0xea, 0x7b, 0x9c, 0x4e, 0xa7, 0x54, 0x8d, 0x53, 0x78, 0x46, 0xe7, 0x7b, 0xd4,
+	0xbb, 0xef, 0x71, 0x3a, 0x1d, 0xcf, 0xda, 0xd0, 0xeb, 0xf8, 0xc2, 0xb3, 0x74, 0x6b, 0xf7, 0xc0,
+	0x04, 0x7b, 0x07, 0x26, 0xf8, 0x7e, 0x60, 0x82, 0xf7, 0x87, 0x66, 0x69, 0xef, 0xd0, 0x2c, 0x7d,
+	0x39, 0x34, 0x4b, 0x4f, 0x1b, 0x69, 0xfb, 0x99, 0xa2, 0x0b, 0x8f, 0xdc, 0x0e, 0x89, 0x58, 0x2b,
+	0xab, 0x2b, 0xdc, 0xf5, 0x1f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xf0, 0x0f, 0x58, 0xb1, 0x91, 0x0a,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -516,6 +866,12 @@ type MsgClient interface {
 	UpdateCampaign(ctx context.Context, in *MsgUpdateCampaign, opts ...grpc.CallOption) (*MsgUpdateCampaignResponse, error)
 	// DeleteCampaign defines the DeleteCampaign RPC.
 	DeleteCampaign(ctx context.Context, in *MsgDeleteCampaign, opts ...grpc.CallOption) (*MsgDeleteCampaignResponse, error)
+	// CreateEligibleWallet defines the CreateEligibleWallet RPC.
+	CreateEligibleWallet(ctx context.Context, in *MsgCreateEligibleWallet, opts ...grpc.CallOption) (*MsgCreateEligibleWalletResponse, error)
+	// UpdateEligibleWallet defines the UpdateEligibleWallet RPC.
+	UpdateEligibleWallet(ctx context.Context, in *MsgUpdateEligibleWallet, opts ...grpc.CallOption) (*MsgUpdateEligibleWalletResponse, error)
+	// DeleteEligibleWallet defines the DeleteEligibleWallet RPC.
+	DeleteEligibleWallet(ctx context.Context, in *MsgDeleteEligibleWallet, opts ...grpc.CallOption) (*MsgDeleteEligibleWalletResponse, error)
 }
 
 type msgClient struct {
@@ -562,6 +918,33 @@ func (c *msgClient) DeleteCampaign(ctx context.Context, in *MsgDeleteCampaign, o
 	return out, nil
 }
 
+func (c *msgClient) CreateEligibleWallet(ctx context.Context, in *MsgCreateEligibleWallet, opts ...grpc.CallOption) (*MsgCreateEligibleWalletResponse, error) {
+	out := new(MsgCreateEligibleWalletResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Msg/CreateEligibleWallet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) UpdateEligibleWallet(ctx context.Context, in *MsgUpdateEligibleWallet, opts ...grpc.CallOption) (*MsgUpdateEligibleWalletResponse, error) {
+	out := new(MsgUpdateEligibleWalletResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Msg/UpdateEligibleWallet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) DeleteEligibleWallet(ctx context.Context, in *MsgDeleteEligibleWallet, opts ...grpc.CallOption) (*MsgDeleteEligibleWalletResponse, error) {
+	out := new(MsgDeleteEligibleWalletResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Msg/DeleteEligibleWallet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
@@ -573,6 +956,12 @@ type MsgServer interface {
 	UpdateCampaign(context.Context, *MsgUpdateCampaign) (*MsgUpdateCampaignResponse, error)
 	// DeleteCampaign defines the DeleteCampaign RPC.
 	DeleteCampaign(context.Context, *MsgDeleteCampaign) (*MsgDeleteCampaignResponse, error)
+	// CreateEligibleWallet defines the CreateEligibleWallet RPC.
+	CreateEligibleWallet(context.Context, *MsgCreateEligibleWallet) (*MsgCreateEligibleWalletResponse, error)
+	// UpdateEligibleWallet defines the UpdateEligibleWallet RPC.
+	UpdateEligibleWallet(context.Context, *MsgUpdateEligibleWallet) (*MsgUpdateEligibleWalletResponse, error)
+	// DeleteEligibleWallet defines the DeleteEligibleWallet RPC.
+	DeleteEligibleWallet(context.Context, *MsgDeleteEligibleWallet) (*MsgDeleteEligibleWalletResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -590,6 +979,15 @@ func (*UnimplementedMsgServer) UpdateCampaign(ctx context.Context, req *MsgUpdat
 }
 func (*UnimplementedMsgServer) DeleteCampaign(ctx context.Context, req *MsgDeleteCampaign) (*MsgDeleteCampaignResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCampaign not implemented")
+}
+func (*UnimplementedMsgServer) CreateEligibleWallet(ctx context.Context, req *MsgCreateEligibleWallet) (*MsgCreateEligibleWalletResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateEligibleWallet not implemented")
+}
+func (*UnimplementedMsgServer) UpdateEligibleWallet(ctx context.Context, req *MsgUpdateEligibleWallet) (*MsgUpdateEligibleWalletResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateEligibleWallet not implemented")
+}
+func (*UnimplementedMsgServer) DeleteEligibleWallet(ctx context.Context, req *MsgDeleteEligibleWallet) (*MsgDeleteEligibleWalletResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteEligibleWallet not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -668,6 +1066,60 @@ func _Msg_DeleteCampaign_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateEligibleWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateEligibleWallet)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateEligibleWallet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Msg/CreateEligibleWallet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateEligibleWallet(ctx, req.(*MsgCreateEligibleWallet))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_UpdateEligibleWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateEligibleWallet)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).UpdateEligibleWallet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Msg/UpdateEligibleWallet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).UpdateEligibleWallet(ctx, req.(*MsgUpdateEligibleWallet))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_DeleteEligibleWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgDeleteEligibleWallet)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).DeleteEligibleWallet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Msg/DeleteEligibleWallet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).DeleteEligibleWallet(ctx, req.(*MsgDeleteEligibleWallet))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scarlettcore.proofofdegen.v1.Msg",
@@ -688,6 +1140,18 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCampaign",
 			Handler:    _Msg_DeleteCampaign_Handler,
+		},
+		{
+			MethodName: "CreateEligibleWallet",
+			Handler:    _Msg_CreateEligibleWallet_Handler,
+		},
+		{
+			MethodName: "UpdateEligibleWallet",
+			Handler:    _Msg_UpdateEligibleWallet_Handler,
+		},
+		{
+			MethodName: "DeleteEligibleWallet",
+			Handler:    _Msg_DeleteEligibleWallet_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -981,6 +1445,240 @@ func (m *MsgDeleteCampaignResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgCreateEligibleWallet) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateEligibleWallet) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateEligibleWallet) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Weight != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Weight))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.ClaimTime != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.ClaimTime))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Claimed {
+		i--
+		if m.Claimed {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateEligibleWalletResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateEligibleWalletResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateEligibleWalletResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateEligibleWallet) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateEligibleWallet) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateEligibleWallet) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Weight != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Weight))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.ClaimTime != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.ClaimTime))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Claimed {
+		i--
+		if m.Claimed {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateEligibleWalletResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateEligibleWalletResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateEligibleWalletResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgDeleteEligibleWallet) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgDeleteEligibleWallet) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgDeleteEligibleWallet) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgDeleteEligibleWalletResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgDeleteEligibleWalletResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgDeleteEligibleWalletResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -1106,6 +1804,110 @@ func (m *MsgDeleteCampaign) Size() (n int) {
 }
 
 func (m *MsgDeleteCampaignResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgCreateEligibleWallet) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Claimed {
+		n += 2
+	}
+	if m.ClaimTime != 0 {
+		n += 1 + sovTx(uint64(m.ClaimTime))
+	}
+	if m.Weight != 0 {
+		n += 1 + sovTx(uint64(m.Weight))
+	}
+	return n
+}
+
+func (m *MsgCreateEligibleWalletResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgUpdateEligibleWallet) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Claimed {
+		n += 2
+	}
+	if m.ClaimTime != 0 {
+		n += 1 + sovTx(uint64(m.ClaimTime))
+	}
+	if m.Weight != 0 {
+		n += 1 + sovTx(uint64(m.Weight))
+	}
+	return n
+}
+
+func (m *MsgUpdateEligibleWalletResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgDeleteEligibleWallet) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgDeleteEligibleWalletResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1896,6 +2698,678 @@ func (m *MsgDeleteCampaignResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgDeleteCampaignResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateEligibleWallet) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateEligibleWallet: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateEligibleWallet: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Claimed", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Claimed = bool(v != 0)
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClaimTime", wireType)
+			}
+			m.ClaimTime = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ClaimTime |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Weight", wireType)
+			}
+			m.Weight = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Weight |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateEligibleWalletResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateEligibleWalletResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateEligibleWalletResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateEligibleWallet) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateEligibleWallet: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateEligibleWallet: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Claimed", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Claimed = bool(v != 0)
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClaimTime", wireType)
+			}
+			m.ClaimTime = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ClaimTime |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Weight", wireType)
+			}
+			m.Weight = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Weight |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateEligibleWalletResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateEligibleWalletResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateEligibleWalletResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgDeleteEligibleWallet) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgDeleteEligibleWallet: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgDeleteEligibleWallet: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgDeleteEligibleWalletResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgDeleteEligibleWalletResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgDeleteEligibleWalletResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

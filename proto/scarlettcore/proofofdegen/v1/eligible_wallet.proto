@@ -1,0 +1,14 @@
+syntax = "proto3";
+package scarlettcore.proofofdegen.v1;
+
+option go_package = "scarlett-core/x/proofofdegen/types";
+
+// EligibleWallet defines the EligibleWallet message.
+message EligibleWallet {
+  string index = 1;
+  string address = 2;
+  bool claimed = 3;
+  uint64 claim_time = 4;
+  uint64 weight = 5;
+  string creator = 6;
+}

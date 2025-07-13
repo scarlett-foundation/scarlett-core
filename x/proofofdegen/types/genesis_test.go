@@ -21,12 +21,25 @@ func TestGenesisState_Validate(t *testing.T) {
 		},
 		{
 			desc:     "valid genesis state",
-			genState: &types.GenesisState{CampaignMap: []types.Campaign{{Index: "0"}, {Index: "1"}}},
+			genState: &types.GenesisState{CampaignMap: []types.Campaign{{Index: "0"}, {Index: "1"}}, EligibleWalletMap: []types.EligibleWallet{{Index: "0"}, {Index: "1"}}},
 			valid:    true,
 		}, {
 			desc: "duplicated campaign",
 			genState: &types.GenesisState{
 				CampaignMap: []types.Campaign{
+					{
+						Index: "0",
+					},
+					{
+						Index: "0",
+					},
+				},
+				EligibleWalletMap: []types.EligibleWallet{{Index: "0"}, {Index: "1"}}},
+			valid: false,
+		}, {
+			desc: "duplicated eligibleWallet",
+			genState: &types.GenesisState{
+				EligibleWalletMap: []types.EligibleWallet{
 					{
 						Index: "0",
 					},

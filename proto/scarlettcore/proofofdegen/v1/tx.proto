@@ -26,6 +26,15 @@ service Msg {
 
   // DeleteCampaign defines the DeleteCampaign RPC.
   rpc DeleteCampaign(MsgDeleteCampaign) returns (MsgDeleteCampaignResponse);
+
+  // CreateEligibleWallet defines the CreateEligibleWallet RPC.
+  rpc CreateEligibleWallet(MsgCreateEligibleWallet) returns (MsgCreateEligibleWalletResponse);
+
+  // UpdateEligibleWallet defines the UpdateEligibleWallet RPC.
+  rpc UpdateEligibleWallet(MsgUpdateEligibleWallet) returns (MsgUpdateEligibleWalletResponse);
+
+  // DeleteEligibleWallet defines the DeleteEligibleWallet RPC.
+  rpc DeleteEligibleWallet(MsgDeleteEligibleWallet) returns (MsgDeleteEligibleWalletResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -84,3 +93,41 @@ message MsgDeleteCampaign {
 
 // MsgDeleteCampaignResponse defines the MsgDeleteCampaignResponse message.
 message MsgDeleteCampaignResponse {}
+
+// MsgCreateEligibleWallet defines the MsgCreateEligibleWallet message.
+message MsgCreateEligibleWallet {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string index = 2;
+  string address = 3;
+  bool claimed = 4;
+  uint64 claim_time = 5;
+  uint64 weight = 6;
+}
+
+// MsgCreateEligibleWalletResponse defines the MsgCreateEligibleWalletResponse message.
+message MsgCreateEligibleWalletResponse {}
+
+// MsgUpdateEligibleWallet defines the MsgUpdateEligibleWallet message.
+message MsgUpdateEligibleWallet {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string index = 2;
+  string address = 3;
+  bool claimed = 4;
+  uint64 claim_time = 5;
+  uint64 weight = 6;
+}
+
+// MsgUpdateEligibleWalletResponse defines the MsgUpdateEligibleWalletResponse message.
+message MsgUpdateEligibleWalletResponse {}
+
+// MsgDeleteEligibleWallet defines the MsgDeleteEligibleWallet message.
+message MsgDeleteEligibleWallet {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string index = 2;
+}
+
+// MsgDeleteEligibleWalletResponse defines the MsgDeleteEligibleWalletResponse message.
+message MsgDeleteEligibleWalletResponse {}
