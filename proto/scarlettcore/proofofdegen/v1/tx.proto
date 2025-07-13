@@ -35,6 +35,9 @@ service Msg {
 
   // DeleteEligibleWallet defines the DeleteEligibleWallet RPC.
   rpc DeleteEligibleWallet(MsgDeleteEligibleWallet) returns (MsgDeleteEligibleWalletResponse);
+
+  // Claim defines the Claim RPC.
+  rpc Claim(MsgClaim) returns (MsgClaimResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -131,3 +134,13 @@ message MsgDeleteEligibleWallet {
 
 // MsgDeleteEligibleWalletResponse defines the MsgDeleteEligibleWalletResponse message.
 message MsgDeleteEligibleWalletResponse {}
+
+// MsgClaim defines the MsgClaim message.
+message MsgClaim {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string address = 2;
+}
+
+// MsgClaimResponse defines the MsgClaimResponse message.
+message MsgClaimResponse {}

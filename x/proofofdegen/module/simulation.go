@@ -128,6 +128,21 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		weightMsgDeleteEligibleWallet,
 		proofofdegensimulation.SimulateMsgDeleteEligibleWallet(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
 	))
+	const (
+		opWeightMsgClaim          = "op_weight_msg_proofofdegen"
+		defaultWeightMsgClaim int = 100
+	)
+
+	var weightMsgClaim int
+	simState.AppParams.GetOrGenerate(opWeightMsgClaim, &weightMsgClaim, nil,
+		func(_ *rand.Rand) {
+			weightMsgClaim = defaultWeightMsgClaim
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgClaim,
+		proofofdegensimulation.SimulateMsgClaim(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
 
 	return operations
 }

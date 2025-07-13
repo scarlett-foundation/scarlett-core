@@ -88,6 +88,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Delete eligible-wallet",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}},
 				},
+				{
+					RpcMethod:      "Claim",
+					Use:            "claim [address]",
+					Short:          "Send a claim tx",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "address"}},
+				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},
 		},
