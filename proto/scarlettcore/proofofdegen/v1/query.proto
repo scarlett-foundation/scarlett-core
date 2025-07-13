@@ -38,6 +38,11 @@ service Query {
   rpc ListEligibleWallet(QueryAllEligibleWalletRequest) returns (QueryAllEligibleWalletResponse) {
     option (google.api.http).get = "/scarlett-core/proofofdegen/v1/eligible_wallet";
   }
+
+  // EligibleAmount Queries a list of EligibleAmount items.
+  rpc EligibleAmount(QueryEligibleAmountRequest) returns (QueryEligibleAmountResponse) {
+    option (google.api.http).get = "/scarlett-core/proofofdegen/v1/eligible_amount/{address}";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -93,3 +98,11 @@ message QueryAllEligibleWalletResponse {
   repeated EligibleWallet eligible_wallet = 1 [(gogoproto.nullable) = false];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
+
+// QueryEligibleAmountRequest defines the QueryEligibleAmountRequest message.
+message QueryEligibleAmountRequest {
+  string address = 1;
+}
+
+// QueryEligibleAmountResponse defines the QueryEligibleAmountResponse message.
+message QueryEligibleAmountResponse {}
