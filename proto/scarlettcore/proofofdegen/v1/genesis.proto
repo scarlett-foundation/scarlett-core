@@ -1,8 +1,10 @@
 syntax = "proto3";
+
 package scarlettcore.proofofdegen.v1;
 
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
+import "scarlettcore/proofofdegen/v1/campaign.proto";
 import "scarlettcore/proofofdegen/v1/params.proto";
 
 option go_package = "scarlett-core/x/proofofdegen/types";
@@ -14,4 +16,5 @@ message GenesisState {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+  repeated Campaign campaign_map = 2 [(gogoproto.nullable) = false];
 }

@@ -1,10 +1,12 @@
 syntax = "proto3";
+
 package scarlettcore.proofofdegen.v1;
 
 import "amino/amino.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "scarlettcore/proofofdegen/v1/campaign.proto";
 import "scarlettcore/proofofdegen/v1/params.proto";
 
 option go_package = "scarlett-core/x/proofofdegen/types";
@@ -14,6 +16,16 @@ service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/scarlett-core/proofofdegen/v1/params";
+  }
+
+  // ListCampaign Queries a list of Campaign items.
+  rpc GetCampaign(QueryGetCampaignRequest) returns (QueryGetCampaignResponse) {
+    option (google.api.http).get = "/scarlett-core/proofofdegen/v1/campaign/{index}";
+  }
+
+  // ListCampaign defines the ListCampaign RPC.
+  rpc ListCampaign(QueryAllCampaignRequest) returns (QueryAllCampaignResponse) {
+    option (google.api.http).get = "/scarlett-core/proofofdegen/v1/campaign";
   }
 }
 
@@ -27,4 +39,25 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryGetCampaignRequest defines the QueryGetCampaignRequest message.
+message QueryGetCampaignRequest {
+  string index = 1;
+}
+
+// QueryGetCampaignResponse defines the QueryGetCampaignResponse message.
+message QueryGetCampaignResponse {
+  Campaign campaign = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAllCampaignRequest defines the QueryAllCampaignRequest message.
+message QueryAllCampaignRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAllCampaignResponse defines the QueryAllCampaignResponse message.
+message QueryAllCampaignResponse {
+  repeated Campaign campaign = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

@@ -21,8 +21,21 @@ func TestGenesisState_Validate(t *testing.T) {
 		},
 		{
 			desc:     "valid genesis state",
-			genState: &types.GenesisState{},
+			genState: &types.GenesisState{CampaignMap: []types.Campaign{{Index: "0"}, {Index: "1"}}},
 			valid:    true,
+		}, {
+			desc: "duplicated campaign",
+			genState: &types.GenesisState{
+				CampaignMap: []types.Campaign{
+					{
+						Index: "0",
+					},
+					{
+						Index: "0",
+					},
+				},
+			},
+			valid: false,
 		},
 	}
 	for _, tc := range tests {

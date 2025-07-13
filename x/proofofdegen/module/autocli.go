@@ -17,6 +17,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:       "params",
 					Short:     "Shows the parameters of the module",
 				},
+				{
+					RpcMethod: "ListCampaign",
+					Use:       "list-campaign",
+					Short:     "List all campaign",
+				},
+				{
+					RpcMethod:      "GetCampaign",
+					Use:            "get-campaign [id]",
+					Short:          "Gets a campaign",
+					Alias:          []string{"show-campaign"},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}},
+				},
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
@@ -27,6 +39,24 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				{
 					RpcMethod: "UpdateParams",
 					Skip:      true, // skipped because authority gated
+				},
+				{
+					RpcMethod:      "CreateCampaign",
+					Use:            "create-campaign [index] [name] [active] [total-allocation]",
+					Short:          "Create a new campaign",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}, {ProtoField: "name"}, {ProtoField: "active"}, {ProtoField: "total_allocation"}},
+				},
+				{
+					RpcMethod:      "UpdateCampaign",
+					Use:            "update-campaign [index] [name] [active] [total-allocation]",
+					Short:          "Update campaign",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}, {ProtoField: "name"}, {ProtoField: "active"}, {ProtoField: "total_allocation"}},
+				},
+				{
+					RpcMethod:      "DeleteCampaign",
+					Use:            "delete-campaign [index]",
+					Short:          "Delete campaign",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "index"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

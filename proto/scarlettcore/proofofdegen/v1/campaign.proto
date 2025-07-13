@@ -1,0 +1,13 @@
+syntax = "proto3";
+package scarlettcore.proofofdegen.v1;
+
+option go_package = "scarlett-core/x/proofofdegen/types";
+
+// Campaign defines the Campaign message.
+message Campaign {
+  string index = 1;
+  string name = 2;
+  bool active = 3;
+  uint64 total_allocation = 4;
+  string creator = 5;
+}

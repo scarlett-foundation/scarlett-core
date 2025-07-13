@@ -35,8 +35,6 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type MsgUpdateParams struct {
 	// authority is the address that controls the module (defaults to x/gov unless overwritten).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	// params defines the module parameters to update.
-	//
 	// NOTE: All parameters must be supplied.
 	Params Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
 }
@@ -126,9 +124,333 @@ func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
+// MsgCreateCampaign defines the MsgCreateCampaign message.
+type MsgCreateCampaign struct {
+	Creator         string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Index           string `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+	Name            string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Active          bool   `protobuf:"varint,4,opt,name=active,proto3" json:"active,omitempty"`
+	TotalAllocation uint64 `protobuf:"varint,5,opt,name=total_allocation,json=totalAllocation,proto3" json:"total_allocation,omitempty"`
+}
+
+func (m *MsgCreateCampaign) Reset()         { *m = MsgCreateCampaign{} }
+func (m *MsgCreateCampaign) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateCampaign) ProtoMessage()    {}
+func (*MsgCreateCampaign) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{2}
+}
+func (m *MsgCreateCampaign) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateCampaign) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateCampaign.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateCampaign) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateCampaign.Merge(m, src)
+}
+func (m *MsgCreateCampaign) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateCampaign) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateCampaign.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateCampaign proto.InternalMessageInfo
+
+func (m *MsgCreateCampaign) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgCreateCampaign) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+func (m *MsgCreateCampaign) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *MsgCreateCampaign) GetActive() bool {
+	if m != nil {
+		return m.Active
+	}
+	return false
+}
+
+func (m *MsgCreateCampaign) GetTotalAllocation() uint64 {
+	if m != nil {
+		return m.TotalAllocation
+	}
+	return 0
+}
+
+// MsgCreateCampaignResponse defines the MsgCreateCampaignResponse message.
+type MsgCreateCampaignResponse struct {
+}
+
+func (m *MsgCreateCampaignResponse) Reset()         { *m = MsgCreateCampaignResponse{} }
+func (m *MsgCreateCampaignResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgCreateCampaignResponse) ProtoMessage()    {}
+func (*MsgCreateCampaignResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{3}
+}
+func (m *MsgCreateCampaignResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgCreateCampaignResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgCreateCampaignResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgCreateCampaignResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgCreateCampaignResponse.Merge(m, src)
+}
+func (m *MsgCreateCampaignResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgCreateCampaignResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgCreateCampaignResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgCreateCampaignResponse proto.InternalMessageInfo
+
+// MsgUpdateCampaign defines the MsgUpdateCampaign message.
+type MsgUpdateCampaign struct {
+	Creator         string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Index           string `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+	Name            string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Active          bool   `protobuf:"varint,4,opt,name=active,proto3" json:"active,omitempty"`
+	TotalAllocation uint64 `protobuf:"varint,5,opt,name=total_allocation,json=totalAllocation,proto3" json:"total_allocation,omitempty"`
+}
+
+func (m *MsgUpdateCampaign) Reset()         { *m = MsgUpdateCampaign{} }
+func (m *MsgUpdateCampaign) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateCampaign) ProtoMessage()    {}
+func (*MsgUpdateCampaign) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{4}
+}
+func (m *MsgUpdateCampaign) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateCampaign) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateCampaign.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateCampaign) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateCampaign.Merge(m, src)
+}
+func (m *MsgUpdateCampaign) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateCampaign) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateCampaign.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateCampaign proto.InternalMessageInfo
+
+func (m *MsgUpdateCampaign) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgUpdateCampaign) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+func (m *MsgUpdateCampaign) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *MsgUpdateCampaign) GetActive() bool {
+	if m != nil {
+		return m.Active
+	}
+	return false
+}
+
+func (m *MsgUpdateCampaign) GetTotalAllocation() uint64 {
+	if m != nil {
+		return m.TotalAllocation
+	}
+	return 0
+}
+
+// MsgUpdateCampaignResponse defines the MsgUpdateCampaignResponse message.
+type MsgUpdateCampaignResponse struct {
+}
+
+func (m *MsgUpdateCampaignResponse) Reset()         { *m = MsgUpdateCampaignResponse{} }
+func (m *MsgUpdateCampaignResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateCampaignResponse) ProtoMessage()    {}
+func (*MsgUpdateCampaignResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{5}
+}
+func (m *MsgUpdateCampaignResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateCampaignResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateCampaignResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateCampaignResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateCampaignResponse.Merge(m, src)
+}
+func (m *MsgUpdateCampaignResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateCampaignResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateCampaignResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateCampaignResponse proto.InternalMessageInfo
+
+// MsgDeleteCampaign defines the MsgDeleteCampaign message.
+type MsgDeleteCampaign struct {
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Index   string `protobuf:"bytes,2,opt,name=index,proto3" json:"index,omitempty"`
+}
+
+func (m *MsgDeleteCampaign) Reset()         { *m = MsgDeleteCampaign{} }
+func (m *MsgDeleteCampaign) String() string { return proto.CompactTextString(m) }
+func (*MsgDeleteCampaign) ProtoMessage()    {}
+func (*MsgDeleteCampaign) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{6}
+}
+func (m *MsgDeleteCampaign) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgDeleteCampaign) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgDeleteCampaign.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgDeleteCampaign) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgDeleteCampaign.Merge(m, src)
+}
+func (m *MsgDeleteCampaign) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgDeleteCampaign) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgDeleteCampaign.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgDeleteCampaign proto.InternalMessageInfo
+
+func (m *MsgDeleteCampaign) GetCreator() string {
+	if m != nil {
+		return m.Creator
+	}
+	return ""
+}
+
+func (m *MsgDeleteCampaign) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+// MsgDeleteCampaignResponse defines the MsgDeleteCampaignResponse message.
+type MsgDeleteCampaignResponse struct {
+}
+
+func (m *MsgDeleteCampaignResponse) Reset()         { *m = MsgDeleteCampaignResponse{} }
+func (m *MsgDeleteCampaignResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgDeleteCampaignResponse) ProtoMessage()    {}
+func (*MsgDeleteCampaignResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7a9b8c6b3151bd0d, []int{7}
+}
+func (m *MsgDeleteCampaignResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgDeleteCampaignResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgDeleteCampaignResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgDeleteCampaignResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgDeleteCampaignResponse.Merge(m, src)
+}
+func (m *MsgDeleteCampaignResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgDeleteCampaignResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgDeleteCampaignResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgDeleteCampaignResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgUpdateParams)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateParams")
 	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateParamsResponse")
+	proto.RegisterType((*MsgCreateCampaign)(nil), "scarlettcore.proofofdegen.v1.MsgCreateCampaign")
+	proto.RegisterType((*MsgCreateCampaignResponse)(nil), "scarlettcore.proofofdegen.v1.MsgCreateCampaignResponse")
+	proto.RegisterType((*MsgUpdateCampaign)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateCampaign")
+	proto.RegisterType((*MsgUpdateCampaignResponse)(nil), "scarlettcore.proofofdegen.v1.MsgUpdateCampaignResponse")
+	proto.RegisterType((*MsgDeleteCampaign)(nil), "scarlettcore.proofofdegen.v1.MsgDeleteCampaign")
+	proto.RegisterType((*MsgDeleteCampaignResponse)(nil), "scarlettcore.proofofdegen.v1.MsgDeleteCampaignResponse")
 }
 
 func init() {
@@ -136,29 +458,41 @@ func init() {
 }
 
 var fileDescriptor_7a9b8c6b3151bd0d = []byte{
-	// 344 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x2d, 0x4e, 0x4e, 0x2c,
-	0xca, 0x49, 0x2d, 0x29, 0x49, 0xce, 0x2f, 0x4a, 0xd5, 0x2f, 0x28, 0xca, 0xcf, 0x4f, 0xcb, 0x4f,
-	0x4b, 0x49, 0x4d, 0x4f, 0xcd, 0xd3, 0x2f, 0x33, 0xd4, 0x2f, 0xa9, 0xd0, 0x2b, 0x28, 0xca, 0x2f,
-	0xc9, 0x17, 0x92, 0x41, 0x56, 0xa6, 0x87, 0xac, 0x4c, 0xaf, 0xcc, 0x50, 0x4a, 0x30, 0x31, 0x37,
-	0x33, 0x2f, 0x5f, 0x1f, 0x4c, 0x42, 0x34, 0x48, 0x89, 0x27, 0xe7, 0x17, 0xe7, 0xe6, 0x17, 0xeb,
-	0xe7, 0x16, 0xa7, 0x83, 0x0c, 0xca, 0x2d, 0x4e, 0x87, 0x4a, 0x48, 0x42, 0x24, 0xe2, 0xc1, 0x3c,
-	0x7d, 0x08, 0x07, 0x2a, 0x25, 0x92, 0x9e, 0x9f, 0x9e, 0x0f, 0x11, 0x07, 0xb1, 0xa0, 0xa2, 0x9a,
-	0x78, 0x5d, 0x58, 0x90, 0x58, 0x94, 0x98, 0x0b, 0x35, 0x40, 0xe9, 0x12, 0x23, 0x17, 0xbf, 0x6f,
-	0x71, 0x7a, 0x68, 0x41, 0x4a, 0x62, 0x49, 0x6a, 0x00, 0x58, 0x46, 0xc8, 0x8c, 0x8b, 0x33, 0xb1,
-	0xb4, 0x24, 0x23, 0xbf, 0x28, 0xb3, 0xa4, 0x52, 0x82, 0x51, 0x81, 0x51, 0x83, 0xd3, 0x49, 0xe2,
-	0xd2, 0x16, 0x5d, 0x11, 0xa8, 0xcd, 0x8e, 0x29, 0x29, 0x45, 0xa9, 0xc5, 0xc5, 0xc1, 0x25, 0x45,
-	0x99, 0x79, 0xe9, 0x41, 0x08, 0xa5, 0x42, 0xee, 0x5c, 0x6c, 0x10, 0xb3, 0x25, 0x98, 0x14, 0x18,
-	0x35, 0xb8, 0x8d, 0x54, 0xf4, 0xf0, 0x05, 0x81, 0x1e, 0xc4, 0x36, 0x27, 0xce, 0x13, 0xf7, 0xe4,
-	0x19, 0x56, 0x3c, 0xdf, 0xa0, 0xc5, 0x18, 0x04, 0xd5, 0x6e, 0x65, 0xd7, 0xf4, 0x7c, 0x83, 0x16,
-	0xc2, 0xe0, 0xae, 0xe7, 0x1b, 0xb4, 0xb4, 0x51, 0xbc, 0x54, 0x81, 0xea, 0x29, 0x34, 0x0f, 0x28,
-	0x49, 0x72, 0x89, 0xa3, 0x09, 0x05, 0xa5, 0x16, 0x17, 0xe4, 0xe7, 0x15, 0xa7, 0x1a, 0x35, 0x31,
-	0x72, 0x31, 0xfb, 0x16, 0xa7, 0x0b, 0x95, 0x70, 0xf1, 0xa0, 0xf8, 0x59, 0x17, 0xbf, 0x5b, 0xd1,
-	0x8c, 0x93, 0x32, 0x25, 0x49, 0x39, 0xcc, 0x76, 0x29, 0xd6, 0x06, 0x90, 0x3f, 0x9d, 0x6c, 0x4e,
-	0x3c, 0x92, 0x63, 0xbc, 0xf0, 0x48, 0x8e, 0xf1, 0xc1, 0x23, 0x39, 0xc6, 0x09, 0x8f, 0xe5, 0x18,
-	0x2e, 0x3c, 0x96, 0x63, 0xb8, 0xf1, 0x58, 0x8e, 0x21, 0x4a, 0x09, 0x66, 0xac, 0x2e, 0x36, 0x7f,
-	0x96, 0x54, 0x16, 0xa4, 0x16, 0x27, 0xb1, 0x81, 0x63, 0xce, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff,
-	0x7e, 0x24, 0x33, 0x7c, 0x88, 0x02, 0x00, 0x00,
+	// 542 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x94, 0x3d, 0x6f, 0xd3, 0x4e,
+	0x1c, 0xc7, 0x73, 0xff, 0x3c, 0xfc, 0xc9, 0x51, 0x51, 0x7a, 0x8a, 0xa8, 0x63, 0x90, 0x89, 0x2c,
+	0x90, 0xd2, 0xa0, 0xd8, 0x6a, 0x10, 0x20, 0x55, 0x08, 0xa9, 0x29, 0x12, 0x53, 0x24, 0x64, 0xc4,
+	0xc2, 0x52, 0x1d, 0xf6, 0xf5, 0xb0, 0xb0, 0x7d, 0xd6, 0xdd, 0x11, 0xa5, 0x4c, 0x88, 0x91, 0x89,
+	0x97, 0xc1, 0x98, 0x81, 0x57, 0xc0, 0xd4, 0xb1, 0xea, 0xc4, 0x84, 0x50, 0x32, 0xe4, 0x1d, 0x30,
+	0x23, 0x3f, 0xb5, 0xb1, 0x89, 0x92, 0x66, 0x60, 0x60, 0xb1, 0xee, 0xf7, 0xf8, 0xbd, 0xcf, 0xdd,
+	0xcf, 0x07, 0xef, 0x0a, 0x1b, 0x73, 0x8f, 0x48, 0x69, 0x33, 0x4e, 0xcc, 0x90, 0x33, 0x76, 0xc4,
+	0x8e, 0x1c, 0x42, 0x49, 0x60, 0x0e, 0x77, 0x4d, 0x39, 0x32, 0x42, 0xce, 0x24, 0x43, 0xb7, 0xe6,
+	0xd3, 0x8c, 0xf9, 0x34, 0x63, 0xb8, 0xab, 0x6e, 0x61, 0xdf, 0x0d, 0x98, 0x19, 0x7f, 0x93, 0x02,
+	0x75, 0xdb, 0x66, 0xc2, 0x67, 0xc2, 0xf4, 0x05, 0x8d, 0x1a, 0xf9, 0x82, 0xa6, 0x81, 0x66, 0x12,
+	0x38, 0x8c, 0x2d, 0x33, 0x31, 0xd2, 0x50, 0x83, 0x32, 0xca, 0x12, 0x7f, 0xb4, 0x4a, 0xbd, 0x3b,
+	0x4b, 0x77, 0x18, 0x62, 0x8e, 0xfd, 0xb4, 0x81, 0x7e, 0x06, 0xe0, 0xe6, 0x40, 0xd0, 0x97, 0xa1,
+	0x83, 0x25, 0x79, 0x1e, 0x47, 0xd0, 0x43, 0x58, 0xc7, 0xef, 0xe4, 0x1b, 0xc6, 0x5d, 0x79, 0xac,
+	0x80, 0x16, 0x68, 0xd7, 0xfb, 0xca, 0xd9, 0xd7, 0x6e, 0x23, 0x55, 0xde, 0x77, 0x1c, 0x4e, 0x84,
+	0x78, 0x21, 0xb9, 0x1b, 0x50, 0xeb, 0x22, 0x15, 0x3d, 0x83, 0xb5, 0xa4, 0xb7, 0xf2, 0x5f, 0x0b,
+	0xb4, 0xaf, 0xf6, 0xee, 0x18, 0xcb, 0x8e, 0xc0, 0x48, 0xd4, 0xfa, 0xf5, 0x93, 0x1f, 0xb7, 0x4b,
+	0x5f, 0x66, 0xe3, 0x0e, 0xb0, 0xd2, 0xf2, 0xbd, 0x27, 0x1f, 0x67, 0xe3, 0xce, 0x45, 0xe3, 0x4f,
+	0xb3, 0x71, 0xe7, 0x5e, 0x0e, 0x69, 0x94, 0x87, 0x2a, 0x00, 0xe8, 0x4d, 0xb8, 0x5d, 0x70, 0x59,
+	0x44, 0x84, 0x2c, 0x10, 0x44, 0xff, 0x06, 0xe0, 0xd6, 0x40, 0xd0, 0x03, 0x4e, 0xb0, 0x24, 0x07,
+	0xd8, 0x0f, 0xb1, 0x4b, 0x03, 0xd4, 0x83, 0xff, 0xdb, 0x91, 0x87, 0xf1, 0x95, 0xbc, 0x59, 0x22,
+	0x6a, 0xc0, 0xaa, 0x1b, 0x38, 0x64, 0x14, 0xc3, 0xd6, 0xad, 0xc4, 0x40, 0x08, 0x56, 0x02, 0xec,
+	0x13, 0xa5, 0x1c, 0x3b, 0xe3, 0x35, 0xba, 0x01, 0x6b, 0xd8, 0x96, 0xee, 0x90, 0x28, 0x95, 0x16,
+	0x68, 0x5f, 0xb1, 0x52, 0x0b, 0xed, 0xc0, 0xeb, 0x92, 0x49, 0xec, 0x1d, 0x62, 0xcf, 0x63, 0x36,
+	0x96, 0x2e, 0x0b, 0x94, 0x6a, 0x0b, 0xb4, 0x2b, 0xd6, 0x66, 0xec, 0xdf, 0x3f, 0x77, 0xef, 0x6d,
+	0x44, 0x27, 0x92, 0x49, 0xeb, 0x37, 0x61, 0xf3, 0x0f, 0x86, 0x22, 0x61, 0x42, 0xff, 0x6f, 0x13,
+	0xe6, 0x19, 0xce, 0x09, 0xdf, 0xc6, 0x80, 0x4f, 0x89, 0x47, 0xfe, 0x06, 0xe0, 0xc2, 0x9d, 0xe4,
+	0xc5, 0xb2, 0x9d, 0xf4, 0x7e, 0x95, 0x61, 0x79, 0x20, 0x28, 0x92, 0x70, 0x23, 0xf7, 0x07, 0x75,
+	0x97, 0x4f, 0x7e, 0x61, 0x38, 0xd5, 0x07, 0x6b, 0xa5, 0x67, 0xea, 0xe8, 0x3d, 0xbc, 0x56, 0x98,
+	0x63, 0x73, 0x65, 0xa3, 0x7c, 0x81, 0xfa, 0x68, 0xcd, 0x82, 0x79, 0xed, 0xc2, 0x84, 0x99, 0x97,
+	0x84, 0x58, 0x43, 0x7b, 0xf1, 0xfd, 0x47, 0xda, 0x85, 0xcb, 0x5f, 0xad, 0x9d, 0x2f, 0xb8, 0x84,
+	0xf6, 0xe2, 0x1b, 0x57, 0xab, 0x1f, 0xa2, 0x97, 0xaa, 0xff, 0xf8, 0x64, 0xa2, 0x81, 0xd3, 0x89,
+	0x06, 0x7e, 0x4e, 0x34, 0xf0, 0x79, 0xaa, 0x95, 0x4e, 0xa7, 0x5a, 0xe9, 0xfb, 0x54, 0x2b, 0xbd,
+	0xd2, 0xb3, 0xc6, 0xdd, 0x45, 0x2f, 0x95, 0x3c, 0x0e, 0x89, 0x78, 0x5d, 0x8b, 0xdf, 0xde, 0xfb,
+	0xbf, 0x03, 0x00, 0x00, 0xff, 0xff, 0x1b, 0x74, 0x29, 0xee, 0x4a, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -176,6 +510,12 @@ type MsgClient interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// CreateCampaign defines the CreateCampaign RPC.
+	CreateCampaign(ctx context.Context, in *MsgCreateCampaign, opts ...grpc.CallOption) (*MsgCreateCampaignResponse, error)
+	// UpdateCampaign defines the UpdateCampaign RPC.
+	UpdateCampaign(ctx context.Context, in *MsgUpdateCampaign, opts ...grpc.CallOption) (*MsgUpdateCampaignResponse, error)
+	// DeleteCampaign defines the DeleteCampaign RPC.
+	DeleteCampaign(ctx context.Context, in *MsgDeleteCampaign, opts ...grpc.CallOption) (*MsgDeleteCampaignResponse, error)
 }
 
 type msgClient struct {
@@ -195,11 +535,44 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) CreateCampaign(ctx context.Context, in *MsgCreateCampaign, opts ...grpc.CallOption) (*MsgCreateCampaignResponse, error) {
+	out := new(MsgCreateCampaignResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Msg/CreateCampaign", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) UpdateCampaign(ctx context.Context, in *MsgUpdateCampaign, opts ...grpc.CallOption) (*MsgUpdateCampaignResponse, error) {
+	out := new(MsgUpdateCampaignResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Msg/UpdateCampaign", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) DeleteCampaign(ctx context.Context, in *MsgDeleteCampaign, opts ...grpc.CallOption) (*MsgDeleteCampaignResponse, error) {
+	out := new(MsgDeleteCampaignResponse)
+	err := c.cc.Invoke(ctx, "/scarlettcore.proofofdegen.v1.Msg/DeleteCampaign", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// UpdateParams defines a (governance) operation for updating the module
 	// parameters. The authority defaults to the x/gov module account.
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// CreateCampaign defines the CreateCampaign RPC.
+	CreateCampaign(context.Context, *MsgCreateCampaign) (*MsgCreateCampaignResponse, error)
+	// UpdateCampaign defines the UpdateCampaign RPC.
+	UpdateCampaign(context.Context, *MsgUpdateCampaign) (*MsgUpdateCampaignResponse, error)
+	// DeleteCampaign defines the DeleteCampaign RPC.
+	DeleteCampaign(context.Context, *MsgDeleteCampaign) (*MsgDeleteCampaignResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -208,6 +581,15 @@ type UnimplementedMsgServer struct {
 
 func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (*UnimplementedMsgServer) CreateCampaign(ctx context.Context, req *MsgCreateCampaign) (*MsgCreateCampaignResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCampaign not implemented")
+}
+func (*UnimplementedMsgServer) UpdateCampaign(ctx context.Context, req *MsgUpdateCampaign) (*MsgUpdateCampaignResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCampaign not implemented")
+}
+func (*UnimplementedMsgServer) DeleteCampaign(ctx context.Context, req *MsgDeleteCampaign) (*MsgDeleteCampaignResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCampaign not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -232,6 +614,60 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateCampaign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateCampaign)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateCampaign(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Msg/CreateCampaign",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateCampaign(ctx, req.(*MsgCreateCampaign))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_UpdateCampaign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateCampaign)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).UpdateCampaign(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Msg/UpdateCampaign",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).UpdateCampaign(ctx, req.(*MsgUpdateCampaign))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_DeleteCampaign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgDeleteCampaign)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).DeleteCampaign(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scarlettcore.proofofdegen.v1.Msg/DeleteCampaign",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).DeleteCampaign(ctx, req.(*MsgDeleteCampaign))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Msg_serviceDesc = _Msg_serviceDesc
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "scarlettcore.proofofdegen.v1.Msg",
@@ -240,6 +676,18 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "CreateCampaign",
+			Handler:    _Msg_CreateCampaign_Handler,
+		},
+		{
+			MethodName: "UpdateCampaign",
+			Handler:    _Msg_UpdateCampaign_Handler,
+		},
+		{
+			MethodName: "DeleteCampaign",
+			Handler:    _Msg_DeleteCampaign_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -309,6 +757,230 @@ func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgCreateCampaign) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateCampaign) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateCampaign) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.TotalAllocation != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.TotalAllocation))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Active {
+		i--
+		if m.Active {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgCreateCampaignResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgCreateCampaignResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgCreateCampaignResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateCampaign) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateCampaign) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateCampaign) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.TotalAllocation != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.TotalAllocation))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Active {
+		i--
+		if m.Active {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateCampaignResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateCampaignResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateCampaignResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgDeleteCampaign) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgDeleteCampaign) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgDeleteCampaign) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgDeleteCampaignResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgDeleteCampaignResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgDeleteCampaignResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -336,6 +1008,104 @@ func (m *MsgUpdateParams) Size() (n int) {
 }
 
 func (m *MsgUpdateParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgCreateCampaign) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Active {
+		n += 2
+	}
+	if m.TotalAllocation != 0 {
+		n += 1 + sovTx(uint64(m.TotalAllocation))
+	}
+	return n
+}
+
+func (m *MsgCreateCampaignResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgUpdateCampaign) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Active {
+		n += 2
+	}
+	if m.TotalAllocation != 0 {
+		n += 1 + sovTx(uint64(m.TotalAllocation))
+	}
+	return n
+}
+
+func (m *MsgUpdateCampaignResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgDeleteCampaign) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgDeleteCampaignResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -492,6 +1262,640 @@ func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateCampaign) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateCampaign: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateCampaign: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Active", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Active = bool(v != 0)
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TotalAllocation", wireType)
+			}
+			m.TotalAllocation = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TotalAllocation |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgCreateCampaignResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgCreateCampaignResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgCreateCampaignResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateCampaign) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateCampaign: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateCampaign: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Active", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Active = bool(v != 0)
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TotalAllocation", wireType)
+			}
+			m.TotalAllocation = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TotalAllocation |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateCampaignResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateCampaignResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateCampaignResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgDeleteCampaign) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgDeleteCampaign: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgDeleteCampaign: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgDeleteCampaignResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgDeleteCampaignResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgDeleteCampaignResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
