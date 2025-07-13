@@ -143,4 +143,6 @@ message MsgClaim {
 }
 
 // MsgClaimResponse defines the MsgClaimResponse message.
-message MsgClaimResponse {}
+message MsgClaimResponse {
+  uint64 claimed_amount = 1;
+}

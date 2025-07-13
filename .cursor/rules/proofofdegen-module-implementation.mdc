@@ -75,8 +75,11 @@ Implement the proofofdegen airdrop module to enable programmable emissions distr
 
 #### Step 4.1: Add Module to App Registration
 **Objective**: Register module in main application
-**Action**: Update app.go with proofofdegen module integration
-**Verification**: User builds chain and confirms module loads successfully
+**Action**: Complete module integration in app layer
+**Sub-steps**:
+- **4.1a**: Add proofofdegen module account to `moduleAccPerms` in `app_config.go`
+- **4.1b**: Verify module account creation and EndBlocker functionality
+**Verification**: User builds chain and confirms module loads successfully with working EndBlocker
 
 #### Step 4.2: Add Genesis State
 **Objective**: Initialize with hardcoded eligible addresses
