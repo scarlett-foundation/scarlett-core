@@ -43,6 +43,11 @@ service Query {
   rpc EligibleAmount(QueryEligibleAmountRequest) returns (QueryEligibleAmountResponse) {
     option (google.api.http).get = "/scarlett-core/proofofdegen/v1/eligible_amount/{address}";
   }
+
+  // CampaignInfo Queries a list of CampaignInfo items.
+  rpc CampaignInfo(QueryCampaignInfoRequest) returns (QueryCampaignInfoResponse) {
+    option (google.api.http).get = "/scarlett-core/proofofdegen/v1/campaign_info";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -106,3 +111,9 @@ message QueryEligibleAmountRequest {
 
 // QueryEligibleAmountResponse defines the QueryEligibleAmountResponse message.
 message QueryEligibleAmountResponse {}
+
+// QueryCampaignInfoRequest defines the QueryCampaignInfoRequest message.
+message QueryCampaignInfoRequest {}
+
+// QueryCampaignInfoResponse defines the QueryCampaignInfoResponse message.
+message QueryCampaignInfoResponse {}
