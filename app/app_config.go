@@ -92,6 +92,7 @@ var (
 		{Account: "inferencerewards"}, // Module account for LLM inference miner rewards
 		{Account: scarlettcoremoduletypes.ModuleName, Permissions: []string{authtypes.Burner}}, // Required for token burning
 		{Account: contractsmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
+		{Account: proofofdegenmoduletypes.ModuleName}, // Required for airdrop emissions distribution
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
