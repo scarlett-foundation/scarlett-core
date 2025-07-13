@@ -14,7 +14,7 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		}
 	}
 	for _, elem := range genState.EligibleWalletMap {
-		if err := k.EligibleWallet.Set(ctx, elem.Index, elem); err != nil {
+		if err := k.EligibleWallet.Set(ctx, elem.Address, elem); err != nil {
 			return err
 		}
 	}
