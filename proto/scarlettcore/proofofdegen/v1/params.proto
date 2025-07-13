@@ -1,0 +1,13 @@
+syntax = "proto3";
+package scarlettcore.proofofdegen.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "scarlett-core/x/proofofdegen/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "scarlettcore/x/proofofdegen/Params";
+  option (gogoproto.equal) = true;
+}

@@ -1,0 +1,186 @@
+---
+description: Step-by-step implementation guide for the proofofdegen airdrop module with automated emission distribution and delayed claim mechanics
+alwaysApply: true
+---
+
+# Proofofdegen Airdrop Module Implementation - Step-by-Step Guide
+
+## Overview
+Implement the proofofdegen airdrop module to enable programmable emissions distribution based on campaign eligibility. This module integrates with the existing x/emissions system to receive allocated emissions and redistribute them to eligible wallets. Creates a foundation for fair launch airdrops and viral growth mechanics while maintaining governance oversight.
+
+**MVP Approach**: Single Genesis campaign with hardcoded eligible addresses. Future versions can add multi-campaign support with governance-controlled emission splitting between campaigns.
+
+## ⚠️ CRITICAL IMPLEMENTATION REQUIREMENTS
+- **PRESERVE current functionality** - existing modules must continue working
+- **MAINTAIN security** - only eligible wallets can claim
+- **LEAN MVP approach** - start with single Genesis campaign (no multi-campaign splitting)
+- **NO breaking changes** - chain must continue running identically during implementation
+- **DELAYED claim mechanics** - patience rewarded with bigger shares
+- **SIMPLIFIED DESIGN** - single campaign eliminates campaign management complexity
+
+## Implementation Steps
+
+### Phase 1: Module Scaffolding
+
+#### Step 1.1: Scaffold Base Module
+**Objective**: Create proofofdegen module foundation
+**Action**: Run ignite scaffold module command
+**Verification**: User builds chain and confirms module scaffolded successfully
+
+#### Step 1.2: Scaffold Campaign Storage
+**Objective**: Add campaign data structure (single Genesis campaign)
+**Action**: Scaffold map for campaign with name, active status, and total allocation
+**Verification**: User builds chain and confirms storage types generated
+
+#### Step 1.3: Scaffold Eligible Wallet Storage
+**Objective**: Add eligible wallet tracking (for Genesis campaign)
+**Action**: Scaffold map for eligible wallets with address, claimed status, and claim time
+**Verification**: User builds chain and confirms storage working
+
+### Phase 2: Core Messaging
+
+#### Step 2.1: Scaffold Claim Message
+**Objective**: Enable users to claim rewards (from Genesis campaign)
+**Action**: Scaffold claim message with address parameter only
+**Verification**: User builds chain and confirms message handler created
+
+#### Step 2.2: Scaffold Eligibility Query
+**Objective**: Allow checking claimable amounts (from Genesis campaign)
+**Action**: Scaffold query for eligible-amount with address parameter only
+**Verification**: User builds chain and confirms query endpoints working
+
+#### Step 2.3: Scaffold Campaign Info Query
+**Objective**: Enable campaign statistics retrieval
+**Action**: Scaffold query for campaign-info with response including stats
+**Verification**: User builds chain and confirms query functionality
+
+### Phase 3: Emission Mechanics
+
+#### Step 3.1: Implement EndBlocker Distribution
+**Objective**: Distribute emissions per block to unclaimed wallets
+**Action**: Add emission calculation and distribution logic in EndBlocker
+**Verification**: User builds chain and confirms emissions working
+
+#### Step 3.2: Implement Claim Logic
+**Objective**: Handle user claims and stop future emissions
+**Action**: Update claim message handler with emission stopping logic
+**Verification**: User builds chain and confirms claim mechanics working
+
+#### Step 3.3: Implement Dynamic Share Calculation
+**Objective**: Calculate bigger shares for delayed claims
+**Action**: Add share calculation based on remaining unclaimed wallets
+**Verification**: User builds chain and confirms patience mechanics working
+
+### Phase 4: Integration
+
+#### Step 4.1: Add Module to App Registration
+**Objective**: Register module in main application
+**Action**: Update app.go with proofofdegen module integration
+**Verification**: User builds chain and confirms module loads successfully
+
+#### Step 4.2: Add Genesis State
+**Objective**: Initialize with hardcoded eligible addresses
+**Action**: Add genesis.json configuration with sample eligible wallets
+**Verification**: User builds chain and confirms genesis state loads
+
+#### Step 4.3: Add Basic CLI Commands
+**Objective**: Enable command line interaction
+**Action**: Implement basic CLI commands for claims and queries
+**Verification**: User builds chain and confirms CLI functionality
+
+#### Step 4.4: Register as Emissions Destination
+**Objective**: Connect proofofdegen to main emissions system
+**Action**: Register proofofdegen module as valid emissions destination in emissions module
+**Verification**: User confirms module appears in emissions destinations list
+
+#### Step 4.5: Set Initial Emissions Allocation
+**Objective**: Allocate portion of block emissions to proofofdegen
+**Action**: Use governance/admin to set proofofdegen allocation (e.g., 5% of total emissions)
+**Verification**: User confirms proofofdegen receiving emissions per block from main system
+
+## Build Verification Protocol
+
+### After Each Step:
+1. **Agent completes code changes**
+2. **Agent asks user**: "Please run `ignite chain serve --reset-once --verbose` and confirm it builds successfully"
+3. **User confirms**: Build status (success/failure)
+4. **If failure**: Agent analyzes and fixes before proceeding
+5. **If success**: Agent auto-generates commit and proceeds to next step
+
+### User Commands to Run:
+```bash
+ignite chain serve --reset-once --verbose
+```
+
+### Agent Must Never:
+- ❌ Run build commands themselves
+- ❌ Assume build success
+- ❌ Proceed without user confirmation
+- ❌ Skip verification steps
+- ❌ Write complex features in single steps
+
+## Core Game Mechanic Requirements
+
+### MVP Claim Logic (EXACT Implementation)
+```go
+// In claim message handler
+if eligibleWallet.Claimed {
+    return nil, types.ErrAlreadyClaimed
+}
+
+// Stop emissions for this wallet
+eligibleWallet.Claimed = true
+eligibleWallet.ClaimTime = uint64(ctx.BlockHeight())
+
+// Calculate current claimable amount based on remaining claimers
+claimableAmount := k.CalculateShare(ctx, walletAddress)
+```
+
+### Emission Distribution (EXACT Implementation)
+```go
+// In EndBlocker
+// Get emissions received from main emissions module this block
+moduleBalance := k.bankKeeper.GetBalance(ctx, k.GetModuleAddress(), "sclt")
+receivedEmissions := moduleBalance.Amount.Uint64()
+
+// Get all unclaimed wallets from Genesis campaign
+unclaimedWallets := k.GetUnclaimedWallets(ctx)
+if len(unclaimedWallets) > 0 && receivedEmissions > 0 {
+    sharePerWallet := receivedEmissions / uint64(len(unclaimedWallets))
+    // Distribute shares to each unclaimed wallet
+    // Clear module balance after distribution
+}
+```
+
+## Success Criteria
+
+### ✅ Core Functionality
+- ✅ Users can claim from eligible address list
+- ✅ Emissions distributed per block to unclaimed wallets
+- ✅ Claiming stops future emissions for that address
+- ✅ Patient claimers receive progressively larger shares
+
+### ✅ Technical Integration
+- ✅ Module properly registered and functional
+- ✅ Genesis state with hardcoded eligible addresses
+- ✅ CLI commands for basic interaction
+- ✅ Query endpoints for checking eligibility and amounts
+- ✅ Module registered as emissions destination
+- ✅ Receiving allocated emissions from main emissions system
+
+## Rollback Plan
+If any step fails:
+1. **Git revert** the last commit
+2. **Analyze** the specific build failure
+3. **Fix** the issue causing the failure
+4. **Re-attempt** the step
+5. **Never proceed** without successful build
+
+## Auto-Attachment Configuration
+This rule should be automatically attached for:
+- Proofofdegen module development
+- Airdrop mechanism implementation
+- Emission distribution features
+- Delayed claim mechanics
+- Campaign-based reward systems
+- Genesis airdrop setup

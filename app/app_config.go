@@ -5,6 +5,8 @@ import (
 	contractsmoduletypes "scarlett-core/x/contracts/types"
 	_ "scarlett-core/x/emissions/module"
 	emissionsmoduletypes "scarlett-core/x/emissions/types"
+	_ "scarlett-core/x/proofofdegen/module"
+	proofofdegenmoduletypes "scarlett-core/x/proofofdegen/types"
 	_ "scarlett-core/x/scarlettcore/module"
 	scarlettcoremoduletypes "scarlett-core/x/scarlettcore/types"
 	"time"
@@ -136,6 +138,7 @@ var (
 						scarlettcoremoduletypes.ModuleName,
 						emissionsmoduletypes.ModuleName,
 						contractsmoduletypes.ModuleName,
+						proofofdegenmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -147,6 +150,7 @@ var (
 						scarlettcoremoduletypes.ModuleName,
 						emissionsmoduletypes.ModuleName,
 						contractsmoduletypes.ModuleName,
+						proofofdegenmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -186,6 +190,7 @@ var (
 						scarlettcoremoduletypes.ModuleName,
 						emissionsmoduletypes.ModuleName,
 						contractsmoduletypes.ModuleName,
+						proofofdegenmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -295,6 +300,10 @@ var (
 			{
 				Name:   contractsmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&contractsmoduletypes.Module{}),
+			},
+			{
+				Name:   proofofdegenmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&proofofdegenmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

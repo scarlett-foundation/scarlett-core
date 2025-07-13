@@ -1,0 +1,17 @@
+syntax = "proto3";
+package scarlettcore.proofofdegen.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "scarlettcore/proofofdegen/v1/params.proto";
+
+option go_package = "scarlett-core/x/proofofdegen/types";
+
+// GenesisState defines the proofofdegen module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

@@ -48,6 +48,7 @@ import (
 	"scarlett-core/docs"
 	contractsmodulekeeper "scarlett-core/x/contracts/keeper"
 	emissionsmodulekeeper "scarlett-core/x/emissions/keeper"
+	proofofdegenmodulekeeper "scarlett-core/x/proofofdegen/keeper"
 	scarlettcoremodulekeeper "scarlett-core/x/scarlettcore/keeper"
 )
 
@@ -103,6 +104,7 @@ type App struct {
 	ScarlettcoreKeeper scarlettcoremodulekeeper.Keeper
 	EmissionsKeeper    emissionsmodulekeeper.Keeper
 	ContractsKeeper    contractsmodulekeeper.Keeper
+	ProofofdegenKeeper proofofdegenmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
@@ -185,6 +187,7 @@ func New(
 		&app.ScarlettcoreKeeper,
 		&app.EmissionsKeeper,
 		&app.ContractsKeeper,
+		&app.ProofofdegenKeeper,
 	); err != nil {
 		panic(err)
 	}
