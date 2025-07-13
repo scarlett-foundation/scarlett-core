@@ -6,7 +6,6 @@ import (
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
-	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -72,9 +71,11 @@ func (k Keeper) GetAuthority() []byte {
 	return k.authority
 }
 
-// DistributeEmissions distributes emissions to unclaimed wallets based on their weights
+// DistributeEmissions handles emissions received from the main emissions module
+// In the accumulation model, emissions stay in the module account and accumulate
+// until users claim their weighted shares
 func (k Keeper) DistributeEmissions(ctx sdk.Context) error {
-	// Get emissions received from main emissions module this block
+	// Get current module balance (accumulated emissions)
 	moduleAccount := k.authKeeper.GetModuleAccount(ctx, types.ModuleName)
 	if moduleAccount == nil {
 		return fmt.Errorf("module account not found: %s", types.ModuleName)
@@ -82,48 +83,23 @@ func (k Keeper) DistributeEmissions(ctx sdk.Context) error {
 
 	moduleAddr := moduleAccount.GetAddress()
 	moduleBalance := k.bankKeeper.GetBalance(ctx, moduleAddr, "sclt")
-	receivedEmissions := moduleBalance.Amount.Uint64()
+	currentBalance := moduleBalance.Amount.Uint64()
 
-	if receivedEmissions == 0 {
-		return nil // No emissions to distribute
+	// Emit event for transparency about emissions accumulation
+	if currentBalance > 0 {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				"emissions_accumulated",
+				sdk.NewAttribute("module", types.ModuleName),
+				sdk.NewAttribute("total_balance", fmt.Sprintf("%d", currentBalance)),
+				sdk.NewAttribute("block_height", fmt.Sprintf("%d", ctx.BlockHeight())),
+			),
+		)
 	}
 
-	// Get all unclaimed wallets from Genesis campaign
-	unclaimedWallets := k.GetUnclaimedWallets(ctx)
-	if len(unclaimedWallets) == 0 {
-		return nil // No unclaimed wallets
-	}
-
-	// Calculate total weight of unclaimed wallets
-	totalWeight := uint64(0)
-	for _, wallet := range unclaimedWallets {
-		totalWeight += wallet.Weight
-	}
-
-	if totalWeight == 0 {
-		return nil // No weight to distribute
-	}
-
-	// Distribute emissions based on weights
-	for _, wallet := range unclaimedWallets {
-		// Calculate this wallet's share: (receivedEmissions * walletWeight) / totalWeight
-		walletShare := (receivedEmissions * wallet.Weight) / totalWeight
-
-		if walletShare > 0 {
-			// Convert wallet address string to sdk.AccAddress
-			walletAddr, err := sdk.AccAddressFromBech32(wallet.Address)
-			if err != nil {
-				continue // Skip invalid addresses
-			}
-
-			// Send tokens to the wallet
-			coins := sdk.NewCoins(sdk.NewCoin("sclt", math.NewInt(int64(walletShare))))
-			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, walletAddr, coins)
-			if err != nil {
-				return err
-			}
-		}
-	}
+	// In accumulation model, we don't distribute tokens immediately
+	// They stay in the module account until users claim their weighted shares
+	// This creates the patience reward mechanics where later claimers get bigger shares
 
 	return nil
 }

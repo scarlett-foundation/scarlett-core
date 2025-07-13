@@ -110,10 +110,25 @@ message QueryEligibleAmountRequest {
 }
 
 // QueryEligibleAmountResponse defines the QueryEligibleAmountResponse message.
-message QueryEligibleAmountResponse {}
+message QueryEligibleAmountResponse {
+  bool is_eligible = 1;
+  uint64 claimable_amount = 2;
+  string status = 3;
+  uint64 wallet_weight = 4;
+  uint64 total_unclaimed_wallets = 5;
+  double weight_percentage = 6;
+  uint64 claimed_at = 7;
+}
 
 // QueryCampaignInfoRequest defines the QueryCampaignInfoRequest message.
 message QueryCampaignInfoRequest {}
 
 // QueryCampaignInfoResponse defines the QueryCampaignInfoResponse message.
-message QueryCampaignInfoResponse {}
+message QueryCampaignInfoResponse {
+  uint64 total_emissions_received = 1;
+  uint64 total_unclaimed_wallets = 2;
+  uint64 total_claimed_wallets = 3;
+  uint64 total_unclaimed_weight = 4;
+  uint64 current_module_balance = 5;
+  string campaign_status = 6;
+}
