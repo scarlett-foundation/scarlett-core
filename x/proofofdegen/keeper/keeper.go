@@ -21,6 +21,7 @@ type Keeper struct {
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
+	authKeeper types.AuthKeeper
 	bankKeeper types.BankKeeper
 
 	Schema         collections.Schema
@@ -34,6 +35,7 @@ func NewKeeper(
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
+	authKeeper types.AuthKeeper,
 	bankKeeper types.BankKeeper,
 
 ) Keeper {
@@ -48,10 +50,13 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
+		authKeeper:   authKeeper,
 		bankKeeper:   bankKeeper,
 
-		Params:   collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
-		Campaign: collections.NewMap(sb, types.CampaignKey, "campaign", collections.StringKey, codec.CollValue[types.Campaign](cdc)), EligibleWallet: collections.NewMap(sb, types.EligibleWalletKey, "eligibleWallet", collections.StringKey, codec.CollValue[types.EligibleWallet](cdc))}
+		Params:         collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
+		Campaign:       collections.NewMap(sb, types.CampaignKey, "campaign", collections.StringKey, codec.CollValue[types.Campaign](cdc)),
+		EligibleWallet: collections.NewMap(sb, types.EligibleWalletKey, "eligibleWallet", collections.StringKey, codec.CollValue[types.EligibleWallet](cdc)),
+	}
 
 	schema, err := sb.Build()
 	if err != nil {
@@ -70,7 +75,12 @@ func (k Keeper) GetAuthority() []byte {
 // DistributeEmissions distributes emissions to unclaimed wallets based on their weights
 func (k Keeper) DistributeEmissions(ctx sdk.Context) error {
 	// Get emissions received from main emissions module this block
-	moduleAddr := k.bankKeeper.GetModuleAddress(types.ModuleName)
+	moduleAccount := k.authKeeper.GetModuleAccount(ctx, types.ModuleName)
+	if moduleAccount == nil {
+		return fmt.Errorf("module account not found: %s", types.ModuleName)
+	}
+
+	moduleAddr := moduleAccount.GetAddress()
 	moduleBalance := k.bankKeeper.GetBalance(ctx, moduleAddr, "sclt")
 	receivedEmissions := moduleBalance.Amount.Uint64()
 

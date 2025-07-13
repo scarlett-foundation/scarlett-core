@@ -11,6 +11,7 @@ import (
 type AuthKeeper interface {
 	AddressCodec() address.Codec
 	GetAccount(context.Context, sdk.AccAddress) sdk.AccountI // only used for simulation
+	GetModuleAccount(ctx context.Context, moduleName string) sdk.ModuleAccountI
 	// Methods imported from account should be defined here
 }
 
@@ -19,7 +20,6 @@ type BankKeeper interface {
 	SpendableCoins(context.Context, sdk.AccAddress) sdk.Coins
 	GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
-	GetModuleAddress(name string) sdk.AccAddress
 	// Methods imported from bank should be defined here
 }
 
