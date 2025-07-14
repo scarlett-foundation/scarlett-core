@@ -24,28 +24,56 @@ func (k msgServer) Claim(ctx context.Context, msg *types.MsgClaim) (*types.MsgCl
 		return nil, errorsmod.Wrap(types.ErrUnauthorized, "can only claim for your own address")
 	}
 
-	// 3. Get eligible wallet record
-	eligibleWallet, err := k.EligibleWallet.Get(ctx, msg.Address)
+	// 3. Get and validate Merkle proof for address
+	merkleProof, err := k.GetMerkleProofForAddress(ctx, msg.Address)
 	if err != nil {
 		return nil, errorsmod.Wrap(types.ErrNotEligible, "address is not eligible for airdrop")
 	}
 
-	// 4. Check if already claimed
-	if eligibleWallet.Claimed {
+	// 4. Get campaign to check merkle root and claim status
+	campaign, err := k.Campaign.Get(ctx, "genesis") // For now, hardcode to "genesis" campaign
+	if err != nil {
+		return nil, errorsmod.Wrap(err, "campaign not found")
+	}
+
+	// 5. Validate Merkle proof against campaign root
+	weight, isValid := k.ValidateMerkleProof(msg.Address, merkleProof, campaign.MerkleRoot)
+	if !isValid {
+		return nil, errorsmod.Wrap(types.ErrInvalidProof, "invalid merkle proof for address")
+	}
+
+	// 6. Check if already claimed (we'll need to track this differently now)
+	// For now, check if address exists in EligibleWallet and is claimed
+	// TODO: Replace this with a more efficient claim tracking system
+	eligibleWallet, err := k.EligibleWallet.Get(ctx, msg.Address)
+	if err == nil && eligibleWallet.Claimed {
 		return nil, errorsmod.Wrap(types.ErrAlreadyClaimed, "address has already claimed airdrop")
 	}
 
-	// 5. Calculate current claimable amount based on remaining claimers
+	// 7. Calculate current claimable amount based on remaining claimers
 	claimableAmount := k.CalculateShare(sdkCtx, msg.Address)
 	if claimableAmount == 0 {
 		return nil, errorsmod.Wrap(types.ErrNoTokensTolaim, "no tokens available to claim")
 	}
 
-	// 6. Stop emissions for this wallet
-	eligibleWallet.Claimed = true
-	eligibleWallet.ClaimTime = uint64(sdkCtx.BlockHeight())
+	// 8. Create or update eligible wallet record with Merkle proof weight
+	if err != nil {
+		// Create new record if it doesn't exist
+		eligibleWallet = types.EligibleWallet{
+			Index:     msg.Address, // Use address as index
+			Address:   msg.Address,
+			Claimed:   true,
+			ClaimTime: uint64(sdkCtx.BlockHeight()),
+			Weight:    weight, // Use weight from Merkle proof
+		}
+	} else {
+		// Update existing record
+		eligibleWallet.Claimed = true
+		eligibleWallet.ClaimTime = uint64(sdkCtx.BlockHeight())
+		eligibleWallet.Weight = weight // Update with weight from Merkle proof
+	}
 
-	// 7. Update eligible wallet record
+	// 9. Update eligible wallet record
 	if err := k.EligibleWallet.Set(ctx, msg.Address, eligibleWallet); err != nil {
 		return nil, errorsmod.Wrap(err, "failed to update eligible wallet record")
 	}
