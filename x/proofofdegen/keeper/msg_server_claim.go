@@ -50,8 +50,8 @@ func (k msgServer) Claim(ctx context.Context, msg *types.MsgClaim) (*types.MsgCl
 		return nil, errorsmod.Wrap(types.ErrAlreadyClaimed, "address has already claimed airdrop")
 	}
 
-	// 7. Calculate current claimable amount based on remaining claimers
-	claimableAmount := k.CalculateShare(sdkCtx, msg.Address)
+	// 7. Calculate current claimable amount using aggregate tracking
+	claimableAmount := k.CalculateShareFromAggregates(ctx, msg.Address, weight)
 	if claimableAmount == 0 {
 		return nil, errorsmod.Wrap(types.ErrNoTokensTolaim, "no tokens available to claim")
 	}
@@ -78,7 +78,14 @@ func (k msgServer) Claim(ctx context.Context, msg *types.MsgClaim) (*types.MsgCl
 		return nil, errorsmod.Wrap(err, "failed to update eligible wallet record")
 	}
 
-	// 8. Transfer tokens to claimer
+	// 10. Update campaign aggregate tracking
+	campaign.ClaimedCount += 1
+	campaign.ClaimedWeight += weight
+	if err := k.Campaign.Set(ctx, "genesis", campaign); err != nil {
+		return nil, errorsmod.Wrap(err, "failed to update campaign aggregate stats")
+	}
+
+	// 11. Transfer tokens to claimer
 	claimerAccAddr := sdk.AccAddress(claimerAddr)
 	coins := sdk.NewCoins(sdk.NewCoin("sclt", math.NewInt(int64(claimableAmount))))
 
