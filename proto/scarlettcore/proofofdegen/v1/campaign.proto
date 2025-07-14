@@ -4,10 +4,30 @@ package scarlettcore.proofofdegen.v1;
 option go_package = "scarlett-core/x/proofofdegen/types";
 
 // Campaign defines the Campaign message.
+//
+// DEV NOTES:
+// - merkle_root: Used for internal Merkle proof validation (users never submit proofs).
+// - claimed_count: Aggregate number of claims for scalable tracking (replaces wallet iteration).
+// - claimed_weight: Aggregate sum of weights claimed (enables weighted patience game).
+// - All fields are required for Merkle-based Genesis campaign scalability.
+// - CLI and MsgClaim interface remain unchanged for users.
+//
+// Field definitions:
+//   index           - Unique identifier for the campaign (e.g., "genesis").
+//   name            - Human-readable campaign name.
+//   active          - Whether the campaign is currently active.
+//   total_allocation- Total SCLT tokens allocated to this campaign.
+//   creator         - Address of campaign creator (for governance/audit).
+//   merkle_root     - Root hash of the Merkle tree for eligibility validation (internal use).
+//   claimed_count   - Number of wallets that have claimed (aggregate, for O(1) stats).
+//   claimed_weight  - Total weight of wallets that have claimed (aggregate, for weighted rewards).
 message Campaign {
   string index = 1;
   string name = 2;
   bool active = 3;
   uint64 total_allocation = 4;
   string creator = 5;
+  string merkle_root = 6;
+  uint64 claimed_count = 7;
+  uint64 claimed_weight = 8;
 }
