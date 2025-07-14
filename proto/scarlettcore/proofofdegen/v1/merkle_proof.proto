@@ -1,0 +1,10 @@
+syntax = "proto3";
+package scarlettcore.proofofdegen.v1;
+
+option go_package = "scarlett-core/x/proofofdegen/types";
+
+// MerkleProof defines the MerkleProof message.
+message MerkleProof {
+  repeated string proof = 1; // Array of proof hashes for Merkle validation
+  uint64 weight = 2;         // Weight of the address in the Merkle tree
+} 

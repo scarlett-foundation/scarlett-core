@@ -23,24 +23,6 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Campaign defines the Campaign message.
-//
-// DEV NOTES:
-// - merkle_root: Used for internal Merkle proof validation (users never submit proofs).
-// - claimed_count: Aggregate number of claims for scalable tracking (replaces wallet iteration).
-// - claimed_weight: Aggregate sum of weights claimed (enables weighted patience game).
-// - All fields are required for Merkle-based Genesis campaign scalability.
-// - CLI and MsgClaim interface remain unchanged for users.
-//
-// Field definitions:
-//
-//	index           - Unique identifier for the campaign (e.g., "genesis").
-//	name            - Human-readable campaign name.
-//	active          - Whether the campaign is currently active.
-//	total_allocation- Total SCLT tokens allocated to this campaign.
-//	creator         - Address of campaign creator (for governance/audit).
-//	merkle_root     - Root hash of the Merkle tree for eligibility validation (internal use).
-//	claimed_count   - Number of wallets that have claimed (aggregate, for O(1) stats).
-//	claimed_weight  - Total weight of wallets that have claimed (aggregate, for weighted rewards).
 type Campaign struct {
 	Index           string `protobuf:"bytes,1,opt,name=index,proto3" json:"index,omitempty"`
 	Name            string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`

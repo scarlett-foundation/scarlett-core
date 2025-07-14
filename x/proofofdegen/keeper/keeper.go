@@ -27,6 +27,7 @@ type Keeper struct {
 	Params         collections.Item[types.Params]
 	Campaign       collections.Map[string, types.Campaign]
 	EligibleWallet collections.Map[string, types.EligibleWallet]
+	MerkleProofs   collections.Map[string, types.MerkleProof]
 }
 
 func NewKeeper(
@@ -55,6 +56,7 @@ func NewKeeper(
 		Params:         collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		Campaign:       collections.NewMap(sb, types.CampaignKey, "campaign", collections.StringKey, codec.CollValue[types.Campaign](cdc)),
 		EligibleWallet: collections.NewMap(sb, types.EligibleWalletKey, "eligibleWallet", collections.StringKey, codec.CollValue[types.EligibleWallet](cdc)),
+		MerkleProofs:   collections.NewMap(sb, types.MerkleProofsKey, "merkleProofs", collections.StringKey, codec.CollValue[types.MerkleProof](cdc)),
 	}
 
 	schema, err := sb.Build()
