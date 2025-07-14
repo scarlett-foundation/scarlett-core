@@ -19,6 +19,15 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 		}
 	}
 
+	// Load Merkle proofs into storage
+	for _, elem := range genState.MerkleProofMap {
+		if elem.Proof != nil {
+			if err := k.MerkleProofs.Set(ctx, elem.Address, *elem.Proof); err != nil {
+				return err
+			}
+		}
+	}
+
 	return k.Params.Set(ctx, genState.Params)
 }
 
@@ -39,6 +48,17 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 	}
 	if err := k.EligibleWallet.Walk(ctx, nil, func(_ string, val types.EligibleWallet) (stop bool, err error) {
 		genesis.EligibleWalletMap = append(genesis.EligibleWalletMap, val)
+		return false, nil
+	}); err != nil {
+		return nil, err
+	}
+
+	// Export Merkle proofs from storage
+	if err := k.MerkleProofs.Walk(ctx, nil, func(address string, proof types.MerkleProof) (stop bool, err error) {
+		genesis.MerkleProofMap = append(genesis.MerkleProofMap, types.MerkleProofEntry{
+			Address: address,
+			Proof:   &proof,
+		})
 		return false, nil
 	}); err != nil {
 		return nil, err

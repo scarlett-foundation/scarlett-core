@@ -75,8 +75,62 @@ func (m *MerkleProof) GetWeight() uint64 {
 	return 0
 }
 
+// MerkleProofEntry defines an entry for genesis state storage
+type MerkleProofEntry struct {
+	Address string       `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Proof   *MerkleProof `protobuf:"bytes,2,opt,name=proof,proto3" json:"proof,omitempty"`
+}
+
+func (m *MerkleProofEntry) Reset()         { *m = MerkleProofEntry{} }
+func (m *MerkleProofEntry) String() string { return proto.CompactTextString(m) }
+func (*MerkleProofEntry) ProtoMessage()    {}
+func (*MerkleProofEntry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c76625d7a0dc79b8, []int{1}
+}
+func (m *MerkleProofEntry) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MerkleProofEntry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MerkleProofEntry.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MerkleProofEntry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MerkleProofEntry.Merge(m, src)
+}
+func (m *MerkleProofEntry) XXX_Size() int {
+	return m.Size()
+}
+func (m *MerkleProofEntry) XXX_DiscardUnknown() {
+	xxx_messageInfo_MerkleProofEntry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MerkleProofEntry proto.InternalMessageInfo
+
+func (m *MerkleProofEntry) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *MerkleProofEntry) GetProof() *MerkleProof {
+	if m != nil {
+		return m.Proof
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*MerkleProof)(nil), "scarlettcore.proofofdegen.v1.MerkleProof")
+	proto.RegisterType((*MerkleProofEntry)(nil), "scarlettcore.proofofdegen.v1.MerkleProofEntry")
 }
 
 func init() {
@@ -84,18 +138,21 @@ func init() {
 }
 
 var fileDescriptor_c76625d7a0dc79b8 = []byte{
-	// 172 bytes of a gzipped FileDescriptorProto
+	// 222 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xd2, 0x2f, 0x4e, 0x4e, 0x2c,
 	0xca, 0x49, 0x2d, 0x29, 0x49, 0xce, 0x2f, 0x4a, 0xd5, 0x2f, 0x28, 0xca, 0xcf, 0x4f, 0xcb, 0x4f,
 	0x4b, 0x49, 0x4d, 0x4f, 0xcd, 0xd3, 0x2f, 0x33, 0xd4, 0xcf, 0x4d, 0x2d, 0xca, 0xce, 0x49, 0x8d,
 	0x07, 0x0b, 0xeb, 0x15, 0x14, 0xe5, 0x97, 0xe4, 0x0b, 0xc9, 0x20, 0x6b, 0xd0, 0x43, 0xd6, 0xa0,
 	0x57, 0x66, 0xa8, 0x64, 0xcd, 0xc5, 0xed, 0x0b, 0xd6, 0x13, 0x00, 0x92, 0x10, 0x12, 0xe1, 0x62,
 	0x05, 0xab, 0x90, 0x60, 0x54, 0x60, 0xd6, 0xe0, 0x0c, 0x82, 0x70, 0x84, 0xc4, 0xb8, 0xd8, 0xca,
-	0x53, 0x33, 0xd3, 0x33, 0x4a, 0x24, 0x98, 0x14, 0x18, 0x35, 0x58, 0x82, 0xa0, 0x3c, 0x27, 0x9b,
-	0x13, 0x8f, 0xe4, 0x18, 0x2f, 0x3c, 0x92, 0x63, 0x7c, 0xf0, 0x48, 0x8e, 0x71, 0xc2, 0x63, 0x39,
-	0x86, 0x0b, 0x8f, 0xe5, 0x18, 0x6e, 0x3c, 0x96, 0x63, 0x88, 0x52, 0x82, 0x59, 0xaa, 0x0b, 0x76,
-	0x66, 0x05, 0xaa, 0x43, 0x4b, 0x2a, 0x0b, 0x52, 0x8b, 0x93, 0xd8, 0xc0, 0xee, 0x33, 0x06, 0x04,
-	0x00, 0x00, 0xff, 0xff, 0x67, 0x84, 0x74, 0xbd, 0xd2, 0x00, 0x00, 0x00,
+	0x53, 0x33, 0xd3, 0x33, 0x4a, 0x24, 0x98, 0x14, 0x18, 0x35, 0x58, 0x82, 0xa0, 0x3c, 0xa5, 0x5c,
+	0x2e, 0x01, 0x24, 0xcd, 0xae, 0x79, 0x25, 0x45, 0x95, 0x42, 0x12, 0x5c, 0xec, 0x89, 0x29, 0x29,
+	0x45, 0xa9, 0xc5, 0xc5, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x30, 0xae, 0x90, 0x3d, 0xcc,
+	0x6c, 0x90, 0x21, 0xdc, 0x46, 0x9a, 0x7a, 0xf8, 0x1c, 0xa6, 0x87, 0x64, 0x30, 0xd4, 0x19, 0x4e,
+	0x36, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3, 0x84, 0xc7,
+	0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc, 0x78, 0x2c, 0xc7, 0x10, 0xa5, 0x04, 0x33, 0x4a, 0x17,
+	0x1c, 0x2a, 0x15, 0xa8, 0xe1, 0x52, 0x52, 0x59, 0x90, 0x5a, 0x9c, 0xc4, 0x06, 0x0e, 0x0e, 0x63,
+	0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x76, 0xfa, 0xd9, 0xda, 0x41, 0x01, 0x00, 0x00,
 }
 
 func (m *MerkleProof) Marshal() (dAtA []byte, err error) {
@@ -135,6 +192,48 @@ func (m *MerkleProof) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *MerkleProofEntry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MerkleProofEntry) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MerkleProofEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Proof != nil {
+		{
+			size, err := m.Proof.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintMerkleProof(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintMerkleProof(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintMerkleProof(dAtA []byte, offset int, v uint64) int {
 	offset -= sovMerkleProof(v)
 	base := offset
@@ -160,6 +259,23 @@ func (m *MerkleProof) Size() (n int) {
 	}
 	if m.Weight != 0 {
 		n += 1 + sovMerkleProof(uint64(m.Weight))
+	}
+	return n
+}
+
+func (m *MerkleProofEntry) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovMerkleProof(uint64(l))
+	}
+	if m.Proof != nil {
+		l = m.Proof.Size()
+		n += 1 + l + sovMerkleProof(uint64(l))
 	}
 	return n
 }
@@ -250,6 +366,124 @@ func (m *MerkleProof) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMerkleProof(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthMerkleProof
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MerkleProofEntry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMerkleProof
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MerkleProofEntry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MerkleProofEntry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMerkleProof
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthMerkleProof
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthMerkleProof
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Proof", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMerkleProof
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthMerkleProof
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthMerkleProof
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Proof == nil {
+				m.Proof = &MerkleProof{}
+			}
+			if err := m.Proof.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMerkleProof(dAtA[iNdEx:])

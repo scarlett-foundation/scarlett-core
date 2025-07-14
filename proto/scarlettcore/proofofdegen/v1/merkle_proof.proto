@@ -7,4 +7,10 @@ option go_package = "scarlett-core/x/proofofdegen/types";
 message MerkleProof {
   repeated string proof = 1; // Array of proof hashes for Merkle validation
   uint64 weight = 2;         // Weight of the address in the Merkle tree
+}
+
+// MerkleProofEntry defines an entry for genesis state storage
+message MerkleProofEntry {
+  string address = 1;        // Wallet address (key)
+  MerkleProof proof = 2;     // Associated Merkle proof
 } 
