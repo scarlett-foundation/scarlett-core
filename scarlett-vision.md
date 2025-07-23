@@ -64,13 +64,10 @@ The cycle operates as follows:
 
 This is how Scarlett fulfills its mission. It is an operating system whose primary function is to run a perpetual motion machine for innovation: turning community governance into capital, capital into new technology, and that technology into shared, decentralized intelligence for all.
 
-### 5. Market-Driven Token Launches
-To supercharge creativity and grassroots participation, Scarlett introduces a 
-new economic primitive: **Incentivized Token Launches**, powered by a native 
-Launch Module. This system rewards creators for building real markets on top of 
-Scarlett. Instead of subsidizing projects with unearned emissions, Scarlett 
-links rewards directly to market performance.
+### 5. Core Platform Modules
+To execute its vision, the Scarlett operating system relies on a set of core modules. These components provide the fundamental infrastructure for on-chain innovation, from market creation to decentralized computation.
 
+#### 5.1 Market-Driven Token Launches
 While any application can apply for direct emissions through governance, Scarlett also provides a powerful, market-based alternative for ecosystem growth: **Market-Driven Token Launches**. This mechanism, powered by a native Launch Module, is designed for projects that wish to build a community-owned token economy from day one. It rewards creators for generating tangible market traction, linking protocol emissions directly to their token's price performance and liquidity, rather than relying on community governance.
 
 **The Mechanism: Stake, Launch, Earn**
@@ -80,21 +77,21 @@ While any application can apply for direct emissions through governance, Scarlet
 
 This design ensures that protocol rewards flow to projects that generate genuine economic energy and community belief, creating a powerful flywheel for sustainable growth.
 
-### 6. Genesis Campaign: Proof of Community
+#### 5.2 Decentralized AI Inference
+Following our Genesis campaign, Scarlett will launch its core on-chain infrastructure, including the Launch Module with native DEX integrations for token campaigns, and the inference module—the most critical component of our decentralized AI operating system.
+
+**The Mechanism: Stake, Serve, Earn**
+*   **Stake, Serve, Earn:** Inference miners stake Scarlett's native token and register GPU resources. They earn block emissions for completing AI workloads submitted by users and smart contracts.
+*   **On-Chain Integration:** Smart contracts can call AI inference directly, giving any project on Scarlett immediate AI capabilities.
+*   **Community Governed:** The network is censorship-resistant, competitively priced, and quality is enforced through staking and slashing mechanisms.
+
+### 6. Genesis Campaign: Launching the Network
 Scarlett's fair launch begins with **Proof of Community**—a campaign that embodies our core principles: no VCs, no pre-mines, no insider advantages.
 
 **The Mechanism: Patience Rewarded**
 Our Genesis campaign implements a novel crypto-economic primitive. Eligible wallets are selected through community participation, and emissions flow automatically to unclaimed addresses. This is a patience game: each claim reduces the pool of future claimers, meaning those who wait receive progressively larger shares. It is designed to bootstrap a committed, long-term governance community.
 
-### 7. Decentralized AI Inference: The Core of the OS
-Following our Genesis campaign, Scarlett will launch its core on-chain infrastructure, including the Launch Module with native DEX integrations for token campaigns, and the inference module—the most critical component of our decentralized AI operating system.
-
-The Mechanism: Stake, Serve, Earn
-*   **Stake, Serve, Earn:** Inference miners stake Scarlett's native token and register GPU resources. They earn block emissions for completing AI workloads submitted by users and smart contracts.
-*   **On-Chain Integration:** Smart contracts can call AI inference directly, giving any project on Scarlett immediate AI capabilities.
-*   **Community Governed:** The network is censorship-resistant, competitively priced, and quality is enforced through staking and slashing mechanisms.
-
-### 8. Conclusion: Intelligence as a Public Good
+### 7. Conclusion: Intelligence as a Public Good
 Decentralized artificial intelligence must be both built and adopted. Scarlett achieves both. It builds verifiable, decentralized intelligence and uses market-driven economics to coordinate the communities that will build it and use it.
 
 Scarlett is a public good—a decentralized operating system designed to support the next era of intelligent systems. It empowers developers, rewards contributors, and returns control to users. The future of AI will not be owned by corporations or controlled by insiders. It will be built by a global community, one block at a time. 
