@@ -72,7 +72,7 @@ While any application can apply for direct emissions through governance, Scarlet
 
 **The Mechanism: Stake, Launch, Earn**
 1.  **Initialization:** A new token is deployed with a bonding curve denominated in Scarlett's native token. Prices increase with demand, creating instant price discovery.
-2.  **Graduation:** Once the curve hits a funding threshold, it graduates. The funds seed a liquidity pool on Scarlett's native DEX, and the tokens used are locked forever.
+2.  **Graduation:** Once the curve hits a funding threshold, it graduates. The funds seed a liquidity pool on Scarlett's native DEX, and the native Scarlett tokens used to create the pool are programmatically and permanently locked—effectively removing them from the circulating supply forever.
 3.  **Emissions:** A portion of protocol emissions is allocated to Launch Module participants. Tokens are ranked by price performance and liquidity, and emissions are distributed pro-rata.
 
 This design ensures that protocol rewards flow to projects that generate genuine economic energy and community belief, creating a powerful flywheel for sustainable growth.
@@ -94,4 +94,4 @@ Our Genesis campaign implements a novel crypto-economic primitive. Eligible wall
 ### 7. Conclusion: Intelligence as a Public Good
 Decentralized artificial intelligence must be both built and adopted. Scarlett achieves both. It builds verifiable, decentralized intelligence and uses market-driven economics to coordinate the communities that will build it and use it.
 
-Scarlett is a public good—a decentralized operating system designed to support the next era of intelligent systems. It empowers developers, rewards contributors, and returns control to users. The future of AI will not be owned by corporations or controlled by insiders. It will be built by a global community, one block at a time. 
+Scarlett is a public good—a decentralized operating system designed to support the next era of intelligent systems. It empowers developers, rewards contributors, and returns control to users. The future of AI will not be owned by corporations or controlled by insiders. It will be built, run, and governed on a new kind of operating system—one powered by a global community, one block at a time. 
