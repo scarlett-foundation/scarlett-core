@@ -34,7 +34,7 @@ The top subnets are still dominated by insiders, proving that dTAO didn't democr
 
 This isn't value creation—it's capital allocation masquerading as meritocracy. Governance remains pseudo-democratic at best: there is no formal, binding on-chain voting for core protocol decisions, which are often made by a centralized group. The system continues to issue hundreds of millions of dollars in emissions annually without transparent value justification.
 
-### Conclusion: Bittensor's Ethereum Moment
+### Conclusion: A Flawed Architecture
 
 This is Bittensor's Ethereum moment. Just as Ethereum became slow, expensive, and saw its decentralization challenged despite its revolutionary promise, Bittensor's execution is flawed and risks centralization over time. The market clearly wants decentralized AI infrastructure, but Bittensor's current architecture cannot deliver it in a sustainable, fair, and truly decentralized manner.
 
