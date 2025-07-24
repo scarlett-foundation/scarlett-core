@@ -91,8 +91,10 @@ These services are available to both native modules and smart contracts.
     *   **2. Graduation to DEX:** Once the market cap on the bonding curve reaches a specific threshold set by governance, the curve terminates. The capital raised is then used to seed a liquidity pool (e.g., `$SCLT`/`NEW_TOKEN`) on Scarlett's native decentralized exchange.
     *   **3. Performance-Based Emissions:** A portion of protocol emissions is allocated to a reward pool for the Launchpad. These emissions are distributed pro-rata to the creators of tokens that have successfully graduated, based on metrics like sustained price performance and liquidity depth. This model ensures that protocol rewards are earned through demonstrated market demand, not guaranteed via subsidy.
 
-*   **Decentralized AI Inference:** A forthcoming module that will provide a marketplace for AI computation.
-    <!-- TODO: Outline the proposed architecture for the inference module, including the roles of inference providers and clients, the staking/slashing mechanism for quality control, and how on-chain requests are fulfilled. -->
+*   **Decentralized AI Inference:** A forthcoming module that will provide a marketplace for AI computation. Its architecture is designed to provide trustless, censorship-resistant, and economically competitive access to AI models.
+    *   **Core Roles:** The marketplace consists of **Clients** (users or smart contracts submitting inference jobs), **Inference Providers** (a permissionless network of nodes that stake `$SCLT` to serve AI models), and **Arbitrators** (a rotating, randomly selected subset of validators tasked with verifying results).
+    *   **Execution Flow:** A Client submits an inference request to the module's on-chain marketplace. Available Providers execute the job off-chain and commit the result back to the chain. To ensure correctness, Arbitrators re-execute a small percentage of jobs. If a discrepancy is found, a broader consensus mechanism is triggered.
+    *   **Economic Security:** Providers are required to stake `$SCLT` as an economic bond. This stake is subject to slashing for malicious behavior, such as providing verifiably false results or excessive downtime. Honest and performant providers are rewarded with a share of protocol emissions and user-paid fees. This model creates a self-regulating system that economically incentivizes high-quality, reliable AI inference.
 
 ---
 
@@ -118,9 +120,10 @@ The native asset of the Scarlett protocol is tentatively named `$SCLT`. It is es
 ### 5. Genesis & Roadmap
 
 #### 5.1 Genesis Campaign: Proof of Community
-Scarlett's fair launch is initiated by the **Proof of Community** campaign, managed by the `x/proofofdegen` module. This is not a typical airdrop.
-*   **Mechanism:** Eligible wallets are determined through community participation. These wallets accrue emissions every block. A key feature is the "patience game": as some users claim their accrued tokens, the emission rate for the remaining unclaimed wallets increases. This incentivizes long-term alignment and bootstraps a committed governance community.
-    <!-- TODO: Add technical details on the claim mechanism and the formula for how the emission share increases for remaining participants. -->
+Scarlett's fair launch is initiated by the **Proof of Community** campaign, managed by the `x/proofofcommunity` module. This is not a typical airdrop; it is a crypto-economic event designed to bootstrap a committed, long-term governance community.
+*   **Eligibility & Genesis State:** Initial participation is earned, not given. The genesis set of eligible wallets is determined by verifiable off-chain contributions, such as completing a Galxe quest and holding specific ecosystem tokens (e.g., from Virtuals or pump.fun). This curated list of addresses is embedded directly into the genesis state of the Scarlett blockchain.
+*   **Mechanism: The Patience Game:** The module distributes a fixed amount of `$SCLT` emissions per block to a reward pool, which is then divided equally among all eligible wallets that have **not yet claimed** their tokens. When a participant claims their accrued rewards, their wallet is permanently removed from the distribution pool. As the total emissions per block remain constant while the number of participants shrinks, this dynamically increases the reward rate for those who demonstrate patience. The formula is: `Emission per Wallet = Total Campaign Emission per Block / Number of Unclaimed Wallets`.
+*   **Gasless Claiming:** To ensure a frictionless onboarding experience, the claim transaction is gasless for the user. The protocol leverages the Cosmos SDK's `feegrant` module to subsidize the transaction fees, allowing new community members to participate without needing a pre-existing balance of `$SCLT`.
 
 #### 5.2 Roadmap
 *   **Phase 1 (Launch):** Mainnet launch, Proof of Community campaign, core governance and staking functionality.
