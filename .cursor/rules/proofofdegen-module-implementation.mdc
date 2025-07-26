@@ -1,8 +1,6 @@
 ---
-description: Step-by-step implementation guide for the proofofdegen airdrop module with automated emission distribution and delayed claim mechanics
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Proofofdegen Airdrop Module Implementation - Step-by-Step Guide
 
 ## Overview

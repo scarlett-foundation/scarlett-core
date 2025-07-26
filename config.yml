@@ -1,6 +1,8 @@
 version: 1
 validation: sovereign
 default_denom: sclt
+build:
+  main: cmd/scarlett-cored
 accounts: 
 - name: alice
   coins:

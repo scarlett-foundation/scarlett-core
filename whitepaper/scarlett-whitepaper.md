@@ -37,7 +37,7 @@ Scarlett rests on four core design principles:
 3.  **A Multi-Layered Application Environment:**
     Scarlett supports both:
     - **Kernel Space:** Performance-critical, governance-approved native modules built directly into the blockchain (implemented in the base protocol for maximum efficiency and security).  
-      *Example: The `x/emissions` module, which manages protocol token distribution, operates in kernel space for optimal performance and trust.*
+      *Example: Core protocol functions like emissions (`x/emissions`), governance (`x/gov`), and the forthcoming decentralized marketplace for AI inference and compute (`x/inference`) operate in kernel space for optimal performance and trust.*
     - **Application Space:** Permissionless CosmWasm smart contracts. This environment provides the fundamental primitives for a decentralized AI economy, enabling developers to build:
         * **Data & Pre-processing Markets:** Creating services for large-scale data scraping, cleaning, and labeling—forming a decentralized alternative to platforms like Scale AI.
         * **Distributed Model Training & Fine-Tuning:** Allowing for the collaborative training of large foundation models and the specialization of models for niche tasks.
@@ -59,6 +59,16 @@ These principles create a self-sustaining economic flywheel, which is the core p
 4.  This innovation **Generates On-Chain Utility**, from AI models to novel applications.
 5.  Growing utility creates **Compound Network Effects**, attracting more talent and capital, thus perpetuating the cycle.
 
+*   **A Network-Theoretic Model of the Flywheel:**
+    The "flywheel" effect can be formally modeled using **Metcalfe's Law**, a core principle of network theory. The law states that the value (\(V\)) of a telecommunications network is proportional to the square of the number of connected users (\(n\)) of the system (\(V \propto n^2\)).
+
+    The Scarlett Flywheel is a mechanism explicitly designed to trigger and sustain this non-linear value creation:
+    1.  The **Fair Launch** and **Proof of Community** campaign bootstrap the initial network with a core set of aligned nodes (\(n_0\)).
+    2.  The economic incentives and open infrastructure attract **developers** (\(n_d\)), who act as "power nodes," building new applications and services.
+    3.  The on-chain utility they create attracts **end-users** (\(n_u\)), who form the majority of the network.
+
+    The total value of the network does not grow linearly with each new participant. Instead, each new application or service creates new potential connections between all existing and future users. This results in the compounding network effects described in the flywheel; as the total number of nodes (\(n = n_0 + n_d + n_u\)) grows, the value of the network grows quadratically, providing exponentially greater incentives for the next wave of participants.
+
 ---
 
 ### 3. System Architecture & Modules
@@ -66,9 +76,19 @@ These principles create a self-sustaining economic flywheel, which is the core p
 The Scarlett blockchain is built using the Cosmos SDK. Its modular architecture allows for specialized, high-performance functionality.
 
 #### 3.1 Kernel Space: Native Modules
-These are core Go modules that provide foundational services. They are subject to on-chain governance for upgrades.
+These are core Go modules that provide foundational services. They are subject to on-chain governance for upgrades. The set of kernel-space modules is not static. Through a formal governance process, akin to a Cosmos Hub Community Improvement Proposal, the community can vote to incorporate new, high-value modules directly into the blockchain's core logic. If approved, these new modules can become eligible for a direct allocation of protocol emissions via the `x/emissions` module, creating a powerful incentive for developers to build foundational infrastructure for the entire ecosystem.
 
 *   **`x/emissions`:** This module manages the distribution of newly minted tokens according to parameters set by on-chain governance. Uniquely, Scarlett enables emissions to be flexibly allocated between both kernel space (native modules) and app space (permissionless smart contracts). The community can direct emissions to destinations such as validators, the community pool, core protocol services in kernel space, or to incentivize specific applications and services deployed in app space. For example, a portion of emissions can be routed to the Market-Driven Token Launchpad (app space), directly rewarding creators of high-performing tokens based on market success, while another portion can fund essential infrastructure or public goods in kernel space. This system, built atop and extending the standard `x/distribution` module from the Cosmos SDK, allows the community to propose and vote on changes to emission parameters—including the `community_tax` rate and custom allocation weights—enabling dynamic, transparent funding of both core protocol and open application-layer innovation.
+
+*   **Mechanism Design for Capital Allocation:** The `x/emissions` module is not merely a distribution system; it is a sophisticated **mechanism** for decentralized capital allocation. In the context of mechanism design, the protocol's goal is to allocate a scarce resource (newly minted `$SCLT`) to projects that provide the maximum value to the network, even when the "value" is private information known only to individual community members.
+
+    *   **A Formal Model of Incentive Compatibility:** We can formally prove that the governance mechanism is **incentive-compatible**. Let \(U_i\) be the utility of a rational token holder \(i\), and let \(\alpha_i\) be their fractional ownership of the network (i.e., their percentage of the total token supply). Let \(V_0\) be the current total value of the Scarlett network. Each voter \(i\) has a private belief, or valuation (\(v_i(p_j)\)), about the additional value that a given proposal \(p_j\) will bring to the network.
+
+        If proposal \(p_j\) is approved, the new total value of the network will be \(V_j = V_0 + \sum_{k=1}^{N} v_k(p_j)\), where \(N\) is the total number of token holders. The utility for holder \(i\) is the value of their personal stake:
+
+        \[ U_i(p_j) = \alpha_i \times V_j = \alpha_i \left( V_0 + \sum_{k=1}^{N} v_k(p_j) \right) \]
+
+        To maximize their own utility, holder \(i\) must choose to vote for the proposal \(p_j\) that maximizes the term \(\sum_{k=1}^{N} v_k(p_j)\). This term represents the total social welfare or the collective belief in the value added by the proposal. Therefore, the dominant strategy for a rational, self-interested token holder is to vote truthfully for the proposal they believe will generate the most value for the entire network. This alignment of individual economic incentives with the collective good is the cornerstone of the mechanism, ensuring that governance directs capital towards its most productive uses. This mathematical guarantee ensures that, unlike its predecessors, Scarlett's economic engine will not devolve into the misaligned, speculative sub-economies that have hampered previous attempts at decentralized AI.
 
 *   **`x/scarlettcore`:** This module handles core protocol functions, including the programmatic burn of the genesis stake. The mechanism is initiated by a transaction from a designated genesis address, which triggers a standard unbonding of the genesis validator's staked tokens. At the end of every block, the protocol checks for completed unbondings. Once the unbonding period is over, the liquid tokens are automatically transferred to the `x/scarlettcore` module account and permanently burned from the supply. This creates a transparent, time-delayed, and auditable process for reducing the initial supply and ensuring credible neutrality.
 
@@ -79,6 +99,10 @@ These are core Go modules that provide foundational services. They are subject t
     *   **Threshold:** A 50% simple majority of participating voting power is required for a proposal to pass.
     *   **Veto Threshold:** A 33.4% 'NoWithVeto' vote can override a passing proposal, providing a crucial safeguard against contentious or potentially harmful changes.
     All of these parameters can be updated via future governance proposals.
+*   **`x/inference` (Decentralized AI Inference):** A forthcoming module that will provide a marketplace for AI computation. Its architecture is designed to provide trustless, censorship-resistant, and economically competitive access to AI models.
+    *   **Core Roles:** The marketplace consists of **Clients** (users or smart contracts submitting inference jobs), **Inference Providers** (a permissionless network of nodes that stake `$SCLT` to serve AI models), and **Arbitrators** (a rotating, randomly selected subset of validators tasked with verifying results).
+    *   **Execution Flow:** A Client submits an inference request to the module's on-chain marketplace. Available Providers execute the job off-chain and commit the result back to the chain. To ensure correctness, Arbitrators re-execute a small percentage of jobs. If a discrepancy is found, a broader consensus mechanism is triggered.
+    *   **Economic Security:** Providers are required to stake `$SCLT` as an economic bond. This stake is subject to slashing for malicious behavior, such as providing verifiably false results or excessive downtime. Honest and performant providers are rewarded with a share of protocol emissions and user-paid fees. This model creates a self-regulating system that economically incentivizes high-quality, reliable AI inference.
 
 #### 3.2 Application Space: CosmWasm Smart Contracts
 Scarlett integrates the `x/contracts` module, enabling any developer to deploy permissionless smart contracts written in Rust and compiled to WebAssembly. This allows for rapid, open innovation.
@@ -91,10 +115,25 @@ These services are available to both native modules and smart contracts.
     *   **2. Graduation to DEX:** Once the market cap on the bonding curve reaches a specific threshold set by governance, the curve terminates. The capital raised is then used to seed a liquidity pool (e.g., `$SCLT`/`NEW_TOKEN`) on Scarlett's native decentralized exchange.
     *   **3. Performance-Based Emissions:** A portion of protocol emissions is allocated to a reward pool for the Launchpad. These emissions are distributed pro-rata to the creators of tokens that have successfully graduated, based on metrics like sustained price performance and liquidity depth. This model ensures that protocol rewards are earned through demonstrated market demand, not guaranteed via subsidy.
 
-*   **Decentralized AI Inference:** A forthcoming module that will provide a marketplace for AI computation. Its architecture is designed to provide trustless, censorship-resistant, and economically competitive access to AI models.
-    *   **Core Roles:** The marketplace consists of **Clients** (users or smart contracts submitting inference jobs), **Inference Providers** (a permissionless network of nodes that stake `$SCLT` to serve AI models), and **Arbitrators** (a rotating, randomly selected subset of validators tasked with verifying results).
-    *   **Execution Flow:** A Client submits an inference request to the module's on-chain marketplace. Available Providers execute the job off-chain and commit the result back to the chain. To ensure correctness, Arbitrators re-execute a small percentage of jobs. If a discrepancy is found, a broader consensus mechanism is triggered.
-    *   **Economic Security:** Providers are required to stake `$SCLT` as an economic bond. This stake is subject to slashing for malicious behavior, such as providing verifiably false results or excessive downtime. Honest and performant providers are rewarded with a share of protocol emissions and user-paid fees. This model creates a self-regulating system that economically incentivizes high-quality, reliable AI inference.
+*   **A Mathematical Framework for the Bonding Curve:**
+    To ensure predictability and fairness, the bonding curve for the token launchpad is defined by a mathematical formula. We will employ a Bancor-style curve, which is one of the most well-understood models for algorithmic market makers.
+
+    The price \(P\) of a new token is determined by its current supply \(S\) and a Connector Weight \(CW\) (also known as the reserve ratio), which is a constant between 0 and 1. The formula is as follows:
+
+    \[ P(S) = \frac{\text{Reserve Balance}}{\text{Token Supply} \times CW} \]
+
+    When a user buys a token, they contribute to the reserve balance (in `$SCLT`), and new tokens are minted. The price of each subsequent token increases along the curve. The cost to mint \(N\) new tokens from a current supply \(S\) is calculated by integrating the price function:
+
+    \[ \text{Cost} = \int_{S}^{S+N} P(s) \,ds \]
+
+    This model provides several key advantages:
+    *   **Continuous Liquidity:** Tokens can be bought or sold at any time directly from the smart contract.
+    *   **Price Discovery:** The market price is determined algorithmically, reflecting real-time demand.
+    *   **Predictable Slippage:** The price slippage for a given trade size can be calculated in advance.
+
+    The Connector Weight (CW) is a critical parameter that will be set by governance. A lower CW (e.g., 10%) results in higher price sensitivity (more volatility), while a higher CW (e.g., 50% or more) creates a more stable, less volatile price trajectory. This allows the community to tailor the risk-reward profile for new projects launching on the platform.
+
+*   **A Note on Curve Selection:** While the pump.fun exponential model is incredibly effective for generating viral, memetic energy, it may not be the best fit for Scarlett's broader mission. Its highly aggressive curve is perfect for the specific niche of memecoins but could be too volatile and speculative for the more serious AI and infrastructure projects we aim to support. The Bancor-style curve we have currently outlined offers far more versatility. By allowing governance to set the Connector Weight (CW), the community can tailor the risk profile for each launch—a lower CW can be used to create higher sensitivity for more memetic projects, while a higher, more stable CW can be used for core infrastructure. This flexibility is better suited to a general-purpose "Operating System for Intelligence" as it empowers the community to decide on the appropriate launch mechanics, rather than hard-coding a single, highly speculative model.
 
 ---
 
@@ -115,6 +154,25 @@ The native asset of the Scarlett protocol is tentatively named `$SCLT`. It is es
     4.  **Economic Bonding:** Required for developers to stake to register their modules/contracts for emissions.
     5.  **Launchpad Collateral:** The primary asset for bonding curves in the token launchpad.
 
+*   **A Control Theory Model for Dynamic Inflation:**
+    The dynamic inflation mechanism is not arbitrary; it can be modeled as a Proportional-Integral-Derivative (PID) controller, a well-established concept from control theory used to maintain a system's output at a desired setpoint.
+
+    *   **Setpoint:** The target staking ratio (e.g., 67% of the total supply).
+    *   **Process Variable:** The actual, real-time staking ratio observed on the network.
+    *   **Actuator:** The inflation rate.
+    *   **Control Objective:** To adjust the inflation rate to guide the process variable (actual staking) toward the setpoint (target staking).
+
+    The change in inflation is calculated each block based on the deviation from the target:
+
+    \[ \Delta I = P_{\text{term}} + I_{\text{term}} + D_{\text{term}} \]
+
+    Where:
+    *   **Proportional (\(P_{\text{term}}\)):** \(K_p \times (\text{Target} - \text{Actual})\). This provides an immediate response proportional to the current error. If staking is too low, inflation increases, and vice-versa.
+    *   **Integral (\(I_{\text{term}}\)):** \(K_i \times \int (\text{Target} - \text{Actual}) \,dt\). This term corrects for past errors, ensuring that even small, persistent deviations from the target are eventually eliminated.
+    *   **Derivative (\(D_{\text{term}}\)):** \(K_d \times \frac{d(\text{Target} - \text{Actual})}{dt}\). This term anticipates future error by reacting to the rate of change of the error, helping to dampen oscillations and prevent overshooting the target.
+
+    While the Cosmos SDK's `x/mint` module primarily uses a proportional controller, framing the mechanism within a PID model provides a more robust and complete theoretical foundation. The coefficients (\(K_p, K_i, K_d\)) and the maximum/minimum inflation rates are governance-controlled parameters, allowing the community to fine-tune the network's monetary policy with a high degree of precision.
+
 ---
 
 ### 5. Genesis & Roadmap
@@ -123,6 +181,28 @@ The native asset of the Scarlett protocol is tentatively named `$SCLT`. It is es
 Scarlett's fair launch is initiated by the **Proof of Community** campaign, managed by the `x/proofofcommunity` module. This is not a typical airdrop; it is a crypto-economic event designed to bootstrap a committed, long-term governance community.
 *   **Eligibility & Genesis State:** Initial participation is earned, not given. The genesis set of eligible wallets is determined by verifiable off-chain contributions, such as completing a Galxe quest and holding specific ecosystem tokens (e.g., from Virtuals or pump.fun). This curated list of addresses is embedded directly into the genesis state of the Scarlett blockchain.
 *   **Mechanism: The Patience Game:** The module distributes a fixed amount of `$SCLT` emissions per block to a reward pool, which is then divided equally among all eligible wallets that have **not yet claimed** their tokens. When a participant claims their accrued rewards, their wallet is permanently removed from the distribution pool. As the total emissions per block remain constant while the number of participants shrinks, this dynamically increases the reward rate for those who demonstrate patience. The formula is: `Emission per Wallet = Total Campaign Emission per Block / Number of Unclaimed Wallets`.
+
+*   **A Formal Game-Theoretic Analysis of the "Patience Game":**
+    The "Patience Game" can be formally modeled as a non-cooperative, multi-player "war of attrition." This framework allows us to prove that the mechanism selects for participants with long-term conviction.
+
+    *   **Players:** A set of \(N\) eligible participants.
+    *   **State at time \(t\):** The number of participants who have not yet claimed, \(N_t\).
+    *   **Emissions:** A constant total emission amount, \(R\), is added to the reward pool per block.
+    *   **Reward Rate:** The reward rate per participant at block \(t\) is \(r_t = R / N_t\).
+    *   **Actions:** At each block \(t\), each remaining participant \(i\) can choose to **Claim** or **Wait**.
+
+    Let's analyze the decision for a participant \(i\) at block \(t\). Their accumulated reward is \(C_i(t)\).
+    1.  If they **Claim**, their payoff is \(P_i^{claim} = C_i(t)\). They exit the game.
+    2.  If they **Wait**, their expected payoff depends on the actions of the other \(N_t - 1\) participants. Let \(k\) be the number of *other* participants who claim at block \(t\). The number of participants at the next block will be \(N_{t+1} = N_t - 1 - k\). The reward rate for the next block will be \(r_{t+1} = R / N_{t+1}\).
+
+    The expected payoff from waiting one more block is \(E[P_i^{wait}] = C_i(t) + E[r_{t+1}]\). Since \(k \geq 0\), it is always true that \(N_{t+1} \leq N_t - 1\), which means \(r_{t+1} \geq R / (N_t - 1)\). The reward rate is guaranteed to increase as long as at least one person exits the game.
+
+    This creates a powerful strategic dilemma:
+    *   Claiming provides an immediate, risk-free payoff.
+    *   Waiting exposes the participant to risk (e.g., the token's future value may decline) but offers a disproportionately higher future reward rate.
+
+    The optimal strategy is not universal; it depends on each player's individual risk tolerance and time preference. However, the game is explicitly designed so that the highest rewards are mathematically guaranteed to flow to those who remain in the game the longest. This structure serves as a provable filtering mechanism, ensuring that the most patient and committed participants—those most aligned with the long-term success of the protocol—are rewarded the most.
+
 *   **Gasless Claiming:** To ensure a frictionless onboarding experience, the claim transaction is gasless for the user. The protocol leverages the Cosmos SDK's `feegrant` module to subsidize the transaction fees, allowing new community members to participate without needing a pre-existing balance of `$SCLT`.
 
 #### 5.2 Roadmap
